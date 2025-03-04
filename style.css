@@ -1,4 +1,107 @@
 body {
     background-color: black;
+    h1 {
+        color: white;
+    }
+    color: #7ed957;
+    padding-top:2em;
+    padding-left:4em;
+    font-family: system-ui;
+}
+
+#slider {
+    width: 100%;
+}
+
+#stats{
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2em;
+    padding: 2em;
+}
+
+#average {
+    display: inline-block;
+    border: 2px, solid;
+    padding-right: 3em;
+    padding-left: 1em;
+    
+    width: 425px;
+    #unit{
+        font-size: 3em;
+        display: block;
+        margin: 10px
+    }
+    #value {
+        font-size: 12em;
+        display: block;
+        margin-left: 100px;
+        margin-right: 10px;
+        text-align: right;
+        font-weight: bold;
+    }
+}
+
+#surgery-info {
+    padding-top: 2em;
+    line-height: 20pt;
+}
+
+
+#time-label {
+    font-weight: bold;
+    font-size: 1.25em;
+    margin: 15px;
+    text-align: right;  
+    margin-right: 3em;
+}
+
+#slider {
+    -webkit-appearance: none;
+    border-radius: 10px;
+    margin-left: 2em;
+    width: 90%;
+    height: 10px;
+    
+}
+
+#slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #7ed957;
+}
+
+
+
+
+
+.legend {
     color: white;
+    opacity: 75%;
+    display: flex;
+    gap: 2px;  
+    margin-block: 20px;
+    width: 100%;
+    align-content: center;
+    flex: 1;
+    padding-left: 1em;
+    
+}
+
+#resting {
+    background-color: rgba(0, 255, 0, 0.2);
+    padding: 8px 95px;
+    
+}
+
+#moderate {
+    background-color: rgba(255, 255, 0, 0.2);   
+    padding: 8px 95px;
+}
+
+#vigerous {
+    background-color: rgb(255, 0, 0, 0.2);
+    padding: 8px 95px;
 }

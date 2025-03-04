@@ -5,12 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>is your heart racing</title>
     <link rel="stylesheet" href="style.css">
-    <script src="index.js"></script>
+    
 </head>
 <body>
-    <h1> is your heart racing ? ? ? ? ?</h1>
-    <p>explore peoples hearts and figure out what makes them beat faster</p>
-    <p> this isn't a dating app its actually a surgery visualization sorry</p>
-    
+    <h1> &lt;3 </h1>
+    <div id="stats">
+        <div class="left-side">
+            <div id="average">
+                <text id="unit">ecg</text>
+                <text id="unit">bpm</text>
+                <div id="categorize"></div>
+                <div id="value"></div>
+            </div>
+            <div id="surgery-info">This is info about the surgery being done. It is a emergency vascular surgery and idk if the patient is dying. ig he/she looks okay. im just writing whatever to fill this space for now. dont judge me. im just a girl</div>
+        </div>
+        
+
+        <div id="animation">
+            <div id="chart">
+            </div>
+
+            <label id="label">
+                <div id="time-label"><time id="selected-time"></time></div>
+                <input type="range" id="slider" min="0" max="100" value="0" step="0.01">
+            </label>
+
+            <div class="legend">
+                <div id="resting">Resting</div>
+                <div id="moderate">Moderate</div>
+                <div id="vigerous">Vigerous</div>
+            </div>
+        </div>
+        
+
+    </div>
+    <script type="module" src="index.js" ></script>
 </body>
 </html>
