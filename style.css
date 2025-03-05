@@ -4,9 +4,13 @@ body {
         color: white;
     }
     color: #7ed957;
-    padding-top:2em;
-    padding-left:4em;
+    padding-top:1.5em;
+    padding-left:4.5em;
     font-family: system-ui;
+
+    h3 {
+        text-align: center;
+    }
 }
 
 #slider {
@@ -17,7 +21,6 @@ body {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 2em;
-    padding: 2em;
 }
 
 #average {
@@ -25,6 +28,7 @@ body {
     border: 2px, solid;
     padding-right: 3em;
     padding-left: 1em;
+    font-weight: bold;
     
     width: 425px;
     #unit{
@@ -38,7 +42,6 @@ body {
         margin-left: 100px;
         margin-right: 10px;
         text-align: right;
-        font-weight: bold;
     }
 }
 
@@ -47,20 +50,34 @@ body {
     line-height: 20pt;
 }
 
+#label {
+    /* margin-left: 4em; */
+    width: 84%;
+}
+#tracker {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    margin-top: 0.5em;
+    margin-right: 4em;
+}
+
+#percent, #time-label {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 20px;
+    margin-right: 4em;
+}
 
 #time-label {
-    font-weight: bold;
-    font-size: 1.25em;
-    margin: 20px;
     text-align: right;  
-    margin-right: 4em;
 }
 
 #slider {
     -webkit-appearance: none;
     border-radius: 10px;
     margin-left: 1.25em;
-    width: 90%;
+    margin-right: 1em;
+    width: 84%;
     height: 10px;
     
 }
@@ -83,24 +100,25 @@ body {
     align-content: center;
     flex: 1;
     padding-left: 1em;
+    margin-top: 1em;
     
 }
 
 #resting {
     background-color: rgba(0, 255, 0, 0.2);
     padding: 8px 85px;
-    border: rgba(255, 255, 255, 0.75), 1px solid; 
+    border: rgba(0, 255, 0, 0.4), 1px solid; 
     
 }
 
 #moderate {
     background-color: rgba(255, 255, 0, 0.2);   
     padding: 8px 85px;
-    border: rgba(255, 255, 255, 0.75), 1px solid; 
+    border: rgba(255, 255, 0, 0.4), 1px solid; 
 }
 
 #vigerous {
     background-color: rgb(255, 0, 0, 0.2);
     padding: 8px 85px;
-    border: rgba(255, 255, 255, 0.75), 1px solid; 
+    border: rgb(255, 0, 0, 0.4), 1px solid; 
 }
