@@ -107,18 +107,18 @@ body {
 #resting {
     background-color: rgba(0, 255, 0, 0.2);
     padding: 8px 85px;
-    border: rgba(0, 255, 0, 0.4), 1px solid; 
+    border: rgba(0, 255, 0, 0.3), 2px solid; 
     
 }
 
 #moderate {
     background-color: rgba(255, 255, 0, 0.2);   
     padding: 8px 85px;
-    border: rgba(255, 255, 0, 0.4), 1px solid; 
+    border: rgba(255, 255, 0, 0.3), 2px solid; 
 }
 
 #vigerous {
     background-color: rgb(255, 0, 0, 0.2);
     padding: 8px 85px;
-    border: rgb(255, 0, 0, 0.4), 1px solid; 
+    border: rgb(255, 0, 0, 0.3), 2px solid; 
 }

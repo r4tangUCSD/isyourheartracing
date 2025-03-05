@@ -291,7 +291,7 @@ function animateSlider() {
             slider.value = sliderValue
             currentTime(); // Update slider position
         }
-    }, 10);
+    }, 50);
 }
 
 function shadingRange() {
