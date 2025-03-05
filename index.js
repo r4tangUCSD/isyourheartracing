@@ -6,7 +6,7 @@ let filteredData;
 let patient_info;
 
 // find patient
-let selectedCaseID = 5;
+let selectedCaseID = 32;
 let patientAge;
 let patient_details;
 let maxHeartRate = 220;
@@ -337,7 +337,13 @@ function shadingRange() {
     .style("opacity", 0.2); 
 
     // vigorous physical activity
-    const higherY = Math.min(vig85, endY);
+
+    let higherY = Math.max(vig85, endY);
+
+    if (vig85 > endY) {
+        higherY = endY
+    }
+    
     svg.append("rect")
     .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
     .attr("y", yScale(higherY))    // Map the end Y value to the scale (invert y-axis)
@@ -394,6 +400,8 @@ d3.csv("emergency.csv")
         mod50 = maxHeartRate * 0.5;
         mod70 = maxHeartRate * 0.7;
         vig85 = maxHeartRate * 0.85;
+
+        console.log(maxHeartRate)
 
         // console.log(secondsToHHMMSS(maxTime))
 

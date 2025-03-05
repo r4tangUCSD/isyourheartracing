@@ -51,15 +51,15 @@ body {
 #time-label {
     font-weight: bold;
     font-size: 1.25em;
-    margin: 15px;
+    margin: 20px;
     text-align: right;  
-    margin-right: 3em;
+    margin-right: 4em;
 }
 
 #slider {
     -webkit-appearance: none;
     border-radius: 10px;
-    margin-left: 2em;
+    margin-left: 1.25em;
     width: 90%;
     height: 10px;
     
@@ -77,7 +77,7 @@ body {
     color: white;
     opacity: 75%;
     display: flex;
-    gap: 2px;  
+    gap: 6px;  
     margin-block: 20px;
     width: 100%;
     align-content: center;
@@ -88,16 +88,19 @@ body {
 
 #resting {
     background-color: rgba(0, 255, 0, 0.2);
-    padding: 8px 95px;
+    padding: 8px 85px;
+    border: rgba(255, 255, 255, 0.75), 1px solid; 
     
 }
 
 #moderate {
     background-color: rgba(255, 255, 0, 0.2);   
-    padding: 8px 95px;
+    padding: 8px 85px;
+    border: rgba(255, 255, 255, 0.75), 1px solid; 
 }
 
 #vigerous {
     background-color: rgb(255, 0, 0, 0.2);
-    padding: 8px 95px;
+    padding: 8px 85px;
+    border: rgba(255, 255, 255, 0.75), 1px solid; 
 }
