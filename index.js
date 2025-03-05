@@ -120,8 +120,8 @@ function currentTime() {
 
 function createWholeGraph() {
     const margin = { top: 20, right: 30, bottom: 40, left: 40 };
-    const width = 800 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
+    const width = 750 - margin.left - margin.right;
+    const height = 375 - margin.top - margin.bottom;
 
     d3.select("#chart").selectAll("svg").remove();  
 
