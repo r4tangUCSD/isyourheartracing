@@ -1,4 +1,7 @@
 # isyourheartracing
 heart rate web site omg
 
-a;jklfsd
+Ivan Chen
+Vivian Lin
+Ryan Tang
+Karina Zambani
