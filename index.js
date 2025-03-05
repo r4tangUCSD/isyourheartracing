@@ -118,6 +118,94 @@ function currentTime() {
 
 }
 
+function createWholeGraph() {
+    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const width = 800 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+
+    d3.select("#chart").selectAll("svg").remove();  
+
+    svg = d3.select("#chart")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Creates x axis scales
+    endTime = Math.max(900, current)
+    xScale = d3.scaleLinear()
+    .domain([0, maxTime]) // data values for x-axis
+    .range([0, width]); // pixel range for the graph
+
+    // Creates y axis scales
+    firstY = Math.max(0, minRate - 20);
+    endY = maxRate + 20;
+
+    yScale = d3.scaleLinear()
+        .domain([firstY, endY]) // data values for y-axis
+        .range([height, 0]); // pixel range for the graph
+
+    // Creates the x and y axis
+
+    const ticks = d3.range(0, maxTime, 60); 
+
+    svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(xScale).tickValues(ticks).tickFormat(d => secondsToHHMMSS(d)));
+
+    svg.append("g")
+    .call(d3.axisLeft(yScale));
+
+    svg.append("g")
+        .call(d3.axisLeft(yScale).ticks(10));
+
+
+    // Creates grids
+
+    svg.append("g")
+    .attr("class", "grid")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(xScale)
+        .tickValues(ticks)  // Number of ticks for gridlines
+        .tickSize(-height) // Extend the gridlines across the chart
+        .tickFormat("") // No tick labels
+    )
+    .style("stroke", "#ccc") // Color of the gridlines
+    .style("stroke-width", "2px")
+    .style("opacity", "20%");
+
+    const ticksY = d3.range(Math.floor((firstY + 10) / 10) * 10, Math.ceil((endY) / 10) * 10, 10);
+    
+    svg.append("g")
+    .attr("class", "grid")
+    .call(d3.axisLeft(yScale)
+        .tickValues(ticksY)  // Use the generated array of ticks
+        .tickSize(-width)    // Extend the gridlines across the chart
+        .tickFormat("")      // Remove tick labels
+    )
+    .style("stroke", "#ccc")  // Gridline color
+    .style("stroke-width", "1px")
+    .style("opacity", "40%");
+
+    // Draw the line
+
+    const line = d3.line()
+        .x(d => xScale(d.second)) // Map time to the x-axis
+        .y(d => yScale(d.heartrate));
+
+    svg.append("path")
+    .data([processedData]) // Bind the data
+    .attr("class", "line") // Add a class for styling (optional)
+    .attr("d", line) // Draw the path based on the data
+    .style("fill", "none") // No fill for the line
+    .style("stroke", "#7ed957") // Line color
+    .style("stroke-width", 2); // Line width
+
+    
+}
+
+
 function createGraph() {
     const margin = { top: 20, right: 30, bottom: 40, left: 40 };
     const width = 800 - margin.left - margin.right;
@@ -161,10 +249,10 @@ function createGraph() {
     svg.append("g")
         .call(d3.axisLeft(yScale).ticks(10));
 
-    if (currentTime === maxTime) {
+    if (Math.ceil(current) >= maxTime) {
         shadingRange();
-        console.log('YAYY')
     }
+    // console.log(current)
 
 
     // Creates grids
@@ -217,12 +305,14 @@ function animateSlider() {
         if (sliderValue >= 100) {
             slider.value = 100
             clearInterval(interval); // Stop the animation when slider reaches 100
+            // console.log(maxTime)
+
         } else {
             sliderValue += 0.175; // Increase the slider value (adjust for speed)
             slider.value = sliderValue
             currentTime(); // Update slider position
         }
-    }, 10);
+    }, 50);
 }
 
 function shadingRange() {
@@ -305,11 +395,13 @@ d3.csv("emergency.csv")
         mod70 = maxHeartRate * 0.7;
         vig85 = maxHeartRate * 0.85;
 
+        console.log(secondsToHHMMSS(maxTime))
+
         // Set Up
         slider.step = 1/maxTime
         currentTime();
         animateSlider();
-        shadingRange();
+               
         slider.addEventListener('input', () => {
             currentTime();
             shadingRange();
