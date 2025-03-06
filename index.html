@@ -8,8 +8,19 @@
     
 </head>
 <body>
-    <h1> &lt;3 </h1>
-    <div id="stats">
+    <div class="container">
+        <div class="visualization" id="visualization">
+            <div class="loading">Loading visualization data...</div>
+        </div>
+        <div class="chart-container">
+            <div id="chart">
+                <div class="no-data">Select a patient to view heart rate data</div>
+            </div>
+        </div>
+    </div>
+    <div id="tooltip" class="tooltip"></div>
+
+    <!-- <div id="stats">
         <div class="left-side">
             <div id="average">
                 <text id="unit">ecg</text>
@@ -39,6 +50,22 @@
         
 
     </div>
+    <div id="surgery-categories"></div>
+    <div id="patient-graph">
+        <svg id="patient-scatter"></svg>
+        <div class="back-button">Back</div>
+    </div>
+    <div id="chart">
+        <div id="slider-container">
+            <input type="range" id="slider" min="0" max="100">
+            <div>
+                Time: <span id="selected-time"></span>
+                Current Heart Rate: <span id="value"></span>
+            </div>
+        </div>
+    </div>
+  -->
+    <script src="surgical-heart-rate-viz.js"></script>
     <script type="module" src="index.js" ></script>
 </body>
 </html>
