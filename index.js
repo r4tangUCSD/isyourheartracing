@@ -149,7 +149,7 @@ function currentTime() {
     }
 
     currHour = currentTime/3600;
-    
+
     createGraph();
 
     // Just to get only the average heart rate within the last minutes
@@ -157,16 +157,26 @@ function currentTime() {
         filteredData = filteredData.filter(d => d.second >= currentTime - 60);
     }
 
+    handlingMissing();
+    
+
+    // displaying average and slider's current position
+    timeValue.textContent = currentAverage;
+    slider.style.background = `linear-gradient(to right, #7ed957 0%, #7ed957 ${timeProgress}%, #fff ${timeProgress}%, #fff 100%)`;
+
+}
+
+function handlingMissing() {
     // accounts for missing heart rates for more than a minute
     if (filteredData.length === 0) {
+        // no recorded heart rate within the last minute 
+
         isMissing = true;
         hasMissing = true;
-        // no recorded heart rate within the last minute 
-        
+
         if (checkPrev.length !== 0 && prevTime < current && !endNull.hasOwnProperty(current) && animating) {
             // slider moving forward
 
-            console.log(current)
             startNull[current] = missingID;
             missingValue[missingID] = currentAverage;
             currMissing = currentAverage;
@@ -191,7 +201,6 @@ function currentTime() {
         if (checkPrev && checkPrev.length === 0 && !startNull.hasOwnProperty(current) && prevTime < current & animating) {
             isMissing = false;
             endNull[prevTime] = missingID;
-            console.log(prevTime)
             missingID ++;
             lastMissingEnd = prevTime;
             missingWithin15 = true;
@@ -200,13 +209,14 @@ function currentTime() {
         
         if (current - (15 * 60) > lastMissingEnd) {
             missingWithin15 = false;
-
         }
+
         prevfiltered = filteredData;
         currentAverage = Math.round(d3.mean(filteredData, d => d.heartrate));
         
     }
 
+    // checks to see if there are any missing values for > 1 minute straight
     for (let i = 0; i < Object.keys(startNull).length; i++){
         let startMissing = Object.keys(startNull)[i];
         if (current - (15*60) < startMissing & startMissing < current) {
@@ -215,16 +225,11 @@ function currentTime() {
         } else {
             missingWithin15 = false;
         }
-       
     }
 
     checkPrev = filteredData;
-
-    // displaying average and slider's current position
-    timeValue.textContent = currentAverage;
-    slider.style.background = `linear-gradient(to right, #7ed957 0%, #7ed957 ${timeProgress}%, #fff ${timeProgress}%, #fff 100%)`;
-
 }
+
 
 function createGraph() {
     const margin = { top: 20, right: 30, bottom: 40, left: 40 };
@@ -305,6 +310,7 @@ function createGraph() {
     .style("stroke-width", "1px")
     .style("opacity", "40%");
 
+    // create differet segments
     let segments = [];
     let segment;
     let segEnd;
