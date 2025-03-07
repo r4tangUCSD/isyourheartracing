@@ -1,11 +1,21 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 
-// all the global variable declarations
+// GLOBAL VARIABLES
+
+let animating = true;
 
 // data processing
 let patient_info;
 let processedData;
 let filteredData;
+
+// surgery descriptions 
+const response = await fetch('./description.json');
+if (!response.ok) {
+    throw new Error(`Failed to fetch projects: ${response.statusText}`);
+}
+
+const surgeryDescription = await response.json();
 
 // working with missing data
     // anything previous
@@ -13,7 +23,7 @@ let prevfiltered;
 let checkPrev;
 let prevTime;
 
-    // storage
+    // storage of missing values while plot animates
 let startNull = {};
 let endNull = {};
 let missingValue = {};
@@ -22,11 +32,14 @@ let missingValue = {};
 let currMissing;
 let missingID = 0;
 let currMissID;
+let isMissing = false;
+let hasMissing = false;
+let missingWithin15 = false;
+let lastMissingEnd;
 
     // finding in range of values
 let rangeMin;
 let rangeMax;
-
 
 // patient stats info
 let selectedCaseID = 32;
@@ -48,7 +61,7 @@ let roundedMin;
 let roundedMax;
 let current;
 
-//time values 
+    //time values 
 let minTime;
 let maxTime;
 let numHours;
@@ -61,24 +74,24 @@ let maxRate;
 let currentAverage;
 
 //graph
-let xScale;
-let yScale;
-
 let svg;
 
+    // x scale
+let xScale;
 let tenMinsAge = 0;
 let endTime;
 
+    // y scale
+let yScale;
 let firstY;
 let endY;
 
-// shading
+    // shading
 let mod50;
 let mod70;
 let vig85;
 
-let animating = true;
-
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Functions ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 function processCSV(data) {
     return data.map (d => {
@@ -91,6 +104,7 @@ function processCSV(data) {
         }
     });
 }
+
 
 function secondsToHHMMSS(seconds) {
     // number of seconds to HH:MM:SS
@@ -120,7 +134,7 @@ function currentTime() {
     const formattedTime = secondsToHHMMSS(currentTime);
     sliderTime.textContent = formattedTime.toLocaleString();
 
-    // with all the heart rate until cirrentTime
+    // with all the heart rate until currentTime
     if (currentTime < minTime){
         filteredData = processedData.filter(d => d.second === minTime);
     } else {
@@ -145,15 +159,20 @@ function currentTime() {
 
     // accounts for missing heart rates for more than a minute
     if (filteredData.length === 0) {
+        isMissing = true;
+        hasMissing = true;
         // no recorded heart rate within the last minute 
         
-        if (checkPrev.length !== 0 && prevTime < current && !endNull.hasOwnProperty(current)) {
+        if (checkPrev.length !== 0 && prevTime < current && !endNull.hasOwnProperty(current) && animating) {
             // slider moving forward
+
+            console.log(current)
             startNull[current] = missingID;
             missingValue[missingID] = currentAverage;
             currMissing = currentAverage;
         } else if (prevTime > current){
             // slider moving backward
+
             for (let i = 0; i < Object.keys(startNull).length; i++) {
                 if (current >= Object.keys(startNull)[i] && current <= Object.keys(endNull)[i]) {
                     // find the range the value is in
@@ -169,14 +188,34 @@ function currentTime() {
     } else {
         // there is recorded data within the last minute
 
-        if (checkPrev && checkPrev.length === 0 && !startNull.hasOwnProperty(current)) {
+        if (checkPrev && checkPrev.length === 0 && !startNull.hasOwnProperty(current) && prevTime < current & animating) {
+            isMissing = false;
             endNull[prevTime] = missingID;
+            console.log(prevTime)
             missingID ++;
-        }
+            lastMissingEnd = prevTime;
+            missingWithin15 = true;
 
+        }
+        
+        if (current - (15 * 60) > lastMissingEnd) {
+            missingWithin15 = false;
+
+        }
         prevfiltered = filteredData;
         currentAverage = Math.round(d3.mean(filteredData, d => d.heartrate));
         
+    }
+
+    for (let i = 0; i < Object.keys(startNull).length; i++){
+        let startMissing = Object.keys(startNull)[i];
+        if (current - (15*60) < startMissing & startMissing < current) {
+            missingWithin15 = true;
+            break;
+        } else {
+            missingWithin15 = false;
+        }
+       
     }
 
     checkPrev = filteredData;
@@ -209,8 +248,8 @@ function createGraph() {
     .range([0, width]); // pixel range for the graph
 
     // Creates y axis scales
-    firstY = Math.max(0, minRate - 20);
-    endY = maxRate + 20;
+    firstY = Math.max(0, Math.floor(minRate/10) * 10);
+    endY = (Math.ceil(maxRate/10) * 10);
 
     yScale = d3.scaleLinear()
         .domain([firstY, endY]) // data values for y-axis
@@ -266,26 +305,67 @@ function createGraph() {
     .style("stroke-width", "1px")
     .style("opacity", "40%");
 
-    // Draw the line
+    let segments = [];
+    let segment;
+    let segEnd;
+    let segStart = current - (15*60)
+
+    if (missingWithin15) {
+        // there is missing data for more than 1 minute straight within the last 15 minutes 
+
+        for (let i = 0; i < Object.keys(startNull).length; i++) {
+            if (segStart < Object.keys(startNull)[i]) {
+                segEnd = Object.keys(startNull)[i];
+                segment = filteredData.filter(d => segStart <= d.second && d.second <= segEnd);
+                segments.push(segment);
+                
+                if (Object.keys(startNull)[i+1]) {
+                    // another segment of missing data
+                    segStart = Object.keys(startNull)[i+1];
+                    continue;
+                } else {
+                    // continue drawing the rest of the data within the 15 minutes shown
+                    segStart = Object.keys(endNull)[i];
+                    segment = filteredData.filter(d => segStart <= d.second);
+                    segments.push(segment)
+                }
+                
+            } else {
+                // If no missing data, just add the whole filtered data
+                segments = [filteredData];  
+                break;
+            }
+        }
+    } else {
+        /* there is no missing data for more than 1 minute straight
+         within the last 15 minutes from current */
+        
+        segments = [filteredData];
+    }
+
+    // Plot the line graph
     const line = d3.line()
         .x(d => xScale(d.second)) // Map time to the x-axis
         .y(d => yScale(d.heartrate));
 
-    svg.append("path")
-    .data([filteredData]) // Bind the data
-    .attr("class", "line") // Add a class for styling (optional)
-    .attr("d", line) // Draw the path based on the data
-    .style("fill", "none") // No fill for the line
-    .style("stroke", "#7ed957") // Line color
-    .style("stroke-width", 2); // Line width
+    // Draw each segment
+    segments.forEach(segment => {
+        svg.append("path")
+        .data([segment]) // Bind the data
+        .attr("class", "line") // Add a class for styling (optional)
+        .attr("d", line) // Draw the path based on the data
+        .style("fill", "none") // No fill for the line
+        .style("stroke", "#7ed957") // Line color
+        .style("stroke-width", 2); // Line width
+    });
+
+
 }
 
 function animateSlider() {
     numHours = maxTime/3600;
-    console.log(numHours)
     const durationPerHour = 10000; // Animation duration in milliseconds (e.g., 5 seconds)
     const totalDuration = durationPerHour * numHours/1000;
-    console.log(totalDuration)
 
     animating = true;
 
@@ -344,22 +424,25 @@ function shadingRange() {
     }
 
     // resting shading
-    svg.append("rect")
+
+    if (firstY < mod50) {
+        svg.append("rect")
         .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
         .attr("y", yScale(mod50))    // Map the end Y value to the scale (invert y-axis)
         .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
         .attr("height", yScale(restinglow) - yScale(mod50)) // Rectangle height (invert the height)
         .attr("fill", "green")  // Rectangle color
         .style("opacity", 0.15); 
-
-
+    }
+    
     // moderate shading
+    let modHigh = Math.min(endY, mod70);
     const lowerY = Math.max(mod50, firstY);
     svg.append("rect")
     .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-    .attr("y", yScale(mod70))    // Map the end Y value to the scale (invert y-axis)
+    .attr("y", yScale(modHigh))    // Map the end Y value to the scale (invert y-axis)
     .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-    .attr("height", yScale(lowerY) - yScale(mod70)) // Rectangle height (invert the height)
+    .attr("height", yScale(lowerY) - yScale(modHigh)) // Rectangle height (invert the height)
     .attr("fill", "yellow")  // Rectangle color
     .style("opacity", 0.15); 
 
@@ -370,20 +453,25 @@ function shadingRange() {
     if (vig85 > endY) {
         higherY = endY
     }
+
+    if (endY > mod70) {
+        svg.append("rect")
+        .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
+        .attr("y", yScale(higherY))    // Map the end Y value to the scale (invert y-axis)
+        .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
+        .attr("height", yScale(mod70) - yScale(higherY)) // Rectangle height (invert the height)
+        .attr("fill", "red")  // Rectangle color
+        .style("opacity", 0.15); 
+    }
     
-    svg.append("rect")
-    .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-    .attr("y", yScale(higherY))    // Map the end Y value to the scale (invert y-axis)
-    .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-    .attr("height", yScale(mod70) - yScale(higherY)) // Rectangle height (invert the height)
-    .attr("fill", "red")  // Rectangle color
-    .style("opacity", 0.15); 
 }
 
 function getPatientInfoByCaseid(caseid) {
     const patient = patient_info.find(record => record.caseid === caseid.toString());
     return patient ? patient : null; // Return patient or null if not found
 }
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ The Magic ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 d3.csv("emergency.csv")
     .then(patients => {
@@ -394,9 +482,6 @@ d3.csv("emergency.csv")
     })
     .then(data => {
         processedData = processCSV(data);
-
-        // console.log(processedData);
-        // console.log(patient_info);
 
         // Scaling the time
         const startTime = new Date();
@@ -421,7 +506,7 @@ d3.csv("emergency.csv")
 
         //surgery details
         surgeryType = patient_details.optype;
-        surgeryInfo.textContent = 'Transplantation is a procedure to replace a failing organ with a healthy organ or tissues from another individual (donor), giving these patients another chance at life. However, demands for transplants exceeds the availiable supply and many wait years or even pass away in the process.';
+        surgeryInfo.textContent = surgeryDescription[surgeryType];
 
         // for shading
         mod50 = maxHeartRate * 0.5;
