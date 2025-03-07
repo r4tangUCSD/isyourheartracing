@@ -117,7 +117,6 @@ function currentTime() {
 
     const currentTime = timeScale.invert(timeProgress);
     current = currentTime;
-    numHours = Math.ceil(currentTime/3600);
     const formattedTime = secondsToHHMMSS(currentTime);
     sliderTime.textContent = formattedTime.toLocaleString();
 
@@ -223,13 +222,16 @@ function createGraph() {
 
     svg.append("g")
     .attr("transform", "translate(0," + height + ")")
+    .style("opacity", 0.55)
     .call(d3.axisBottom(xScale).tickValues(ticks).tickFormat(d => secondsToHHMMSS(d)));
 
     svg.append("g")
-    .call(d3.axisLeft(yScale));
+    .call(d3.axisLeft(yScale))
+    .style("opacity", 0.35);
 
     svg.append("g")
-        .call(d3.axisLeft(yScale).ticks(10));
+        .call(d3.axisLeft(yScale).ticks(10))
+        .style("opacity", 0.35);
 
     // add shading
     if (animating === false || Math.ceil(current) >= maxTime) {
@@ -279,33 +281,79 @@ function createGraph() {
 }
 
 function animateSlider() {
-    // draws the line
+    numHours = maxTime/3600;
+    console.log(numHours)
+    const durationPerHour = 10000; // Animation duration in milliseconds (e.g., 5 seconds)
+    const totalDuration = durationPerHour * numHours/1000;
+    console.log(totalDuration)
+
+    animating = true;
+
     const interval = setInterval(() => {
         if (sliderValue >= 100) {
             animating = false;
-            slider.value = 100
-            clearInterval(interval); // Stop the animation when slider reaches 100
-
+            slider.value = maxTime;
+            clearInterval(interval);
         } else {
-            sliderValue += 0.175; // Increase the slider value (adjust for speed)
-            slider.value = sliderValue
+            sliderValue += 0.175; // Adjust step size based on range
+            slider.value = sliderValue;
             currentTime(); // Update slider position
         }
-    }, 50);
+    }, totalDuration);
 }
 
 function shadingRange() {
-    // resting
-    const restinglow = Math.max(0, firstY);
-    svg.append("rect")
-    .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-    .attr("y", yScale(mod50))    // Map the end Y value to the scale (invert y-axis)
-    .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-    .attr("height", yScale(restinglow) - yScale(mod50)) // Rectangle height (invert the height)
-    .attr("fill", "green")  // Rectangle color
-    .style("opacity", 0.15); 
+    let restinglow;
+    let lowMax;
+    let lowLow;
 
-    // moderate-intensity activities
+    // too low and resting by age
+    if (patientAge < 5) {
+        // patients below age 5
+
+            // boundary for low to resting
+        lowMax = 80;
+        restinglow = Math.max(80, firstY);
+        
+
+    } else if (patientAge < 10) {
+        // patients below age 10
+
+            // boundary for low to resting
+        lowMax = 70;
+        restinglow = Math.max(70, firstY);
+
+    } else {
+        // everyone else
+
+            // boundary for low to resting
+        lowMax = 40;
+        restinglow = Math.max(40, firstY);
+    }
+    
+    // low shading
+    if (firstY < lowMax) {
+        lowLow = Math.max(0, firstY);
+        svg.append("rect")
+        .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
+        .attr("y", yScale(lowMax))    // Map the end Y value to the scale (invert y-axis)
+        .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
+        .attr("height", yScale(lowLow) - yScale(lowMax)) // Rectangle height (invert the height)
+        .attr("fill", "blue")  // Rectangle color
+        .style("opacity", 0.15); 
+    }
+
+    // resting shading
+    svg.append("rect")
+        .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
+        .attr("y", yScale(mod50))    // Map the end Y value to the scale (invert y-axis)
+        .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
+        .attr("height", yScale(restinglow) - yScale(mod50)) // Rectangle height (invert the height)
+        .attr("fill", "green")  // Rectangle color
+        .style("opacity", 0.15); 
+
+
+    // moderate shading
     const lowerY = Math.max(mod50, firstY);
     svg.append("rect")
     .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
@@ -315,7 +363,8 @@ function shadingRange() {
     .attr("fill", "yellow")  // Rectangle color
     .style("opacity", 0.15); 
 
-    // vigorous physical activity
+
+    // high shading
     let higherY = Math.max(vig85, endY);
 
     if (vig85 > endY) {
@@ -372,7 +421,7 @@ d3.csv("emergency.csv")
 
         //surgery details
         surgeryType = patient_details.optype;
-        surgeryInfo.textContent = surgeryType + ' Surgery Info'
+        surgeryInfo.textContent = 'Transplantation is a procedure to replace a failing organ with a healthy organ or tissues from another individual (donor), giving these patients another chance at life. However, demands for transplants exceeds the availiable supply and many wait years or even pass away in the process.';
 
         // for shading
         mod50 = maxHeartRate * 0.5;
