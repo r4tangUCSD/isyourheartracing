@@ -252,6 +252,16 @@ function createGraph() {
     .domain([tenMinsAge, endTime]) // data values for x-axis
     .range([0, width]); // pixel range for the graph
 
+    // x axis labels
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + 35)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("font-weight", "bold")
+        .style("fill", "rgb(126, 217, 87, 0.6)")
+        .text("Time (HH:MM:SS)");
+
     // Creates y axis scales
     firstY = Math.max(0, Math.floor(minRate/10) * 10);
     endY = (Math.ceil(maxRate/10) * 10);
@@ -259,6 +269,17 @@ function createGraph() {
     yScale = d3.scaleLinear()
         .domain([firstY, endY]) // data values for y-axis
         .range([height, 0]); // pixel range for the graph
+
+    // y axis labels
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -30)
+        .attr("text-anchor", "middle")
+        .style("font-weight", "bold")
+        .style("font-size", "12px")
+        .style("fill", "rgb(126, 217, 87, 0.6)")
+        .text("Heart Rate (bpm)");
 
     // Creates the x and y axis
 
