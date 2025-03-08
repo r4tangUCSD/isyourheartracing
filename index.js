@@ -42,7 +42,7 @@ let rangeMin;
 let rangeMax;
 
 // patient stats info
-let selectedCaseID = 32;
+let selectedCaseID = 242;
 let patientAge;
 let patient_details;
 let maxHeartRate = 220;
