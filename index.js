@@ -3,6 +3,8 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 // GLOBAL VARIABLES
 
 let animating = true;
+let instruction = document.getElementById('post-animate');
+instruction.style.opacity = 0;
 
 // data processing
 let patient_info;
@@ -42,11 +44,12 @@ let rangeMin;
 let rangeMax;
 
 // patient stats info
-let selectedCaseID = 242;
+let selectedCaseID = 32; //changes based on patient selected
 let patientAge;
 let patient_details;
 let maxHeartRate = 220;
 let surgeryType;
+let infoTitle = document.getElementById('title');
 let surgeryInfo = document.getElementById('surgery-info');
 
 //slider and time
@@ -90,6 +93,9 @@ let endY;
 let mod50;
 let mod70;
 let vig85;
+
+//back bubble
+let svgCircle;
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Functions ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
@@ -260,7 +266,7 @@ function createGraph() {
         .style("font-size", "12px")
         .style("font-weight", "bold")
         .style("fill", "rgb(126, 217, 87, 0.6)")
-        .text("Time (HH:MM:SS)");
+        .text("Time Since Operation Started (HH:MM:SS)");
 
     // Creates y axis scales
     firstY = Math.max(0, Math.floor(minRate/10) * 10);
@@ -274,7 +280,7 @@ function createGraph() {
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
-        .attr("y", -30)
+        .attr("y", -31.5)
         .attr("text-anchor", "middle")
         .style("font-weight", "bold")
         .style("font-size", "12px")
@@ -393,13 +399,14 @@ function animateSlider() {
     numHours = maxTime/3600;
     const durationPerHour = 10000; // Animation duration in milliseconds (e.g., 5 seconds)
     const totalDuration = durationPerHour * numHours/1000;
-
+    
     animating = true;
 
     const interval = setInterval(() => {
         if (sliderValue >= 100) {
             animating = false;
             slider.value = maxTime;
+            instruction.style.opacity = 0.3;
             clearInterval(interval);
         } else {
             sliderValue += 0.175; // Adjust step size based on range
@@ -446,7 +453,7 @@ function shadingRange() {
         .attr("y", yScale(lowMax))    // Map the end Y value to the scale (invert y-axis)
         .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
         .attr("height", yScale(lowLow) - yScale(lowMax)) // Rectangle height (invert the height)
-        .attr("fill", "blue")  // Rectangle color
+        .attr("fill", "#009AEE")  // Rectangle color
         .style("opacity", 0.15); 
     }
 
@@ -458,7 +465,7 @@ function shadingRange() {
         .attr("y", yScale(mod50))    // Map the end Y value to the scale (invert y-axis)
         .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
         .attr("height", yScale(restinglow) - yScale(mod50)) // Rectangle height (invert the height)
-        .attr("fill", "green")  // Rectangle color
+        .attr("fill", "#2db41e")  // Rectangle color
         .style("opacity", 0.15); 
     }
     
@@ -470,7 +477,7 @@ function shadingRange() {
     .attr("y", yScale(modHigh))    // Map the end Y value to the scale (invert y-axis)
     .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
     .attr("height", yScale(lowerY) - yScale(modHigh)) // Rectangle height (invert the height)
-    .attr("fill", "yellow")  // Rectangle color
+    .attr("fill", "#FEED53")  // Rectangle color
     .style("opacity", 0.15); 
 
 
@@ -487,7 +494,7 @@ function shadingRange() {
         .attr("y", yScale(higherY))    // Map the end Y value to the scale (invert y-axis)
         .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
         .attr("height", yScale(mod70) - yScale(higherY)) // Rectangle height (invert the height)
-        .attr("fill", "red")  // Rectangle color
+        .attr("fill", "#F63C4C")  // Rectangle color
         .style("opacity", 0.15); 
     }
     
@@ -534,6 +541,7 @@ d3.csv("emergency.csv")
         //surgery details
         surgeryType = patient_details.optype;
         surgeryInfo.textContent = surgeryDescription[surgeryType];
+        infoTitle.textContent = surgeryType + ' Surgery Info';
 
         // for shading
         mod50 = maxHeartRate * 0.5;
@@ -551,7 +559,47 @@ d3.csv("emergency.csv")
 
     })
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Part ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Back Button ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+
+function drawBackBubble() {
+    const backBubble = d3.select("#back-bubble");
+    // Clear previous contents before appending a new SVG
+    
+    // Append new SVG
+    svgCircle = backBubble
+        .append("svg")
+        .attr("width", 600)
+        .attr("height", 125);
+
+    // console.log(svgCircle)
+
+    // Append a circle inside the SVG
+    svgCircle.append("circle")
+        .attr("cx", 260)  // Center the circle
+        .attr("cy", -175)
+        .attr("r", 300)
+        .style("fill", "#333739")
+        .style("opacity", 0.85)
+        .on("mouseover", function(event, d) {
+            d3.select(this)
+                .transition()
+                // .duration(200)
+                .style("fill", "#7ed957")
+                .style("opacity", 1)
+        })
+        .on("mouseout", function(event, d) {
+            d3.select(this)
+                .transition()
+                // .duration(200)
+                .style("fill", "#333739")
+                .style("opacity", 0.85)
+        });
+
+}
+
+drawBackBubble();
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Page ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 function createWholeGraph() {
     const margin = { top: 20, right: 30, bottom: 40, left: 40 };

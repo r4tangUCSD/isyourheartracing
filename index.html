@@ -8,48 +8,64 @@
     
 </head>
 <body>
-    <h1> &lt;3 </h1>
-    <div id="stats">
-        <div class="left-side">
-            <h3>Average Heart Rate Within the Last Minute</h3>
-            <div id="average">
-                <text id="unit">solar8000/HR</text>
-                <text id="unit">bpm</text>
-                <div id="value"></div>
-            </div>
-            <div id="surgery-info"></div>
-        </div>
-        
-
-        <div id="animation">
-            <h3>Heart Rate Within the Last 15 Minutes</h3>
-            <div id="chart">
-            </div>
-
-            <label id="label">
-                <div id="tracker">
-                    <div id="percent"></div>
-                    <div id="time-label"><time id="selected-time"></time></div>
+    <div id="back-bubble"></div>
+    <div id="everything-else">
+        <div id="stats">
+            <div class="left-side">
+                <h3>Average Heart Rate Within the Last Minute</h3>
+                <div id="average">
+                    <text id="unit">solar8000/HR</text>
+                    <text id="unit">bpm</text>
+                    <div id="value"></div>
+                </div>
+                <div id="information">
+                    <div id="title"></div>
+                    <div id="surgery-info"></div>
                 </div>
                 
-                <input type="range" id="slider" min="0" max="100" value="0" step="0.01">
-            </label>
-
-            <div class="legend">
-                <div id="low">Low</div>
-                <div id="resting">Resting</div>
-                <div id="moderate">Moderate</div>
-                <div id="high">High</div>
             </div>
+            
+    
+            <div id="animation">
+                <h3>Heart Rate Over the Course of the Surgery</h3>
+                <div id="chart">
+                </div>
+                
+    
+                <label id="label">
+                    <div id="post-animate">Move the slider thumb to go back.</div>
+                    <div id="tracker">
+                        <div id="percent"></div>
+                        <div id="time-label"><time id="selected-time"></time></div>
+                    </div>
+                    
+                    <input type="range" id="slider" min="0" max="100" value="0" step="0.01">
+                    
+                </label>
+    
+    
+                <div class="legend">
+                    <div id="low">Low</div>
+                    <div id="resting">Resting</div>
+                    <div id="moderate">Moderate</div>
+                    <div id="high">High</div>
+                </div>
+            </div>
+            
+    
         </div>
-        
 
+        <p>So far, we have worked on animating a line plot of the recorded heart rate throughout the surgery for a specific patient. The plot will show the plot up to the current time and within the last 15 minutes which is determined where the thumb is on the slide. To the left of the plot, we have the average heart rate calculated by taking all recorded heart rates within the last minute. This is because heart rate can fluctuate within a short amount of time. By showing the more recent data, anesthesiologists can access and decide what to administer based on current trends.
+            On one branch, “circles,” we’ve started to come up with a way to visualize all cases in our dataset by grouping them into different circles based on their operation type. On another branch, we’ve started implementing a scrollytelling format for our beginning introduction. On a Canva page, we’ve created a draft for the layout and annotations of each slide in the introduction.
+            
+            One challenge was getting the line plot to correspond with the current slider value. In the future, we think the most challenging part to design will be settling on a final design for our main graph. We also have found in the past that combining different branches together can be tedious and time consuming. We think this process might be the source of many bugs. Lastly, we found that the track data was a little wonky, since sometimes data is missing for chunks of time, and we might need to find a way to clean up the heart rate .cs files.
+            </p>
     </div>
+   
+    <!-- <h1> &lt;3 </h1> -->
+    
+    
     <script type="module" src="index.js" ></script>
-    <p>So far, we have worked on animating a line plot of the recorded heart rate throughout the surgery for a specific patient. The plot will show the plot up to the current time and within the last 15 minutes which is determined where the thumb is on the slide. To the left of the plot, we have the average heart rate calculated by taking all recorded heart rates within the last minute. This is because heart rate can fluctuate within a short amount of time. By showing the more recent data, anesthesiologists can access and decide what to administer based on current trends.
-        On one branch, “circles,” we’ve started to come up with a way to visualize all cases in our dataset by grouping them into different circles based on their operation type. On another branch, we’ve started implementing a scrollytelling format for our beginning introduction. On a Canva page, we’ve created a draft for the layout and annotations of each slide in the introduction.
-        
-        One challenge was getting the line plot to correspond with the current slider value. In the future, we think the most challenging part to design will be settling on a final design for our main graph. We also have found in the past that combining different branches together can be tedious and time consuming. We think this process might be the source of many bugs. Lastly, we found that the track data was a little wonky, since sometimes data is missing for chunks of time, and we might need to find a way to clean up the heart rate .cs files.
-        </p>
+    
 </body>
 </html>

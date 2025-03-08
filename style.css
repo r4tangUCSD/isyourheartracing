@@ -1,17 +1,23 @@
 body {
     background-color: black;
+
+    #everything-else {
+        padding-top:1em;
+        padding-left:5.5em;
+        padding-right: 5em;
+        font-family: system-ui;
+    }
     h1 {
         color: white;
     }
     color: #7ed957;
-    padding-top:1.5em;
-    padding-left:5.5em;
-    padding-right: 5em;
-    font-family: system-ui;
+    
 
     h3 {
         text-align: center;
         color: rgba(255, 255, 255, 0.75);
+        padding: 0.75em;
+        margin: 1.5em;
     }
 }
 
@@ -23,6 +29,9 @@ body {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 3.5em;
+    margin-bottom: 3em;
+    padding-bottom: 4em;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.5);
 }
 
 #average {
@@ -31,6 +40,7 @@ body {
     padding-right: 3em;
     padding-left: 1em;
     font-weight: bold;
+    margin-top: 0.6em;
     
     
     width: 375px;
@@ -50,23 +60,30 @@ body {
     }
 }
 
-#surgery-info {
-    margin-top: 20px;
+#information {
+    #title {
+        text-align: center;
+        font-weight: bold;
+        font-style: italic;
+        color:rgba(255, 255, 255, 0.8);
+    }
+    margin-top: 1em;
     padding: 0.5em;
     line-height: 20pt;
     color: rgba(255, 255, 255, 0.75);
-    border: rgba(255, 255, 255, 0.5), 2px, solid;
+    border: rgba(255, 255, 255, 0.4), 2px, solid;
     width: 430px;
 }
 
 #label {
     /* margin-left: 4em; */
     width: 84%;
+
 }
 #tracker {
     display: grid;
     grid-template-columns: auto 1fr;
-    margin-top: 0.5em;
+    /* margin-top: 0.5em; */
     /* margin-right: 4em; */
 }
 
@@ -102,6 +119,13 @@ body {
     background-color: rgb(126, 217, 87);
 }
 
+
+#post-animate {
+    color: white;
+    text-align: center;
+    padding-top: 1em;
+}
+
 .legend {
     color: white;
     opacity: 75%;
@@ -118,41 +142,41 @@ body {
 
 
 #low {
-    background-color: rgba(0, 0, 255, 0.2);
+    background-color: rgba(0, 154, 238, 0.2);
     width: 175px;
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: center;
     /* padding: 8px 70px; */
-    border: rgba(0, 0, 255, 0.15), 2px solid; 
+    border: rgba(0, 154, 238, 0.15), 2px solid; 
     
 }
 #resting {
-    background-color: rgba(0, 255, 0, 0.2);
+    background-color: rgba(45, 180, 30, 0.2);
     width: 175px;
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: center;
-    border: rgba(0, 255, 0, 0.15), 2px solid; 
+    border: rgba(45, 180, 30, 0.15), 2px solid; 
     
 }
 
 
 
 #moderate {
-    background-color: rgba(255, 255, 0, 0.2);   
+    background-color: rgba(254, 237, 83, 0.2);   
     width: 175px;
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: center;
-    border: rgba(255, 255, 0, 0.15), 2px solid; 
+    border: rgba(254, 237, 83, 0.15), 2px solid; 
 }
 
 #high {
-    background-color: rgb(255, 0, 0, 0.2);
+    background-color: rgb(246, 60, 76, 0.2);
     width: 175px;
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: center;
-    border: rgb(255, 0, 0, 0.15), 2px solid; 
+    border: rgb(246, 60, 76, 0.15), 2px solid; 
 }
