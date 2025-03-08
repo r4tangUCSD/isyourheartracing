@@ -569,15 +569,15 @@ function drawBackBubble() {
     svgCircle = backBubble
         .append("svg")
         .attr("width", 600)
-        .attr("height", 125);
+        .attr("height", 75);
 
     // console.log(svgCircle)
 
     // Append a circle inside the SVG
     svgCircle.append("circle")
         .attr("cx", 260)  // Center the circle
-        .attr("cy", -175)
-        .attr("r", 300)
+        .attr("cy", -125)
+        .attr("r", 200)
         .style("fill", "#333739")
         .style("opacity", 0.85)
         .on("mouseover", function(event, d) {
