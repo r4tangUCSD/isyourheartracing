@@ -455,9 +455,9 @@ function createWholeGraph() {
     const chartContainer = document.getElementById("chart");
     const containerWidth = chartContainer.clientWidth;
     const containerHeight = chartContainer.clientHeight;
-    
-    const width = containerWidth - margin.left - margin.right;
-    const height = containerHeight - margin.top - margin.bottom - 40; // Additional space for title
+ 
+    const width = 750 - margin.left - margin.right;
+    const height = 375 - margin.top - margin.bottom - 40; // Additional space for title
 
     d3.select("#chart").selectAll("*").remove();  
 
