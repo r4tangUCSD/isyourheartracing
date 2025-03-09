@@ -16,16 +16,16 @@ async function loadData() {
         // Use d3.csv directly
         d3.csv("emergency_everything.csv")
             .then(patientData => {
-                allPatients = patientData.map(d => {
-                    return {
+                allPatients = patientData
+                    .filter(d => d.optype !== "Others") // Exclude 'Other' category
+                    .map(d => ({
                         id: d.case_id,
                         age: +(d.age || 0),
                         max_hr: +(d.max_hr || 0),
                         duration: Math.round(+(d.duration || 0) / 60), // Convert seconds to minutes
                         category: d.optype
-                    };
-                });
-                
+                    }));
+
                 // Extract surgery categories
                 const categoryMap = {};
                 allPatients.forEach(patient => {
@@ -38,15 +38,15 @@ async function loadData() {
                     }
                     categoryMap[patient.category].count++;
                 });
-                
+
                 surgeryCategories = Object.values(categoryMap);
-                
+
                 // Group patients by category
                 patientsByCategoryId = {};
                 surgeryCategories.forEach(category => {
                     patientsByCategoryId[category.id] = allPatients.filter(p => p.category === category.id);
                 });
-                
+
                 // Initialize visualization
                 initVisualization();
             })
@@ -59,6 +59,7 @@ async function loadData() {
         document.querySelector('.loading').textContent = 'Error loading data. Please try again later.';
     }
 }
+
 
 // Helper to format category names
 function formatCategoryName(categoryId) {
@@ -100,7 +101,7 @@ function initVisualization() {
     
     // Get container dimensions - make sure to get accurate dimensions
     const containerRect = visualizationContainer.node().getBoundingClientRect();
-    width = containerRect.width;
+    width = containerRect.width ;
     height = containerRect.height;
     
     // Create SVG with the full container size
@@ -217,7 +218,7 @@ async function showCategoryDetail(category) {
         .attr("x", width / 2)
         .attr("y", height / 2)
         .attr("text-anchor", "middle")
-        .attr("fill", "#a5a2a2")
+        .attr("fill", "white")
         .text("Loading patient data...");
     
     // Get patients for this category
@@ -251,30 +252,39 @@ async function showCategoryDetail(category) {
     svg.select(".loading-text").remove();
     
     // Create main container circle - MADE LARGER AND OFF-CENTER
-    const circleRadius = Math.min(width, height) * 0.6; // Increased radius
+    const circleRadius = Math.min(width, height) * 0.62; // Increased radius
     const containerCircle = svg.append("circle")
-        .attr("cx", width * 0.4) // Moved left
-        .attr("cy", height * 0.7) // Moved below bottom edge
+        .attr("cx", width * 0.35) // Moved left
+        .attr("cy", height * 0.62) // Moved below bottom edge
         .attr("r", circleRadius)
         .attr("fill", "#7ed957")
         .attr("stroke", "#333739")
         .attr("stroke-width", 2)
         .style("opacity", 0.8); // Added some transparency
+    
+    // Define clip path to keep everything inside the green circle
+    svg.append("defs")
+        .append("clipPath")
+        .attr("id", "circle-clip")
+        .append("circle")
+        .attr("cx", width * 0.4)
+        .attr("cy", height * 0.7)
+        .attr("r", circleRadius);
         
     // Add category title
     svg.append("text")
-        .attr("x", width / 2)
+        .attr("x", width / 2 - 100)
         .attr("y", height * 0.1)
         .attr("text-anchor", "middle")
-        .attr("fill", "#363336")
-        .style("font-size", "24px")
+        .attr("fill", "#dcdcdc")
+        .style("font-size", "30px")
         .style("font-weight", "bold")
         .text(category.data.name);
         
     // Add back button
     const backButtonGroup = svg.append("g")
         .attr("class", "back-button")
-        .attr("transform", `translate(${width * 0.1}, ${height * 0.1})`)
+        .attr("transform", `translate(${width * 0.05}, ${height * 0.06})`)
         .on("click", drawCategoryBubbles)
         .on("mouseover", function() {
             d3.select(this).select("circle")
@@ -300,10 +310,10 @@ async function showCategoryDetail(category) {
         });
         
     backButtonGroup.append("circle")
-        .attr("r", 20)
+        .attr("r", 35)
         .attr("fill", "#333739")
         .attr("stroke", "#292929")
-        .attr("stroke-width", 2);
+        .attr("stroke-width", 0);
         
     backButtonGroup.append("text")
         .attr("text-anchor", "middle")
@@ -311,34 +321,85 @@ async function showCategoryDetail(category) {
         .attr("fill", "#a5a2a2")
         .style("font-size", "12px")
         .text("Back");
+    
+    // Create grid container that will be clipped
+    const gridContainer = svg.append("g")
+        .attr("clip-path", "url(#circle-clip)");
+    
+    // Add grid lines instead of axes
+    // Vertical grid lines (for x-axis)
+    const xTicks = xScale.ticks(10);
+    gridContainer.selectAll(".vertical-grid")
+        .data(xTicks)
+        .enter()
+        .append("line")
+        .attr("class", "vertical-grid")
+        .attr("x1", d => xScale(d))
+        .attr("y1", height * 0.15)
+        .attr("x2", d => xScale(d))
+        .attr("y2", height * 0.75)
+        .attr("stroke", "white")
+        .attr("stroke-width", 0.5)
+        .attr("opacity", 0.3);
+    
+    // Horizontal grid lines (for y-axis)
+    const yTicks = yScale.ticks(10);
+    gridContainer.selectAll(".horizontal-grid")
+        .data(yTicks)
+        .enter()
+        .append("line")
+        .attr("class", "horizontal-grid")
+        .attr("x1", width * 0.15)
+        .attr("y1", d => yScale(d))
+        .attr("x2", width * 0.85)
+        .attr("y2", d => yScale(d))
+        .attr("stroke", "white")
+        .attr("stroke-width", 0.5)
+        .attr("opacity", 0.3);
+    
+    // Add tick labels for x-axis (without the axis line)
+    gridContainer.selectAll(".x-label")
+        .data(xTicks)
+        .enter()
+        .append("text")
+        .attr("class", "x-label")
+        .attr("x", d => xScale(d))
+        .attr("y", height * 0.78)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#dcdcdc")
+        .style("font-size", "10px")
+        .text(d => d);
+    
+    // Add tick labels for y-axis (without the axis line)
+    gridContainer.selectAll(".y-label")
+        .data(yTicks)
+        .enter()
+        .append("text")
+        .attr("class", "y-label")
+        .attr("x", width * 0.13)
+        .attr("y", d => yScale(d))
+        .attr("text-anchor", "end")
+        .attr("dominant-baseline", "middle")
+        .attr("fill", "#dcdcdc")
+        .style("font-size", "10px")
+        .text(d => d);
         
-    // Add axes - SWITCHED: x-axis is now age, y-axis is max heart rate
-    // X axis (now Age)
-    svg.append("g")
-        .attr("transform", `translate(0, ${height * 0.8})`)
-        .call(d3.axisBottom(xScale))
-        .attr("color", "white");
-        
+    // Add x-axis label
     svg.append("text")
         .attr("x", width / 2)
-        .attr("y", height * 0.87)
+        .attr("y", height * 0.82)
         .attr("text-anchor", "middle")
-        .attr("fill", "#a5a2a2")
+        .attr("fill", "#dcdcdc")
         .style("font-size", "14px")
         .text("Patient Age");
         
-    // Y axis (now Max Heart Rate)
-    svg.append("g")
-        .attr("transform", `translate(${width * 0.15}, 0)`)
-        .call(d3.axisLeft(yScale))
-        .attr("color", "white");
-        
+    // Add y-axis label
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
         .attr("y", width * 0.07)
         .attr("text-anchor", "middle")
-        .attr("fill", "#a5a2a2")
+        .attr("fill", "#dcdcdc")
         .style("font-size", "14px")
         .text("Max Heart Rate (bpm)");
 
@@ -347,7 +408,7 @@ async function showCategoryDetail(category) {
     );
         
     // Add patient bubbles - SWITCHED: x coordinate is now age, y coordinate is max_hr
-    svg.selectAll(".patient")
+    gridContainer.selectAll(".patient")
         .data(sortedPatients)
         .enter()
         .append("circle")
@@ -451,7 +512,7 @@ function createWholeGraph() {
         return;
     }
     
-    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const margin = { top: 20, right: 30, bottom: 40, left: 50 }; // Increased left margin for y-axis labels
     const chartContainer = document.getElementById("chart");
     const containerWidth = chartContainer.clientWidth;
     const containerHeight = chartContainer.clientHeight;
@@ -498,22 +559,21 @@ function createWholeGraph() {
         finalXTicks.push(maxTime);
     }
 
-    // Creates y axis scales - with padding to keep line on screen
-    // Get actual min/max values from the filtered data
-    const [dataMinRate, dataMaxRate] = d3.extent(filteredData, d => d.heartrate);
+    // Creates y axis scales with exactly 13 ticks in denominations of 20, starting from 0
+    // Get actual max value from the filtered data
+    const dataMaxRate = d3.max(filteredData, d => d.heartrate);
     
-    // Add padding to y-axis to keep the line from touching the edges
-    const yPadding = Math.max(10, (dataMaxRate - dataMinRate) * 0.1); // At least 10 or 10% of the range
-    const minRate = Math.max(0, dataMinRate - yPadding);
-    const maxRate = dataMaxRate + yPadding;
-
+    // Calculate the max tick value needed (at least enough to cover the max data point)
+    // 12 * 20 = 240, so our 13 ticks will go from 0 to 240 in steps of 20
+    const maxTickValue = Math.max(240, Math.ceil(dataMaxRate / 20) * 20);
+    
+    // Generate exactly 13 y-axis ticks starting from 0 with step size of 20
+    const yTickStep = 20;
+    const yTicks = Array.from({ length: 13 }, (_, i) => i * yTickStep);
+    
     const yScale = d3.scaleLinear()
-        .domain([minRate, maxRate]) // data values for y-axis with padding
+        .domain([0, 240]) // Fixed domain from 0 to 240
         .range([height, 0]); // pixel range for the graph
-
-    // Generate y-axis ticks
-    const yTickCount = 10; // Reasonable number of ticks for y-axis
-    const yTicks = yScale.ticks(yTickCount);
 
     // Creates the x and y axis
     svg.append("g")
@@ -580,25 +640,27 @@ function createWholeGraph() {
         .attr("y", -10)
         .attr("text-anchor", "middle")
         .style("font-size", "16px")
-        .style("fill", "#a5a2a2")
+        .style("fill", "#7ed957")
         .text(`Heart Rate Data for Patient ${currentPatient.id}`);
         
-    // Add axis labels
+    // Add axis labels with bold text - position adjusted to ensure visibility
     svg.append("text")
         .attr("x", width / 2)
-        .attr("y", height + 35)
+        .attr("y", height + 30) // Adjusted position
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
-        .style("fill", "#a5a2a2")
-        .text("Time (MM:SS)");
+        .style("fill", "#7ed957")
+        .style("font-weight", "bold")
+        .text("Time Since Operation Started (HH:MM)");
         
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
-        .attr("y", -30)
+        .attr("y", -35) // Adjusted position further from axis
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
-        .style("fill", "#a5a2a2")
+        .style("fill", "#7ed957")
+        .style("font-weight", "bold")
         .text("Heart Rate (bpm)");
 }
 
@@ -608,8 +670,8 @@ window.addEventListener('resize', () => {
     // Update dimensions on resize
     const visualizationContainer = d3.select("#visualization");
     const containerRect = visualizationContainer.node().getBoundingClientRect();
-    width = containerRect.width;
-    height = containerRect.height;
+    width = containerRect.width - 100;
+    height = containerRect.height - 100;
     
     // Redraw based on current view
     if (currentView === "categories") {
