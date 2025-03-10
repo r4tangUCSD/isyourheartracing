@@ -115,6 +115,11 @@ function initVisualization() {
 
 function drawCategoryBubbles() {
     // Clear previous content
+    // Clear the heart rate graph
+    d3.select("#chart").html("");  // This removes the graph content
+
+    // Reset patient selection (optional)
+    currentPatient = null;
     svg.selectAll("*").remove();
     
     // Create bubble layout
@@ -505,22 +510,22 @@ function secondsToHHMMSS(seconds) {
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-// The createWholeGraph function 
+// The createWholeGraph function
 function createWholeGraph() {
     if (!processedData || processedData.length === 0) {
         d3.select("#chart").html('<div class="no-data">No heart rate data available for this patient</div>');
         return;
     }
     
-    const margin = { top: 20, right: 30, bottom: 40, left: 50 }; // Increased left margin for y-axis labels
+    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const chartContainer = document.getElementById("chart");
     const containerWidth = chartContainer.clientWidth;
     const containerHeight = chartContainer.clientHeight;
- 
-    const width = 750 - margin.left - margin.right;
-    const height = 375 - margin.top - margin.bottom - 40; // Additional space for title
 
-    d3.select("#chart").selectAll("*").remove();  
+    const width = 750 - margin.left - margin.right;
+    const height = 375 - margin.top - margin.bottom - 40;
+
+    d3.select("#chart").selectAll("*").remove();
 
     const svg = d3.select("#chart")
         .append("svg")
@@ -529,73 +534,94 @@ function createWholeGraph() {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // Filter data to ensure we're only using valid points within the time range
-    const filteredData = processedData.filter(d => 
-        !isNaN(d.heartrate) && 
-        d.second >= 0 && 
-        d.second <= maxTime
-    );
+    // Add axis labels
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + 30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#7ed957")
+        .style("font-weight", "bold")
+        .text("Time Since Operation Started (HH:MM)");
+
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -35)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#7ed957")
+        .style("font-weight", "bold")
+        .text("Heart Rate (bpm)");
     
-    if (filteredData.length === 0) {
+        // Ensure we use the full dataset range without filtering NaN values
+    const fullData = processedData; 
+
+    if (fullData.length === 0) {
         d3.select("#chart").html('<div class="no-data">No valid heart rate data available for this patient</div>');
         return;
     }
 
-    // Creates x axis scales
-    const xScale = d3.scaleLinear()
-        .domain([0, maxTime]) // data values for x-axis
-        .range([0, width]); // pixel range for the graph
+    // Find max time value without slicing or filtering
+    const maxTime = d3.max(fullData, d => d.second);
 
-    // Generate exactly 15 tick values evenly spaced across the x-axis
-    const xTickInterval = Math.ceil(maxTime / 14); // 14 intervals = 15 ticks
+    // Creates x-axis scale
+    const xScale = d3.scaleLinear()
+        .domain([0, maxTime]) 
+        .range([0, width]);
+
+    // Generate exactly 15 evenly spaced tick values
+    const xTickInterval = Math.ceil(maxTime / 14); // Dividing full range into 14 equal segments
     const xTicks = d3.range(0, maxTime + xTickInterval, xTickInterval)
-        .filter(tick => tick <= maxTime); // Ensure we don't exceed maxTime
-    
-    // Limit to exactly 15 ticks if we have more
-    const finalXTicks = xTicks.length > 15 ? xTicks.slice(0, 15) : xTicks;
-    
-    // If we have fewer than 15 ticks, add the maxTime as the last tick if it's not already included
-    if (finalXTicks.length < 15 && !finalXTicks.includes(maxTime)) {
-        finalXTicks.push(maxTime);
+        .slice(0, 15); // Ensure exactly 15 ticks
+
+    // Ensure last tick is exactly at maxTime if not included
+    if (!xTicks.includes(maxTime)) {
+        xTicks[xTicks.length - 1] = maxTime;
     }
 
-    // Creates y axis scales with exactly 13 ticks in denominations of 20, starting from 0
-    // Get actual max value from the filtered data
-    const dataMaxRate = d3.max(filteredData, d => d.heartrate);
-    
-    // Calculate the max tick value needed (at least enough to cover the max data point)
-    // 12 * 20 = 240, so our 13 ticks will go from 0 to 240 in steps of 20
-    const maxTickValue = Math.max(240, Math.ceil(dataMaxRate / 20) * 20);
-    
-    // Generate exactly 13 y-axis ticks starting from 0 with step size of 20
-    const yTickStep = 20;
-    const yTicks = Array.from({ length: 13 }, (_, i) => i * yTickStep);
-    
-    const yScale = d3.scaleLinear()
-        .domain([0, 240]) // Fixed domain from 0 to 240
-        .range([height, 0]); // pixel range for the graph
+    // Fixes inconsistent time labeling by ensuring proper HH:MM formatting
+    function secondsToHHMM(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        return `${hours}:${remainingMinutes.toString().padStart(2, "0")}`;
+    }
 
-    // Creates the x and y axis
+    // Determine max heart rate value dynamically without slicing
+    const dataMaxRate = d3.max(fullData, d => d.heartrate);
+
+    // Set y-axis ticks in steps of 20 up to at least 240
+    const maxTickValue = Math.max(240, Math.ceil(dataMaxRate / 20) * 20);
+    const yTicks = d3.range(0, maxTickValue + 20, 20);
+
+    const yScale = d3.scaleLinear()
+        .domain([0, maxTickValue])
+        .range([height, 0]);
+
+    // Create x and y axes
     svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(xScale)
-            .tickValues(finalXTicks)
-            .tickFormat(d => secondsToHHMMSS(d)));
+            .tickValues(xTicks)
+            .tickFormat(d => secondsToHHMM(d))
+        );
 
     svg.append("g")
         .call(d3.axisLeft(yScale)
-            .tickValues(yTicks));
+            .tickValues(yTicks)
+        );
 
-    // Creates grids
+    // Create gridlines
     svg.append("g")
         .attr("class", "grid")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(xScale)
-            .tickValues(finalXTicks)
-            .tickSize(-height) // Extend the gridlines across the chart
-            .tickFormat("") // No tick labels
+            .tickValues(xTicks)
+            .tickSize(-height)
+            .tickFormat("")
         )
-        .style("stroke", "#ccc") // Color of the gridlines
+        .style("stroke", "#ccc")
         .style("stroke-width", "2px")
         .style("opacity", "20%");
 
@@ -603,14 +629,14 @@ function createWholeGraph() {
         .attr("class", "grid")
         .call(d3.axisLeft(yScale)
             .tickValues(yTicks)
-            .tickSize(-width)    // Extend the gridlines across the chart
-            .tickFormat("")      // Remove tick labels
+            .tickSize(-width)
+            .tickFormat("")
         )
-        .style("stroke", "#ccc")  // Gridline color
+        .style("stroke", "#ccc")
         .style("stroke-width", "1px")
         .style("opacity", "40%");
 
-    // Create clipPath to prevent the line from going outside the chart area
+    // Clip path to keep the line inside the graph area
     svg.append("defs").append("clipPath")
         .attr("id", "clip-path")
         .append("rect")
@@ -619,21 +645,21 @@ function createWholeGraph() {
         .attr("x", 0)
         .attr("y", 0);
 
-    // Draw the line with clip path applied
+    // Draw the line graph without filtering NaN values
     const line = d3.line()
-        .x(d => xScale(d.second)) // Map time to the x-axis
-        .y(d => yScale(d.heartrate))
-        .defined(d => !isNaN(d.heartrate)); // Skip missing values
+        .defined(d => !isNaN(d.heartrate)) // Only exclude NaN points from being drawn, but keep them in the dataset
+        .x(d => xScale(d.second))
+        .y(d => yScale(d.heartrate));
 
     svg.append("path")
-        .datum(filteredData) // Bind the filtered data
-        .attr("class", "line") // Add a class for styling
-        .attr("clip-path", "url(#clip-path)") // Apply the clip path
-        .attr("d", line) // Draw the path based on the data
-        .style("fill", "none") // No fill for the line
-        .style("stroke", "#7ed957") // Line color
-        .style("stroke-width", 2); // Line width
-        
+        .datum(fullData)
+        .attr("class", "line")
+        .attr("clip-path", "url(#clip-path)")
+        .attr("d", line)
+        .style("fill", "none")
+        .style("stroke", "#7ed957")
+        .style("stroke-width", 2);
+
     // Add title
     svg.append("text")
         .attr("x", width / 2)
@@ -642,26 +668,8 @@ function createWholeGraph() {
         .style("font-size", "16px")
         .style("fill", "#7ed957")
         .text(`Heart Rate Data for Patient ${currentPatient.id}`);
-        
-    // Add axis labels with bold text - position adjusted to ensure visibility
-    svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height + 30) // Adjusted position
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#7ed957")
-        .style("font-weight", "bold")
-        .text("Time Since Operation Started (HH:MM)");
-        
-    svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -35) // Adjusted position further from axis
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#7ed957")
-        .style("font-weight", "bold")
-        .text("Heart Rate (bpm)");
+
+    
 }
 
 // Initialize visualization when the page loads
