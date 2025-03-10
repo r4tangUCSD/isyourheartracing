@@ -194,7 +194,7 @@ function drawCategoryBubbles() {
         .attr("text-anchor", "middle")
         .attr("dy", "-.2em")
         .attr("fill", "#a5a2a2")
-        .style("font-size", d => Math.min(2 * d.r / (d.data.name.length), 16) + "px")
+        .style("font-size", d => Math.min(2.5 * d.r / (d.data.name.length), 18) + "px")
         .text(d => d.data.name);
     
     // Add count labels
@@ -202,7 +202,7 @@ function drawCategoryBubbles() {
         .attr("text-anchor", "middle")
         .attr("dy", "1.5em")
         .attr("fill", "#a5a2a2")
-        .style("font-size", d => Math.min(1.5 * d.r / 10, 14) + "px")
+        .style("font-size", d => Math.min(1.75 * d.r / 10, 14) + "px")
         .text(d => d.data.count > 0 ? `${d.data.count} cases` : "");
         
     currentView = "categories";
