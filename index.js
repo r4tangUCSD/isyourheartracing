@@ -626,7 +626,7 @@ function createWholeGraph() {
     endY = maxRate + 20;
 
     yScale = d3.scaleLinear()
-        .domain([firstY, endY]) // data values for y-axis
+        .domain([0, 220]) // data values for y-axis
         .range([height, 0]); // pixel range for the graph
 
     // Creates the x and y axis
