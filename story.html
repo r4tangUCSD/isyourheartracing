@@ -9,14 +9,21 @@
 
 <body>
     <div class="container">
-        <div id="silhouette" class="silhouette" style="background-image: url('story_body.png');"></div>
+        <!-- body -->
+        <div id="silhouette" class="silhouette" style="background-image: url('body_isolated.png');"></div>
         
-        <div class="content">
-            <div id="stage-name" class="stage-name">Stage Name</div>
-            <div class="bpm-box">
-                <div id="heart-rate" class="bpm">-- <span style="font-size: 2rem;">bpm</span></div>
+        <!-- heart rate -->
+        <div class="bpm-container">
+            <div id="bpm-box" class="bpm-box">
+                <span class="bpm-label"></span>
+                <div id="heart-rate" class="bpm">--</div>
             </div>
-            <div id="stage-time" class="time">Time: -- minutes</div>
+            <div id="stage-time" class="time" style="margin-top: 20px;">Time: -- minutes</div>
+        </div>
+        
+        <!-- description  -->
+        <div class="stage-info">
+            <div id="stage-name" class="stage-name">Stage Name</div>
             <div id="stage-description" class="description">Description of the surgical stage</div>
         </div>
     </div>
