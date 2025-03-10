@@ -80,6 +80,29 @@ function getHeartRateColor(heartRate) {
     }
 }
 
+// border color opacity 
+function getBorderColor(heartRate) {
+    // define heart rate thresholds
+    const normalLow = 60;
+    const normalHigh = 80;
+    const riskLow = 50;
+    const riskHigh = 90;
+    
+    // normal (green): 60-80 bpm
+    if (heartRate >= normalLow && heartRate <= normalHigh) {
+        return 'rgba(126, 217, 87, 0.4)'; // green
+    }
+    // risky (yellow): 50-60 or 80-90 bpm
+    else if ((heartRate >= riskLow && heartRate < normalLow) || 
+            (heartRate > normalHigh && heartRate <= riskHigh)) {
+        return 'rgba(255, 255, 0, 0.4)'; // yellow
+    }
+    // critical (red): < 50 or > 90 bpm
+    else {
+        return 'rgba(255, 49, 49, 0.4)'; // red
+    }
+}
+
 // HEART ANIMATION FUNCTIONALITY
 
 let heartEl = null;
@@ -167,7 +190,7 @@ document.head.appendChild(styleSheet);
 // update stages function
 function updateStageInfo(stage) {
     stageNameEl.textContent = stage.stage;
-    heartRateEl.innerHTML = `${stage.heartRate} <span style="font-size: 2rem;">bpm</span>`;
+    heartRateEl.innerHTML = `<div id="unit" style="font-size: 2rem;">solar8000/HR</div><div id="unit" style="font-size: 2rem;">bpm</div>${stage.heartRate} `;
     stageDescriptionEl.textContent = stage.description;
     stageTimeEl.textContent = `Time: ${stage.time} minutes into surgery`;
     
@@ -176,8 +199,9 @@ function updateStageInfo(stage) {
 
     // update heart rate color
     const heartRateColor = getHeartRateColor(stage.heartRate);
+    const borderColoring = getBorderColor(stage.heartRate);
     heartRateEl.style.color = heartRateColor;
-    bpmBoxEl.style.borderColor = heartRateColor;
+    bpmBoxEl.style.borderColor = borderColoring;
 }
 
 // scroll event handler

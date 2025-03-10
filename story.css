@@ -36,14 +36,19 @@ body, html {
 }
 .bpm-box {
     background-color: rgba(255,255,255,0.1);
-    border: 2px solid #7ed957;
+    border: rgb(126, 217, 87, 0.4) 2px solid ;
     padding: 20px;
-    text-align: center;
+    text-align: right;
     margin-bottom: 20px;
 }
 .bpm {
     font-size: 6rem;
     font-weight: bold;
+}
+
+#unit {
+    text-align: left;
+    opacity: 70%;
 }
 .stage-info {
     flex: 0 0 40%;
