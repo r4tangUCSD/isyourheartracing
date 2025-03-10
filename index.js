@@ -95,10 +95,16 @@ async function loadHeartRateData(caseId) {
 
 function initVisualization() {
     const visualizationContainer = d3.select("#visualization");
+
+    // Hide chart container initially
+    d3.select(".chart-container").style("display", "none");
+
+    // Add fullscreen class to visualization
+    visualizationContainer.attr("class", "visualization-fullscreen");
     
     // Remove loading message
     d3.select(".loading").remove();
-    
+
     // Get container dimensions - make sure to get accurate dimensions
     const containerRect = visualizationContainer.node().getBoundingClientRect();
     width = containerRect.width ;
@@ -114,36 +120,51 @@ function initVisualization() {
 }
 
 function drawCategoryBubbles() {
-    // Clear previous content
-    // Clear the heart rate graph
-    d3.select("#chart").html("");  // This removes the graph content
+    // Hide chart container when returning to categories view
+    d3.select(".chart-container").style("display", "none");
 
-    // Reset patient selection (optional)
+    // Change visualization back to fullscreen mode
+    d3.select("#visualization")
+        .attr("class", "visualization-fullscreen");
+    
+    // Update the width and height based on new container size
+    const visualizationContainer = d3.select("#visualization");
+    const containerRect = visualizationContainer.node().getBoundingClientRect();
+    width = containerRect.width;
+    height = containerRect.height;
+    
+    // Resize SVG
+    svg.attr("width", width)
+       .attr("height", height);
+
+    d3.select("#chart").html(""); // Clear heart rate graph
     currentPatient = null;
     svg.selectAll("*").remove();
-    
-    // Create bubble layout
+
+    // Define available space and create bubble layout
     const bubble = d3.pack()
-        .size([width, height])
+        .size([width, height * 0.9])  // Reduce height to keep bubbles centered
         .padding(20);
-    
+
     // Prepare hierarchy data
     const hierarchyData = { children: surgeryCategories };
-    const root = d3.hierarchy(hierarchyData)
-        .sum(d => d.count || 0);
-    
+    const root = d3.hierarchy(hierarchyData).sum(d => d.count || 0);
+
     // Apply layout
     bubble(root);
-    
+
+    // Calculate vertical offset for centering
+    const verticalOffset = (height - root.r * 2) / 2;
+
     // Create bubble groups
     const bubbleGroups = svg.selectAll(".bubble")
         .data(root.children)
         .enter()
         .append("g")
         .attr("class", "bubble")
-        .attr("transform", d => `translate(${d.x},${d.y})`)
+        .attr("transform", d => `translate(${d.x},${d.y + verticalOffset})`)  // Apply centering offset
         .style("cursor", "pointer");
-    
+
     // Add circles
     bubbleGroups.append("circle")
         .attr("r", d => d.r)
@@ -152,38 +173,24 @@ function drawCategoryBubbles() {
         .attr("stroke-width", 0)
         .style("opacity", 0.75)
         .on("mouseover", function(event, d) {
-            d3.select(this)
-                .transition()
-                .duration(200)
-                .attr("fill", "#7ed957")
-                .style("opacity", 1);
-            
+            d3.select(this).transition().duration(200).attr("fill", "#7ed957").style("opacity", 1);
+
             // Show tooltip
-            const tooltip = d3.select("#tooltip");
-            tooltip
+            d3.select("#tooltip")
                 .style("left", `${event.pageX + 10}px`)
                 .style("top", `${event.pageY - 10}px`)
                 .html(`<strong>${d.data.name}</strong><br>${d.data.count} surgeries`)
                 .style("opacity", 1);
-            
-            // Change text color
+
             d3.select(this.parentNode).selectAll("text")
                 .transition()
                 .duration(200)
-                .attr("fill", "#363336");
+                .attr("fill", "#363336");    
         })
-        .on("mouseout", function(event, d) {
-            d3.select(this)
-                .transition()
-                .duration(200)
-                .attr("fill", "#333739")
-                .style("opacity", 0.85);
-            
-            // Hide tooltip
-            d3.select("#tooltip")
-                .style("opacity", 0);
-            
-            // Restore text color
+        .on("mouseout", function() {
+            d3.select(this).transition().duration(200).attr("fill", "#333739").style("opacity", 0.85);
+            d3.select("#tooltip").style("opacity", 0);
+
             d3.select(this.parentNode).selectAll("text")
                 .transition()
                 .duration(200)
@@ -191,31 +198,51 @@ function drawCategoryBubbles() {
         })
         .on("click", function(event, d) {
             currentCategory = d.data.id;
+            d3.select("#tooltip").style("opacity", 0);
             showCategoryDetail(d);
         });
-    
-    // Add labels
+
+    // Add category name labels
     bubbleGroups.append("text")
         .attr("text-anchor", "middle")
         .attr("dy", "-.2em")
         .attr("fill", "#a5a2a2")
         .style("font-size", d => Math.min(2.5 * d.r / (d.data.name.length), 18) + "px")
+        .style("pointer-events", "none")
         .text(d => d.data.name);
-    
-    // Add count labels
+
+    // Add case count labels
     bubbleGroups.append("text")
         .attr("text-anchor", "middle")
         .attr("dy", "1.5em")
         .attr("fill", "#a5a2a2")
         .style("font-size", d => Math.min(1.75 * d.r / 10, 14) + "px")
+        .style("pointer-events", "none")
         .text(d => d.data.count > 0 ? `${d.data.count} cases` : "");
-        
+
     currentView = "categories";
 }
 
 async function showCategoryDetail(category) {
+    // Show chart container when a category is selected
+    d3.select(".chart-container").style("display", "block");
+
+    // Change visualization class to split mode
+    d3.select("#visualization")
+        .attr("class", "visualization-split");
+
     // Clear previous content
     svg.selectAll("*").remove();
+
+    // Update the width and height based on new container size
+    const visualizationContainer = d3.select("#visualization");
+    const containerRect = visualizationContainer.node().getBoundingClientRect();
+    width = containerRect.width;
+    height = containerRect.height;
+    
+    // Resize SVG
+    svg.attr("width", width)
+       .attr("height", height);
     
     // Show loading
     svg.append("text")
@@ -267,22 +294,22 @@ async function showCategoryDetail(category) {
         .attr("stroke-width", 2)
         .style("opacity", 0.8); // Added some transparency
     
-    // Define clip path to keep everything inside the green circle
-    svg.append("defs")
-        .append("clipPath")
-        .attr("id", "circle-clip")
-        .append("circle")
-        .attr("cx", width * 0.4)
-        .attr("cy", height * 0.7)
-        .attr("r", circleRadius);
+     // Define clip path to keep everything inside the green circle
+     svg.append("defs")
+     .append("clipPath")
+     .attr("id", "circle-clip")
+     .append("circle")
+     .attr("cx", width * 0.33)
+     .attr("cy", height * 0.57)
+     .attr("r", circleRadius + 35);
         
     // Add category title
     svg.append("text")
         .attr("x", width / 2 - 100)
-        .attr("y", height * 0.1)
+        .attr("y", height * 0.15)
         .attr("text-anchor", "middle")
         .attr("fill", "#dcdcdc")
-        .style("font-size", "30px")
+        .style("font-size", "38px")
         .style("font-weight", "bold")
         .text(category.data.name);
         
@@ -329,8 +356,10 @@ async function showCategoryDetail(category) {
     
     // Create grid container that will be clipped
     const gridContainer = svg.append("g")
-        .attr("clip-path", "url(#circle-clip)");
+        .attr("clip-path", "url(#circle-clip)")
+        .attr("transform", `translate(${width * - 0.05}, ${height * 0.07})`); // Move the entire chart down and left;
     
+
     // Add grid lines instead of axes
     // Vertical grid lines (for x-axis)
     const xTicks = xScale.ticks(10);
@@ -391,8 +420,8 @@ async function showCategoryDetail(category) {
         
     // Add x-axis label
     svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height * 0.82)
+        .attr("x", width / 2 - 30)
+        .attr("y", height * 0.90)
         .attr("text-anchor", "middle")
         .attr("fill", "#dcdcdc")
         .style("font-size", "14px")
@@ -402,7 +431,7 @@ async function showCategoryDetail(category) {
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
-        .attr("y", width * 0.07)
+        .attr("y", width * 0.04)
         .attr("text-anchor", "middle")
         .attr("fill", "#dcdcdc")
         .style("font-size", "14px")
@@ -678,8 +707,12 @@ window.addEventListener('resize', () => {
     // Update dimensions on resize
     const visualizationContainer = d3.select("#visualization");
     const containerRect = visualizationContainer.node().getBoundingClientRect();
-    width = containerRect.width - 100;
-    height = containerRect.height - 100;
+    width = containerRect.width;
+    height = containerRect.height;
+    
+    // Resize SVG
+    svg.attr("width", width)
+       .attr("height", height);
     
     // Redraw based on current view
     if (currentView === "categories") {
