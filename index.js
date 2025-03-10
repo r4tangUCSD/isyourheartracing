@@ -256,7 +256,7 @@ async function showCategoryDetail(category) {
     // Get patients for this category
     const patients = patientsByCategoryId[category.data.id];
     
-    // Calculate scales - NOTE: Switched x and y axes
+    // Calculate scales
     const ageExtent = d3.extent(patients, d => d.age);
     const hrExtent = d3.extent(patients, d => d.max_hr);
     const durationExtent = d3.extent(patients, d => d.duration);
@@ -267,7 +267,7 @@ async function showCategoryDetail(category) {
     hrExtent[0] = Math.max(0, hrExtent[0] - 5);
     hrExtent[1] = hrExtent[1] + 5;
     
-    // Create scales - SWITCHED: age is now x-axis, max_hr is y-axis
+    // Create scales - age is x-axis, max_hr is y-axis
     const xScale = d3.scaleLinear()
         .domain(ageExtent)
         .range([width * 0.15, width * 0.85]);
@@ -283,25 +283,25 @@ async function showCategoryDetail(category) {
     // Remove loading text
     svg.select(".loading-text").remove();
     
-    // Create main container circle - MADE LARGER AND OFF-CENTER
-    const circleRadius = Math.min(width, height) * 0.62; // Increased radius
+    // Create main container circle
+    const circleRadius = Math.min(width, height) * 0.62;
     const containerCircle = svg.append("circle")
-        .attr("cx", width * 0.35) // Moved left
-        .attr("cy", height * 0.62) // Moved below bottom edge
+        .attr("cx", width * 0.35)
+        .attr("cy", height * 0.62)
         .attr("r", circleRadius)
         .attr("fill", "#7ed957")
         .attr("stroke", "#333739")
         .attr("stroke-width", 2)
-        .style("opacity", 0.8); // Added some transparency
+        .style("opacity", 0.8);
     
-     // Define clip path to keep everything inside the green circle
-     svg.append("defs")
-     .append("clipPath")
-     .attr("id", "circle-clip")
-     .append("circle")
-     .attr("cx", width * 0.33)
-     .attr("cy", height * 0.57)
-     .attr("r", circleRadius + 35);
+    // Define clip path to keep everything inside the green circle
+    svg.append("defs")
+        .append("clipPath")
+        .attr("id", "circle-clip")
+        .append("circle")
+        .attr("cx", width * 0.33)
+        .attr("cy", height * 0.57)
+        .attr("r", circleRadius + 35);
         
     // Add category title
     svg.append("text")
@@ -357,10 +357,9 @@ async function showCategoryDetail(category) {
     // Create grid container that will be clipped
     const gridContainer = svg.append("g")
         .attr("clip-path", "url(#circle-clip)")
-        .attr("transform", `translate(${width * - 0.05}, ${height * 0.07})`); // Move the entire chart down and left;
-    
+        .attr("transform", `translate(${width * - 0.05}, ${height * 0.07})`); // Move the entire chart down and left
 
-    // Add grid lines instead of axes
+    // Add grid lines
     // Vertical grid lines (for x-axis)
     const xTicks = xScale.ticks(10);
     gridContainer.selectAll(".vertical-grid")
@@ -391,32 +390,35 @@ async function showCategoryDetail(category) {
         .attr("stroke-width", 0.5)
         .attr("opacity", 0.3);
     
-    // Add tick labels for x-axis (without the axis line)
-    gridContainer.selectAll(".x-label")
-        .data(xTicks)
-        .enter()
-        .append("text")
-        .attr("class", "x-label")
-        .attr("x", d => xScale(d))
-        .attr("y", height * 0.78)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#dcdcdc")
-        .style("font-size", "10px")
-        .text(d => d);
+    // Add x-axis with axis bar
+    const xAxis = d3.axisBottom(xScale)
+        .ticks(10)
+        .tickSize(5);
+        
+    gridContainer.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0, ${height * 0.75})`)
+        .call(xAxis)
+        .attr("color", "#dcdcdc")
+        .style("font-size", "10px");
     
-    // Add tick labels for y-axis (without the axis line)
-    gridContainer.selectAll(".y-label")
-        .data(yTicks)
-        .enter()
-        .append("text")
-        .attr("class", "y-label")
-        .attr("x", width * 0.13)
-        .attr("y", d => yScale(d))
-        .attr("text-anchor", "end")
-        .attr("dominant-baseline", "middle")
-        .attr("fill", "#dcdcdc")
-        .style("font-size", "10px")
-        .text(d => d);
+    // Add y-axis with axis bar
+    const yAxis = d3.axisLeft(yScale)
+        .ticks(10)
+        .tickSize(5);
+        
+    gridContainer.append("g")
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${width * 0.15}, 0)`)
+        .call(yAxis)
+        .attr("color", "#dcdcdc")
+        .style("font-size", "10px");
+    
+    // Style the axes paths and lines
+    gridContainer.selectAll(".x-axis path, .y-axis path, .x-axis line, .y-axis line")
+        .attr("stroke", "#dcdcdc")
+        .style("opacity", 0.5)
+        .attr("stroke-width", 1.5);
         
     // Add x-axis label
     svg.append("text")
@@ -425,6 +427,7 @@ async function showCategoryDetail(category) {
         .attr("text-anchor", "middle")
         .attr("fill", "#dcdcdc")
         .style("font-size", "14px")
+        .style("opacity", 0.9)
         .text("Patient Age");
         
     // Add y-axis label
@@ -435,13 +438,14 @@ async function showCategoryDetail(category) {
         .attr("text-anchor", "middle")
         .attr("fill", "#dcdcdc")
         .style("font-size", "14px")
+        .style("opacity", 0.8)
         .text("Max Heart Rate (bpm)");
 
     const sortedPatients = [...patients].sort((a, b) => 
         sizeScale(b.duration) - sizeScale(a.duration)
     );
         
-    // Add patient bubbles - SWITCHED: x coordinate is now age, y coordinate is max_hr
+    // Add patient bubbles
     gridContainer.selectAll(".patient")
         .data(sortedPatients)
         .enter()
@@ -453,9 +457,9 @@ async function showCategoryDetail(category) {
         .attr("fill", "#7b7878")
         .attr("stroke", "#7b7878")
         .attr("stroke-width", 1)
-        .style("opacity", 0.7)  // Set initial opacity
+        .style("opacity", 0.7)
         .style("cursor", "pointer")
-        .style("transition", "all 0.2s ease")  // Add CSS transition property
+        .style("transition", "all 0.2s ease")
         .on("mouseover", async function(event, d) {
             // Update appearance immediately
             d3.select(this)
@@ -476,7 +480,6 @@ async function showCategoryDetail(category) {
                 .style("opacity", 1);
                 
             // Load and display heart rate data
-        
             d3.select("#chart").html('<div class="no-data">Loading heart rate data...</div>');
             
             processedData = await loadHeartRateData(d.id);
@@ -529,6 +532,7 @@ async function showCategoryDetail(category) {
         
     currentView = "category-detail";
 }
+
 
 // Helper function to convert seconds to HH:MM:SS format
 function secondsToHHMMSS(seconds) {
