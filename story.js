@@ -35,6 +35,12 @@ const storyData = [
         heartRate: 82, 
         stage: 'Surgery Completion', 
         description: 'Ending heart rate' 
+    },
+    { 
+        time: 150, 
+        heartRate: 82, 
+        stage: 'Let\'s explore more!', 
+        description: 'Loading visualization...' 
     }
 ];
 
@@ -50,7 +56,7 @@ const stageTimeEl = document.getElementById('stage-time');
 
 // create the scroll container
 const scrollContainer = document.createElement('div');
-scrollContainer.style.height = `${storyData.length * 100}vh`;
+scrollContainer.style.height = `${storyData.length * 50}vh`;
 scrollContainer.style.position = 'absolute';
 scrollContainer.style.top = '0';
 scrollContainer.style.left = '0';
