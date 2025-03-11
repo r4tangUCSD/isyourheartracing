@@ -23,7 +23,13 @@ async function loadData() {
                         age: +(d.age || 0),
                         max_hr: +(d.max_hr || 0),
                         duration: Math.round(+(d.duration || 0) / 60), // Convert seconds to minutes
-                        category: d.optype
+                        category: d.optype,
+                        sex: d.sex,
+                        bmi: +(d.bmi || 0),
+                        position: d.position,
+                        death_inhosp: d.death_inhosp === "1" ? "Yes" : "No",
+                        preop_htn: d.preop_htn === "1" ? "Yes" : "No", 
+                        preop_dm: d.preop_dm === "1" ? "Yes" : "No"
                     }));
 
                 // Extract surgery categories
@@ -58,6 +64,82 @@ async function loadData() {
         console.error('Error initializing data:', error);
         document.querySelector('.loading').textContent = 'Error loading data. Please try again later.';
     }
+}
+
+// Create a function to display patient information panel
+function displayPatientInfo(patient) {
+    // Create or update the info panel
+    let infoPanel = d3.select("#patient-info-panel");
+    
+    if (infoPanel.empty()) {
+        // Create the panel if it doesn't exist
+        infoPanel = d3.select(".chart-container")
+            .append("div")
+            .attr("id", "patient-info-panel")
+            .style("color", "#a5a2a2")
+            .style("display", "flex")
+            .style("flex-direction", "column") // Stack elements vertically
+            .style("align-items", "center") // Center everything
+            .style("margin-top", "50px")
+            .style("font-size", "20px")
+            .style("padding", "10px")
+    }
+    
+    // Clear existing content
+    infoPanel.html("");
+    
+     // Create a centered container for the patient details (to avoid left shifting)
+     const detailsContainer = infoPanel.append("div")
+     .style("display", "flex")
+     .style("justify-content", "center") // Center the two columns
+     .style("width", "60%") // Adjust width so it's balanced
+     .style("max-width", "600px") // Prevent it from getting too wide
+     .style("gap", "40px"); // Adds space between the columns
+
+ // Create left column
+ const leftColumn = detailsContainer.append("div")
+     .style("flex", "1")
+     .style("text-align", "center"); // Center text inside column
+
+ // Create right column
+ const rightColumn = detailsContainer.append("div")
+     .style("flex", "1")
+     .style("text-align", "center"); // Center text inside column
+
+ // Add info to left column
+ leftColumn.html(`
+     <div><strong>Case ID:</strong> ${patient.id}</div>
+     <div><strong>Sex:</strong> ${patient.sex}</div>
+     <div><strong>Age:</strong> ${patient.age}</div>
+     <div><strong>BMI:</strong> ${patient.bmi.toFixed(1)}</div>
+ `);
+
+ // Add info to right column
+ rightColumn.html(`
+     <div><strong>Location:</strong> ${patient.position || "Unknown"}</div>
+     <div><strong>Mortality:</strong> ${patient.death_inhosp}</div>
+     <div><strong>Hypertension:</strong> ${patient.preop_htn}</div>
+     <div><strong>Diabetes:</strong> ${patient.preop_dm}</div>
+ `);
+
+ // Add footer text centered at the bottom
+ infoPanel.append("div")
+     .style("margin-top", "15px")
+     .style("color", "#dcdcdc")
+     .style("font-size", "16px")
+     .style("font-style", "italic")
+     .style("text-align", "center")
+     .text("Click a case for more.");
+}
+
+// Hide patient info panel when no patient is selected
+function hidePatientInfo() {
+    d3.select("#patient-info-panel").style("display", "none");
+}
+
+// Show patient info panel
+function showPatientInfo() {
+    d3.select("#patient-info-panel").style("display", "flex");
 }
 
 
@@ -432,6 +514,10 @@ async function setupCategoryDetailView(category) {
                 [minRate, maxRate] = d3.extent(processedData, d => d.heartrate);
                 createWholeGraph();
             }
+
+            // Display patient info
+            displayPatientInfo(d);
+            showPatientInfo();
         })
         .on("mouseout", function(event, d) {
             // Only reset appearance if this isn't the selected patient
@@ -472,6 +558,8 @@ async function setupCategoryDetailView(category) {
                 [minRate, maxRate] = d3.extent(processedData, d => d.heartrate);
                 createWholeGraph();
             }
+
+            
         });
         
     currentView = "category-detail";
@@ -584,12 +672,15 @@ function createEmptyHeartRateGraph() {
         .style("font-size", "16px")
         .style("fill", "#a5a2a2")
         .text("Hover over a patient to view heart rate data");
+
+        d3.select("#patient-info-panel").remove(); // Remove the panel completely
 }
 
 // Update the drawCategoryBubbles function to handle the click event
 function drawCategoryBubbles() {
     // Hide chart container FIRST before doing anything else
     d3.select(".chart-container").style("display", "none");
+    d3.select("#patient-info-panel").remove(); // Remove the panel completely
     
     // Only do animation if we're coming from category detail view
     if (currentView === "category-detail" && currentCategory) {
