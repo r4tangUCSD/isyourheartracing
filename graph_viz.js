@@ -242,9 +242,9 @@ function createGraph() {
     const width = 750 - margin.left - margin.right;
     const height = 375 - margin.top - margin.bottom;
 
-    d3.select("#chart").selectAll("svg").remove();  
+    d3.select("#graph").selectAll("svg").remove();  
 
-    svg = d3.select("#chart")
+    svg = d3.select("#graph")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -562,6 +562,8 @@ export function magic(caseId) {
         });
 
     })
+
+    drawBackBubble();
 }
 
 
@@ -599,11 +601,38 @@ function drawBackBubble() {
                 // .duration(200)
                 .style("fill", "#333739")
                 .style("opacity", 0.85)
-        });
+        })
+        .on("mouseout", function(event, d) {
+            
+            transitionToBubble(d);
+        })         
 
 }
 
-drawBackBubble();
+function transitionToBubble(d) {
+    // Fade out the graph section
+    document.getElementById('graph-section').style.opacity = '0';
+
+    setTimeout(() => {
+        // Hide the graph section and show the bubble section
+        document.getElementById('graph-section').style.display = 'none';
+        document.getElementById('bubble-section').style.display = 'block';
+
+        // Apply fade-in effect with a slight delay
+        setTimeout(() => {
+            document.getElementById('bubble-section').style.opacity = '1';
+            
+            // Remove all elements created by the magic function
+            d3.selectAll("#graph svg").remove();
+            d3.selectAll("#tooltip").remove();
+            d3.selectAll("#back-bubble svg").remove();
+
+            // Call the magic function with the caseid
+            magic(d.id);
+        }, 300);
+
+    }, 1000); // Matches fade-out duration
+}
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Page ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
@@ -612,9 +641,9 @@ function createWholeGraph() {
     const width = 750 - margin.left - margin.right;
     const height = 375 - margin.top - margin.bottom;
 
-    d3.select("#chart").selectAll("svg").remove();  
+    d3.select("#graph").selectAll("svg").remove();  
 
-    svg = d3.select("#chart")
+    svg = d3.select("#graph")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)

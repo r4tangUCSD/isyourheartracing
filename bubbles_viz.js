@@ -550,7 +550,7 @@ async function setupCategoryDetailView(category) {
                 .attr("stroke", "#ff3131")
                 .attr("stroke-width", 2);
 
-                transitionToGraph();
+                transitionToGraph(d);
                 
             /*// Load and display heart rate data
             currentPatient = d;
@@ -570,7 +570,7 @@ async function setupCategoryDetailView(category) {
     currentView = "category-detail";
 }
 
-function transitionToGraph() {
+function transitionToGraph(d) {
     // Fade out the story section
     document.getElementById('bubble-section').style.opacity = '0';
 
@@ -582,7 +582,7 @@ function transitionToGraph() {
         // Apply fade-in effect with a slight delay
         setTimeout(() => {
             document.getElementById('graph-section').style.opacity = '1';
-            magic(currentPatient.id);
+            magic(d.id);
         }, 300);
 
     }, 1000); // Matches fade-out duration
