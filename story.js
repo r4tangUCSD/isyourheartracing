@@ -1,5 +1,6 @@
 // Import bubble function
-import { refreshVisualization } from './bubbles_viz.js';
+//import { refreshVisualization } from './bubbles_viz.js';
+import { loadData } from './bubbles_viz.js';
 
 // STATIC STORY INFORMATION
 const storyData = [
@@ -250,8 +251,14 @@ function transitionToVisualization() {
         // Apply fade-in effect with a slight delay
         setTimeout(() => {
             document.getElementById('viz-section').style.opacity = '1';
-            // Load the visualization (bubbles)
-            refreshVisualization();
+            
+            // Load the visualization data
+            loadData().then(() => {
+                // Wait a bit more to ensure the visualization container is fully visible
+                /*setTimeout(() => {
+                    refreshVisualization();
+                }, 300);*/
+            });
         }, 300);
 
     }, 1000); // Matches fade-out duration

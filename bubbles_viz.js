@@ -11,7 +11,7 @@ let surgeryCategories = [];
 let patientsByCategoryId = {};
 
 // Load data on page load
-async function loadData() {
+export async function loadData() {
     try {
         // Use d3.csv directly
         d3.csv("emergency_data/emergency_everything.csv")
@@ -1043,12 +1043,7 @@ function createWholeGraph() {
 }
 
 // Initialize visualization when the page loads
-window.addEventListener('load', loadData);
 window.addEventListener('resize', () => {
-    refreshVisualization();
-});
-
-export function refreshVisualization() {
     // Update dimensions on resize
     const visualizationContainer = d3.select("#visualization");
     const containerRect = visualizationContainer.node().getBoundingClientRect();
@@ -1077,4 +1072,8 @@ export function refreshVisualization() {
     if (currentPatient && processedData && processedData.length > 0) {
         createWholeGraph();
     }
-};
+});
+
+/*export function refreshVisualization() {
+
+};*/
