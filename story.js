@@ -224,16 +224,31 @@ function handleScroll() {
 
 // Function to transition to visualization (either bubbles or graph)
 function transitionToVisualization() {
-    document.getElementById('story-section').style.opacity = '0'; // Fade out story
-    setTimeout(() => {
-        document.getElementById('story-section').style.display = 'none'; // Hide story
-        document.getElementById('viz-section').style.display = 'block'; // Show visualization
-        document.getElementById('viz-section').style.opacity = '1'; // Fade in visualization
+    // Fade out the story section
+    document.getElementById('story-section').style.opacity = '0';
 
-        // Optionally trigger which visualization to load
-        // loadVisualization();  
-    }, 1000); // Wait for fade-out effect
+    setTimeout(() => {
+        // Hide the story and show visualization
+        document.getElementById('story-section').style.display = 'none';
+        document.getElementById('viz-section').style.display = 'block';
+
+        // Reset scroll position
+        window.scrollTo({ top: 0, behavior: 'instant' });
+
+        // Adjust page height to match the new content
+        document.body.style.height = document.getElementById('viz-section').offsetHeight + "px";
+        document.documentElement.style.overflow = "hidden"; // Prevent extra scrolling
+
+        // Apply fade-in effect with a slight delay
+        setTimeout(() => {
+            document.getElementById('viz-section').style.opacity = '1';
+        }, 300); // Delay to ensure smooth fade-in
+
+        // Load the visualization (bubbles or graph)
+        loadVisualization();
+    }, 1000); // Matches fade-out duration
 }
+
 
 // Function to choose between bubbles or graph
 function loadVisualization() {

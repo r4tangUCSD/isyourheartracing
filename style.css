@@ -157,6 +157,13 @@ h4 {
     }
 } */
 
+/* Transition */
+#viz-section {
+    display: none;
+    opacity: 0;
+    transition: opacity 1s ease-in-out; /* Smooth fade-in */
+}
+
 /* Bubbles */
 
 .container {
@@ -368,6 +375,7 @@ h4 {
     border: rgba(0, 154, 238, 0.15), 2px solid; 
     
 }
+
 #resting {
     background-color: rgba(45, 180, 30, 0.2);
     width: 175px;
