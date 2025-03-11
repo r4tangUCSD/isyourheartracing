@@ -245,6 +245,10 @@ function transitionToVisualization() {
         // Reset scroll position
         window.scrollTo({ top: 0, behavior: 'instant' });
 
+        if (scrollContainer) {
+            scrollContainer.remove();
+        }
+
         // Set overflow to hidden to remove scroll
         document.body.style.overflow = 'hidden';
 

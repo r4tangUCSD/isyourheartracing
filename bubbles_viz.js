@@ -799,6 +799,7 @@ function drawCategoryBubbles() {
 
 // Create a separate function for drawing the category bubbles
 function drawAllCategoryBubbles() {
+    console.log("Drawing all category bubbles");
     // Define available space and create bubble layout
     const bubble = d3.pack()
         .size([width, height * 0.9])  // Reduce height to keep bubbles centered
@@ -824,6 +825,7 @@ function drawAllCategoryBubbles() {
         .style("cursor", "pointer");
 
     // Add circles
+    console.log(bubbleGroups);
     bubbleGroups.append("circle")
         .attr("r", d => d.r)
         .attr("fill", "#333739")
@@ -846,7 +848,7 @@ function drawAllCategoryBubbles() {
                 .attr("fill", "#363336");    
         })
         .on("mouseout", function() {
-            d3.select(this).transition().duration(200).attr("fill", "#333739").style("opacity", 0.85);
+            d3.select(this).transition().duration(200).attr("fill", "#333739").style("opacity", 0.75);
             d3.select("#tooltip").style("opacity", 0);
 
             d3.select(this.parentNode).selectAll("text")
@@ -880,7 +882,6 @@ function drawAllCategoryBubbles() {
 
     currentView = "categories";
 }
-
 
 // Helper function to convert seconds to HH:MM:SS format
 function secondsToHHMMSS(seconds) {
@@ -1073,7 +1074,3 @@ window.addEventListener('resize', () => {
         createWholeGraph();
     }
 });
-
-/*export function refreshVisualization() {
-
-};*/
