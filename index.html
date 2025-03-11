@@ -33,8 +33,8 @@
         <script type="module" src="story.js"></script>
     </section>
 
-    <!-- Interactive Visualization Section (Hidden Initially) -->
-    <section id="viz-section" style="display: none;">
+    <!-- Bubble Section (Hidden Initially) -->
+    <section id="bubble-section" style="display: none;">
         <h1> Let's Explore on Our Own!</h1>
         <h4> Heart Rate Results Throughout Surgery</h4>
         <div class="container">
@@ -48,6 +48,57 @@
             </div>
         </div>
         <div id="tooltip" class="tooltip"></div>
+    </section>
+
+    <!-- Graph Section (Hidden Initially) -->
+    <section id="graph-section" style="display: none;">
+        <div id="back-bubble"></div>
+        <div id="everything-else">
+            <div id="stats">
+                <div class="left-side">
+                    <h3>Average Heart Rate Within the Last Minute</h3>
+                    <div id="average">
+                        <text id="unit">HR</text>
+                        <text id="unit">bpm</text>
+                        <div id="value"></div>
+                    </div>
+                    <div id="information">
+                        <div id="title"></div>
+                        <div id="surgery-info"></div>
+                    </div>
+                    
+                </div>
+                
+        
+                <div id="animation">
+                    <h3>Heart Rate Over the Course of the Surgery</h3>
+                    <div id="chart">
+                    </div>
+                    
+        
+                    <label id="label">
+                        <div id="post-animate">Move the slider thumb to go back.</div>
+                        <div id="tracker">
+                            <div id="percent"></div>
+                            <div id="time-label"><time id="selected-time"></time></div>
+                        </div>
+                        
+                        <input type="range" id="slider" min="0" max="100" value="0" step="0.01">
+                        
+                    </label>
+        
+        
+                    <div class="legend">
+                        <div id="low">Low</div>
+                        <div id="resting">Resting</div>
+                        <div id="moderate">Moderate</div>
+                        <div id="high">High</div>
+                    </div>
+                </div>
+                
+        
+            </div>
+        </div>
     </section>
 
     <!--<script src="viz.js"></script>-->

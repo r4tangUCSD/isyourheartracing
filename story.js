@@ -240,7 +240,7 @@ function transitionToVisualization() {
     setTimeout(() => {
         // Hide the story and show visualization
         document.getElementById('story-section').style.display = 'none';
-        document.getElementById('viz-section').style.display = 'block';
+        document.getElementById('bubble-section').style.display = 'block';
 
         // Reset scroll position
         window.scrollTo({ top: 0, behavior: 'instant' });
@@ -254,7 +254,7 @@ function transitionToVisualization() {
 
         // Apply fade-in effect with a slight delay
         setTimeout(() => {
-            document.getElementById('viz-section').style.opacity = '1';
+            document.getElementById('bubble-section').style.opacity = '1';
             
             // Load the visualization data
             loadData().then(() => {
@@ -271,7 +271,7 @@ function transitionToVisualization() {
 // Add fade effect styles
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('story-section').style.transition = "opacity 1s ease";
-    document.getElementById('viz-section').style.transition = "opacity 1s ease";
+    document.getElementById('bubble-section').style.transition = "opacity 1s ease";
 });
 
 // scroll event listener

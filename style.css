@@ -8,15 +8,13 @@ body, html {
     overflow-x: hidden;
 }
 
-/* Not sure what this is for */
-
-/*#everything-else {
+#everything-else {
     padding-top:1em;
     padding-left:5.5em;
     padding-right: 5em;
     font-family: system-ui;
     color: #7ed957;
-}*/
+}
 
 /* Basic headings and stuff */
 
