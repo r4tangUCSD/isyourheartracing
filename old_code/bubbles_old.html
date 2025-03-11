@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>is your heart racing</title>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <h1> Let's Explore on Our Own!</h1>
+    <h4> Heart Rate Results Throughout Surgery</h4>
+    <div class="container">
+        <div class="visualization" id="visualization">
+            <div class="loading">Loading visualization data...</div>
+        </div>
+        <div class="chart-container">
+            <div id="chart">
+                <div class="no-data">Select a patient to view heart rate data</div>
+            </div>
+        </div>
+    </div>
+    <div id="tooltip" class="tooltip"></div>
+
+    <!-- <div id="stats">
+        <div class="left-side">
+            <div id="average">
+                <text id="unit">ecg</text>
+                <text id="unit">bpm</text>
+                <div id="categorize"></div>
+                <div id="value"></div>
+            </div>
+            <div id="surgery-info">This is info about the surgery being done. It is a emergency vascular surgery and idk if the patient is dying. ig he/she looks okay. im just writing whatever to fill this space for now. dont judge me. im just a girl</div>
+        </div>
+        
+
+        <div id="animation">
+            <div id="chart">
+            </div>
+
+            <label id="label">
+                <div id="time-label"><time id="selected-time"></time></div>
+                <input type="range" id="slider" min="0" max="100" value="0" step="0.01">
+            </label>
+
+            <div class="legend">
+                <div id="resting">Resting</div>
+                <div id="moderate">Moderate</div>
+                <div id="vigerous">Vigerous</div>
+            </div>
+        </div>
+        
+
+    </div>
+    <div id="surgery-categories"></div>
+    <div id="patient-graph">
+        <svg id="patient-scatter"></svg>
+        <div class="back-button">Back</div>
+    </div>
+    <div id="chart">
+        <div id="slider-container">
+            <input type="range" id="slider" min="0" max="100">
+            <div>
+                Time: <span id="selected-time"></span>
+                Current Heart Rate: <span id="value"></span>
+            </div>
+        </div>
+    </div>
+  -->
+    <script src="surgical-heart-rate-viz.js"></script>
+    <script type="module" src="index.js" ></script>
+</body>
+</html>
