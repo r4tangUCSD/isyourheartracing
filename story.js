@@ -131,8 +131,6 @@ function createHeartOverlay() {
     
     // mark as created
     heartCreated = true;
-    
-    console.log('Heart overlay created');
 }
 
 // animate the heart based on heart rate
@@ -149,6 +147,28 @@ function animateHeart(heartRate) {
     // calculate animation duration based on heart rate
     const beatsPerSecond = heartRate / 60;
     const animationDuration = 1 / beatsPerSecond;
+
+    // calculate heart size based on heart rate
+    // scale heart size between 15% (at 45 bpm) to 25% (at 90 bpm)
+    const minRate = 45;  // lowest rate in your data
+    const maxRate = 90;  // highest reasonable rate
+    const minSize = 15;  // minimum size (%)
+    const maxSize = 25;  // maximum size (%)
+    
+    // calculate the size as a percentage between minSize and maxSize
+    const sizePercent = minSize + (Math.min(Math.max(heartRate - minRate, 0), maxRate - minRate) / (maxRate - minRate)) * (maxSize - minSize);
+    
+    // set the heart size
+    heartEl.style.width = `${sizePercent}%`;
+    heartEl.style.height = `${sizePercent}%`;
+    
+    // calculate scale for animation based on heart rate
+    const minScale = 1.2;  // minimum scale for beats
+    const maxScale = 1.5;  // maximum scale for beats
+    const scaleAmount = minScale + (Math.min(Math.max(heartRate - minRate, 0), maxRate - minRate) / (maxRate - minRate)) * (maxScale - minScale);
+    
+    // update the animation with dynamic scale values
+    heartEl.style.setProperty('--scale-amount', scaleAmount);
     
     // apply the animation
     heartEl.style.animation = `heartbeat ${animationDuration}s ease-in-out infinite`;
@@ -160,39 +180,44 @@ const styleSheet = document.createElement('style');
 styleSheet.textContent = `
 #heart-overlay {
     position: absolute;
-    width: 10%;
-    height: 15%;
+    width: 17%;
+    height: 13%;
     background: url("images/heart_isolated.png") no-repeat center center;
     background-size: contain;
-    /* Position relative to the silhouette element */
-    top: 37%;
-    left: 16%;
+    /* position relative to the silhouette element */
+    top: 43%;
+    left: 21%;
+    transform: translate(-50%, -50%);
     z-index: 100;
     transform-origin: center;
     pointer-events: none;
+    /* make size transitions smooth */
+    transition: width 0.5s, height 0.5s;
+    --scale-amount: 1.3;
 }
 
 @keyframes heartbeat {
     0% {
-        transform: scale(1);
+        transform: translate(-50%, -50%) scale(1);
     }
     15% {
-        transform: scale(1.3);
+        transform: translate(-50%, -50%) scale(var(--scale-amount));
     }
     30% {
-        transform: scale(1);
+        transform: translate(-50%, -50%) scale(1);
     }
     45% {
-        transform: scale(1.2);
+        transform: translate(-50%, -50%) scale(calc(var(--scale-amount) * 0.9));
     }
     60% {
-        transform: scale(1);
+        transform: translate(-50%, -50%) scale(1);
     }
     100% {
-        transform: scale(1);
+        transform: translate(-50%, -50%) scale(1);
     }
 }
 `;
+
 document.head.appendChild(styleSheet);
 
 // SURGERY STAGE FUNCTIONALITY
