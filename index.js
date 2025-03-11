@@ -10,6 +10,84 @@ let allPatients = [];
 let surgeryCategories = [];
 let patientsByCategoryId = {};
 
+// working with missing data
+    // anything previous
+    let prevfiltered;
+    let checkPrev;
+    let prevTime;
+    
+        // storage of missing values while plot animates
+    let startNull = {};
+    let endNull = {};
+    let missingValue = {};
+    
+        // track missing
+    let currMissing;
+    let missingID = 0;
+    let currMissID;
+    let isMissing = false;
+    let hasMissing = false;
+    let missingWithin15 = false;
+    let lastMissingEnd;
+    
+        // finding in range of values
+    let rangeMin;
+    let rangeMax;
+    
+    // patient stats info
+    let selectedCaseID; //changes based on patient selected
+    let patientAge;
+    let patient_details;
+    let maxHeartRate = 220;
+    let surgeryType;
+    let infoTitle = document.getElementById('title');
+    let surgeryInfo = document.getElementById('surgery-info');
+    
+    //slider and time
+    let timeScale; 
+    let showPercent = document.getElementById('percent');
+    let slider = document.getElementById('slider');
+    let sliderTime = document.getElementById('selected-time');
+    let timeValue = document.getElementById('value');
+    let sliderValue = 0;
+    
+    let roundedMin;
+    let roundedMax;
+    let current;
+    
+        //time values 
+    let minTime;
+    let maxTime_v;
+    let numHours;
+    let currHour;
+    
+    //heart rate values
+    let minRate_v;
+    let maxRate_v;
+    
+    let currentAverage;
+    
+    //graph
+    let svg_v;
+    
+        // x scale
+    let xScale_v;
+    let tenMinsAge = 0;
+    let endTime;
+    
+        // y scale
+    let yScale_v;
+    let firstY;
+    let endY;
+    
+        // shading
+    let mod50;
+    let mod70;
+    let vig85;
+    
+    //back bubble
+    let svgCircle;
+
 // Load data on page load
 async function loadData() {
     try {
@@ -547,22 +625,68 @@ async function setupCategoryDetailView(category) {
                 .style("opacity", 1)
                 .attr("stroke", "#ff3131")
                 .attr("stroke-width", 2);
-                
-            // Load and display heart rate data
-            currentPatient = d;
-            d3.select("#chart").html('<div class="no-data">Loading heart rate data...</div>');
+
+            // Hide first half containers
+            d3.select("#visualization").style("display", "none");
+            d3.select(".chart-container").style("display", "none");
             
-            processedData = await loadHeartRateData(d.id);
-            if (processedData && processedData.length > 0) {
-                maxTime = d.duration * 60;
-                [minRate, maxRate] = d3.extent(processedData, d => d.heartrate);
-                createWholeGraph();
-            }
+            // Show second half containers
+            d3.select("#detailed-view-container").style("display", "block");
+                
+            // Set selected case ID and trigger detailed view
+            selectedCaseID = d.id;
+            initializeDetailedView();
 
             
         });
         
     currentView = "category-detail";
+}
+
+// Add new function to initialize detailed view
+async function initializeDetailedView() {
+    // Reset animation state
+    animating = true;
+    sliderValue = 0;
+    instruction.style.opacity = 0;
+    
+    // Clear previous data
+    startNull = {};
+    endNull = {};
+    missingValue = {};
+    missingID = 0;
+    
+    // Load and process data for selected patient
+    const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv";
+    const data = await d3.csv(filepath);
+    processedData = processCSV(data);
+    
+    // Initialize time scales and patient details
+    minTime = d3.min(processedData, d => d.second);
+    maxTime = d3.max(processedData, d => d.second);
+    numHours = Math.ceil(maxTime/3600);
+    
+    timeScale = d3.scaleLinear()
+        .domain([0, maxTime])
+        .range([0, 100]);
+
+    // Set up patient details
+    patientAge = patient_details.age;
+    maxHeartRate = 220 - patientAge;
+    
+    // Update surgery info
+    surgeryType = patient_details.optype;
+    surgeryInfo.textContent = surgeryDescription[surgeryType];
+    infoTitle.textContent = surgeryType + ' Surgery Info';
+    
+    // Calculate heart rate zones
+    mod50 = maxHeartRate * 0.5;
+    mod70 = maxHeartRate * 0.7;
+    vig85 = maxHeartRate * 0.85;
+
+    
+    part_two_triggered(selectedCaseID);
+    patient_details = getPatientInfoByCaseid(selectedCaseID);
 }
 
 // Function to create an empty heart rate graph with instructions
@@ -882,14 +1006,7 @@ function drawAllCategoryBubbles() {
 }
 
 
-// Helper function to convert seconds to HH:MM:SS format
-function secondsToHHMMSS(seconds) {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-}
+
 
 // The createWholeGraph function
 function createWholeGraph() {
@@ -1075,693 +1192,559 @@ window.addEventListener('resize', () => {
     }
 });
 
-// function createWholeGraph() {
-//     const margin = { top: 20, right: 30, bottom: 40, left: 40 };
-//     const width = 800 - margin.left - margin.right;
-//     const height = 400 - margin.top - margin.bottom;
+// GLOBAL VARIABLES
 
-//     d3.select("#chart").selectAll("svg").remove();  
+let animating = true;
+let instruction = document.getElementById('post-animate');
+instruction.style.opacity = 0;
 
-//     svg = d3.select("#chart")
-//     .append("svg")
-//     .attr("width", width + margin.left + margin.right)
-//     .attr("height", height + margin.top + margin.bottom)
-//     .append("g")
-//     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+// data processing
+let patient_info;
+let processedData_v;
+let filteredData;
 
-//     // Creates x axis scales
-//     endTime = Math.max(900, current)
-//     xScale = d3.scaleLinear()
-//     .domain([0, maxTime]) // data values for x-axis
-//     .range([0, width]); // pixel range for the graph
+// surgery descriptions 
+const response = await fetch('./description.json');
+if (!response.ok) {
+    throw new Error(`Failed to fetch projects: ${response.statusText}`);
+}
 
-//     // Creates y axis scales
-//     firstY = Math.max(0, minRate - 20);
-//     endY = maxRate + 20;
-
-//     yScale = d3.scaleLinear()
-//         .domain([firstY, endY]) // data values for y-axis
-//         .range([height, 0]); // pixel range for the graph
-
-//     // Creates the x and y axis
-
-//     const ticks = d3.range(0, maxTime, 60); 
-
-//     svg.append("g")
-//     .attr("transform", "translate(0," + height + ")")
-//     .call(d3.axisBottom(xScale).tickValues(ticks).tickFormat(d => secondsToHHMMSS(d)));
-
-//     svg.append("g")
-//     .call(d3.axisLeft(yScale));
-
-//     svg.append("g")
-//         .call(d3.axisLeft(yScale).ticks(10));
+const surgeryDescription = await response.json();
 
 
-//     // Creates grids
 
-//     svg.append("g")
-//     .attr("class", "grid")
-//     .attr("transform", "translate(0," + height + ")")
-//     .call(d3.axisBottom(xScale)
-//         .tickValues(ticks)  // Number of ticks for gridlines
-//         .tickSize(-height) // Extend the gridlines across the chart
-//         .tickFormat("") // No tick labels
-//     )
-//     .style("stroke", "#ccc") // Color of the gridlines
-//     .style("stroke-width", "2px")
-//     .style("opacity", "20%");
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Functions ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
-//     const ticksY = d3.range(Math.floor((firstY + 10) / 10) * 10, Math.ceil((endY) / 10) * 10, 10);
+function processCSV(data) {
+    return data.map (d => {
+        const values = d['Solar8000/HR'];
+        return {
+            second: Math.round(d['Time']),
+            hour: d['Time']/3600,
+            time: secondsToHHMMSS(d['Time']),
+            heartrate: values
+        }
+    });
+}
+
+
+function secondsToHHMMSS(seconds) {
+    // number of seconds to HH:MM:SS
+
+    seconds = Math.round(seconds);
+    const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
+    const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
+    const remainingSeconds = seconds % 60; // Remaining seconds
+
+    const formattedTime = 
+        String(hours).padStart(2, '0') + ':' +
+        String(minutes).padStart(2, '0') + ':' +
+        String(remainingSeconds).padStart(2, '0');
+
+    return formattedTime;
+}
+
+function currentTime() {
+    prevTime = current;
+
+    // Time near slider
+    const timeProgress = slider.value;
+    showPercent.textContent = Math.round(timeProgress) + '% through the procedure';
+
+    const currentTime = timeScale.invert(timeProgress);
+    current = currentTime;
+    const formattedTime = secondsToHHMMSS(currentTime);
+    sliderTime.textContent = formattedTime.toLocaleString();
+
+    // with all the heart rate until currentTime
     
-//     svg.append("g")
-//     .attr("class", "grid")
-//     .call(d3.axisLeft(yScale)
-//         .tickValues(ticksY)  // Use the generated array of ticks
-//         .tickSize(-width)    // Extend the gridlines across the chart
-//         .tickFormat("")      // Remove tick labels
-//     )
-//     .style("stroke", "#ccc")  // Gridline color
-//     .style("stroke-width", "1px")
-//     .style("opacity", "40%");
-
-//     // Draw the line
-
-//     const line = d3.line()
-//         .x(d => xScale(d.second)) // Map time to the x-axis
-//         .y(d => yScale(d.heartrate));
-
-//     svg.append("path")
-//     .data([processedData]) // Bind the data
-//     .attr("class", "line") // Add a class for styling (optional)
-//     .attr("d", line) // Draw the path based on the data
-//     .style("fill", "none") // No fill for the line
-//     .style("stroke", "#7ed957") // Line color
-//     .style("stroke-width", 2); // Line width
-
     
-// }
+    if (currentTime < minTime){
+        filteredData = processedData_v.filter(d => d.second === minTime);
+    } else {
+        filteredData = processedData_v.filter(d => d.second <= currentTime);
+    }
 
-// // data processing
-// let processedData;
-// let filteredData;
-// let patient_info;
+    if (currentTime >= 900) {
+        tenMinsAge = currentTime - 900
+        filteredData = filteredData.filter(d => d.second >= currentTime - 900);
+    } else {
+        tenMinsAge = 0;
+    }
 
-// // find patient
-// let selectedCaseID = 5;
-// let patientAge;
-// let patient_details;
-// let maxHeartRate = 220;
-// let surgeryType;
-// let surgeryInfo = document.getElementById('surgery-info');
+    currHour = currentTime/3600;
 
-// //slider and time
-// let timeScale; 
-// let slider = document.getElementById('slider');
-// let sliderTime = document.getElementById('selected-time');
-// let timeValue = document.getElementById('value');
-// let current;
-// let sliderValue = 0;
+    createGraph();
 
-// //time values 
-// let minTime;
-// let maxTime;
-// let numHours;
-// let currHour;
+    // Just to get only the average heart rate within the last minutes
+    if (currentTime >= 60) {
+        filteredData = filteredData.filter(d => d.second >= currentTime - 60);
+    }
 
-// //heart rate values
-// let minRate;
-// let maxRate;
+    handlingMissing();
+    
 
-// //graph
-// let xScale;
-// let yScale;
+    // displaying average and slider's current position
+    timeValue.textContent = currentAverage;
+    slider.style.background = `linear-gradient(to right, #7ed957 0%, #7ed957 ${timeProgress}%, #fff ${timeProgress}%, #fff 100%)`;
 
-// let svg;
+}
 
-// let tenMinsAge = 0;
-// let endTime;
+function handlingMissing() {
+    // accounts for missing heart rates for more than a minute
+    if (filteredData.length === 0) {
+        // no recorded heart rate within the last minute 
 
-// let firstY;
-// let endY;
+        isMissing = true;
+        hasMissing = true;
 
-// // shading
-// let mod50;
-// let mod70;
-// let vig85;
+        if (checkPrev.length !== 0 && prevTime < current && !endNull.hasOwnProperty(current) && animating) {
+            // slider moving forward
 
+            startNull[current] = missingID;
+            missingValue[missingID] = currentAverage;
+            currMissing = currentAverage;
+        } else if (prevTime > current){
+            // slider moving backward
 
-
-
-
-// // Original processCSV and helper functions from the provided code
-// function processCSV(data) {
-//     return data.map(d => ({
-//         second: Math.round(d['Time']),
-//         hour: d['Time']/3600,
-//         time: secondsToHHMMSS(d['Time']),
-//         heartrate: d['Solar8000/HR']
-//     }));
-// }
-
-// function secondsToHHMMSS(seconds) {
-//     seconds = Math.round(seconds);
-//     const hours = Math.floor(seconds / 3600);
-//     const minutes = Math.floor((seconds % 3600) / 60);
-//     const remainingSeconds = seconds % 60;
-
-//     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-// }
-
-// // Main visualization class
-// class SurgicalHeartRateViz {
-//     constructor() {
-//         this.surgeryCategories = {};
-//         this.patientData = {};
-//         this.selectedCategory = null;
-//         this.setupElements();
-//         this.loadData();
-//     }
-
-//     setupElements() {
-//         this.categoriesContainer = document.getElementById('surgery-categories');
-//         this.patientGraphContainer = document.getElementById('patient-graph');
-//         this.patientScatterSVG = document.getElementById('patient-scatter');
-//         this.backButton = document.querySelector('.back-button');
-//         this.chartContainer = document.getElementById('chart');
-//         this.slider = document.getElementById('slider');
+            for (let i = 0; i < Object.keys(startNull).length; i++) {
+                if (current >= Object.keys(startNull)[i] && current <= Object.keys(endNull)[i]) {
+                    // find the range the value is in
+                    rangeMin = Object.keys(startNull)[i];
+                    rangeMax = Object.keys(endNull)[i];
+                    break;
+                } 
+            }
+            currMissID = startNull[rangeMin];
+            currentAverage = missingValue[currMissID];
+        }
         
-//         this.backButton.addEventListener('click', () => this.showCategories());
-//     }
+    } else {
+        // there is recorded data within the last minute
 
-//     async loadData() {
-//         try {
-//             // Load emergency_everything.csv
-//             const emergencyResponse = await fetch('emergency_everything.csv');
-//             const emergencyText = await emergencyResponse.text();
-//             const emergencyData = d3.csvParse(emergencyText);
+        if (checkPrev && checkPrev.length === 0 && !startNull.hasOwnProperty(current) && prevTime < current & animating) {
+            isMissing = false;
+            endNull[prevTime] = missingID;
+            missingID ++;
+            lastMissingEnd = prevTime;
+            missingWithin15 = true;
 
-//             // Categorize surgeries
-//             emergencyData.forEach(patient => {
-//                 const category = this.determineSurgeryCategory(patient);
-//                 if (!this.surgeryCategories[category]) {
-//                     this.surgeryCategories[category] = [];
-//                 }
-//                 this.surgeryCategories[category].push(patient);
-//             });
-
-//             this.renderSurgeryCategories();
-//         } catch (error) {
-//             console.error('Error loading data:', error);
-//         }
-//     }
-
-//     determineSurgeryCategory(patient) {
-//         // Use 'optype' column directly from the CSV
-//         const category = patient.optype;
+        }
         
-//         // Exclude 'Thyroid' and 'Other' categories as specified
-//         const excludedCategories = ['Thyroid', 'Other'];
+        if (current - (15 * 60) > lastMissingEnd) {
+            missingWithin15 = false;
+        }
+
+        prevfiltered = filteredData;
+        currentAverage = Math.round(d3.mean(filteredData, d => d.heartrate));
         
-//         return excludedCategories.includes(category) ? null : category;
-//     }
+    }
+
+    // checks to see if there are any missing values for > 1 minute straight
+    for (let i = 0; i < Object.keys(startNull).length; i++){
+        let startMissing = Object.keys(startNull)[i];
+        if (current - (15*60) < startMissing & startMissing < current) {
+            missingWithin15 = true;
+            break;
+        } else {
+            missingWithin15 = false;
+        }
+    }
+
+    checkPrev = filteredData;
+}
+
+
+function createGraph() {
+    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const width = 750 - margin.left - margin.right;
+    const height = 375 - margin.top - margin.bottom;
+
+    d3.select("#chart").selectAll("svg").remove();  
+
+    svg_v = d3.select("#chart")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+    // Creates x axis scales
+    endTime = Math.max(900, current)
+    xScale_v = d3.scaleLinear()
+    .domain([tenMinsAge, endTime]) // data values for x-axis
+    .range([0, width]); // pixel range for the graph
+
+    // x axis labels
+    svg_v.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + 35)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("font-weight", "bold")
+        .style("fill", "rgb(126, 217, 87, 0.6)")
+        .text("Time Since Operation Started (HH:MM:SS)");
+
+    // Creates y axis scales
+    firstY = Math.max(0, Math.floor(minRate_v/10) * 10);
+    endY = (Math.ceil(maxRate_v/10) * 10);
+
+    yScale_v = d3.scaleLinear()
+        .domain([firstY, endY]) // data values for y-axis
+        .range([height, 0]); // pixel range for the graph
+
+    // y axis labels
+    svg_v.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -31.5)
+        .attr("text-anchor", "middle")
+        .style("font-weight", "bold")
+        .style("font-size", "12px")
+        .style("fill", "rgb(126, 217, 87, 0.6)")
+        .text("Heart Rate (bpm)");
+
+    // Creates the x and y axis
+
+    const ticks = d3.range(tenMinsAge, endTime, 60); 
+
+    svg_v.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .style("opacity", 0.55)
+    .call(d3.axisBottom(xScale_v).tickValues(ticks).tickFormat(d => secondsToHHMMSS(d)));
+
+    svg_v.append("g")
+    .call(d3.axisLeft(yScale_v))
+    .style("opacity", 0.35);
+
+    svg_v.append("g")
+        .call(d3.axisLeft(yScale_v).ticks(10))
+        .style("opacity", 0.35);
+
+    // add shading
+    if (animating === false || Math.ceil(current) >= maxTime_v) {
+        shadingRange();
+    }
+
+    // Creates grids
+        // vertical grids
+    svg_v.append("g")
+    .attr("class", "grid")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(xScale_v)
+        .tickValues(ticks)  // Number of ticks for gridlines
+        .tickSize(-height) // Extend the gridlines across the chart
+        .tickFormat("") // No tick labels
+    )
+    .style("stroke", "#ccc") // Color of the gridlines
+    .style("stroke-width", "2px")
+    .style("opacity", "20%");
+
+        // horizontal grids
+    const ticksY = d3.range(Math.floor((firstY + 10) / 10) * 10, Math.ceil((endY) / 10) * 10, 10);
     
-//     renderSurgeryCategories() {
-//         this.categoriesContainer.innerHTML = '';
+    svg_v.append("g")
+    .attr("class", "grid")
+    .call(d3.axisLeft(yScale_v)
+        .tickValues(ticksY)  // Use the generated array of ticks
+        .tickSize(-width)    // Extend the gridlines across the chart
+        .tickFormat("")      // Remove tick labels
+    )
+    .style("stroke", "#ccc")  // Gridline color
+    .style("stroke-width", "1px")
+    .style("opacity", "40%");
+
+    // create differet segments
+    let segments = [];
+    let segment;
+    let segEnd;
+    let segStart = current - (15*60)
+
+    if (missingWithin15) {
+        // there is missing data for more than 1 minute straight within the last 15 minutes 
+
+        for (let i = 0; i < Object.keys(startNull).length; i++) {
+            if (segStart < Object.keys(startNull)[i]) {
+                segEnd = Object.keys(startNull)[i];
+                segment = filteredData.filter(d => segStart <= d.second && d.second <= segEnd);
+                segments.push(segment);
+                
+                if (Object.keys(startNull)[i+1]) {
+                    // another segment of missing data
+                    segStart = Object.keys(startNull)[i+1];
+                    continue;
+                } else {
+                    // continue drawing the rest of the data within the 15 minutes shown
+                    segStart = Object.keys(endNull)[i];
+                    segment = filteredData.filter(d => segStart <= d.second);
+                    segments.push(segment)
+                }
+                
+            } else {
+                // If no missing data, just add the whole filtered data
+                segments = [filteredData];  
+                break;
+            }
+        }
+    } else {
+        /* there is no missing data for more than 1 minute straight
+         within the last 15 minutes from current */
         
-//         // Filter out null categories
-//         const filteredCategories = Object.entries(this.surgeryCategories)
-//             .filter(([category, patients]) => category !== 'null');
+        segments = [filteredData];
+    }
+
+    // Plot the line graph
+    const line = d3.line()
+        .x(d => xScale_v(d.second)) // Map time to the x-axis
+        .y(d => yScale_v(d.heartrate));
+
+    // Draw each segment
+    segments.forEach(segment => {
+        svg_v.append("path")
+        .data([segment]) // Bind the data
+        .attr("class", "line") // Add a class for styling (optional)
+        .attr("d", line) // Draw the path based on the data
+        .style("fill", "none") // No fill for the line
+        .style("stroke", "#7ed957") // Line color
+        .style("stroke-width", 2); // Line width
+    });
+
+
+}
+
+function animateSlider() {
+    numHours = maxTime_v/3600;
+    const durationPerHour = 10000; // Animation duration in milliseconds (e.g., 5 seconds)
+    const totalDuration = durationPerHour * numHours/1000;
     
-//         filteredCategories.forEach(([category, patients]) => {
-//             const bubble = document.createElement('div');
-//             bubble.classList.add('surgery-bubble');
-//             bubble.textContent = category;
-//             bubble.style.width = `${50 + patients.length * 10}px`;
-//             bubble.style.height = `${50 + patients.length * 10}px`;
-            
-//             bubble.addEventListener('mouseenter', () => {
-//                 bubble.style.backgroundColor = '#7ed957';
-//                 bubble.style.color = '#363336';
-//             });
-            
-//             bubble.addEventListener('mouseleave', () => {
-//                 bubble.style.backgroundColor = '#333739';
-//                 bubble.style.color = '#a5a2a2';
-//             });
-            
-//             bubble.addEventListener('click', () => this.showPatientGraph(category, patients));
-            
-//             this.categoriesContainer.appendChild(bubble);
-//         });
-//     }
+    animating = true;
 
-//     showPatientGraph(category, patients) {
-//         this.selectedCategory = category;
-//         this.categoriesContainer.style.display = 'none';
-//         this.patientGraphContainer.style.display = 'block';
+    const interval = setInterval(() => {
+        if (sliderValue >= 100) {
+            animating = false;
+            slider.value = maxTime_v;
+            instruction.style.opacity = 0.3;
+            clearInterval(interval);
+        } else {
+            sliderValue += 0.175; // Adjust step size based on range
+            slider.value = sliderValue;
+            currentTime(); // Update slider position
+        }
+    }, totalDuration);
+}
 
-//         const width = 600;
-//         const height = 400;
-//         const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+function shadingRange() {
+    let restinglow;
+    let lowMax;
+    let lowLow;
 
-//         const svg = d3.select('#patient-scatter')
-//             .attr('width', width)
-//             .attr('height', height);
+    // too low and resting by age
+    if (patientAge < 5) {
+        // patients below age 5
 
-//         svg.selectAll('*').remove();
+            // boundary for low to resting
+        lowMax = 80;
+        restinglow = Math.max(80, firstY);
+        
 
-//         const xScale = d3.scaleLinear()
-//             .domain([0, d3.max(patients, d => d.max_hr)])
-//             .range([margin.left, width - margin.right]);
+    } else if (patientAge < 10) {
+        // patients below age 10
 
-//         const yScale = d3.scaleLinear()
-//             .domain([0, d3.max(patients, d => d.age)])
-//             .range([height - margin.bottom, margin.top]);
+            // boundary for low to resting
+        lowMax = 70;
+        restinglow = Math.max(70, firstY);
 
-//         svg.append('g')
-//             .attr('transform', `translate(0,${height - margin.bottom})`)
-//             .call(d3.axisBottom(xScale).label('Max Heart Rate'));
+    } else {
+        // everyone else
 
-//         svg.append('g')
-//             .attr('transform', `translate(${margin.left},0)`)
-//             .call(d3.axisLeft(yScale).label('Patient Age'));
-
-//         svg.selectAll('.patient-point')
-//             .data(patients)
-//             .enter()
-//             .append('circle')
-//             .attr('class', 'patient-point')
-//             .attr('cx', d => xScale(d.max_hr))
-//             .attr('cy', d => yScale(d.age))
-//             .attr('r', d => Math.sqrt(d.duration / 60) * 2)  // Size based on surgery duration
-//             .style('opacity', 0.7)
-//             .on('mouseover', (event, patient) => this.loadPatientHeartRate(patient.caseid))
-//             .on('click', (event, patient) => this.loadPatientHeartRate(patient.caseid));
-//     }
-
-//     async loadPatientHeartRate(caseId) {
-//         try {
-//             const response = await fetch(`heart_rate_data/case_${caseId}.csv`);
-//             const text = await response.text();
-//             const data = d3.csvParse(text);
-            
-//             processedData = processCSV(data);
-            
-//             // Setup slider and graph
-//             minTime = d3.min(processedData, d => d.second);
-//             maxTime = d3.max(processedData, d => d.second);
-//             minRate = d3.min(processedData, d => d.heartrate);
-//             maxRate = d3.max(processedData, d => d.heartrate);
-
-//             this.slider.min = 0;
-//             this.slider.max = 100;
-//             this.slider.value = 0;
-
-//             timeScale = d3.scaleLinear()
-//                 .domain([0, 100])
-//                 .range([minTime, maxTime]);
-
-//             this.slider.addEventListener('input', currentTime);
-//             currentTime(); // Initial graph rendering
-//             createWholeGraph();
-//         } catch (error) {
-//             console.error('Error loading patient heart rate:', error);
-//         }
-//     }
-
-//     showCategories() {
-//         this.patientGraphContainer.style.display = 'none';
-//         this.categoriesContainer.style.display = 'flex';
-//     }
-// }
-
-// // Initialize visualization when page loads
-// document.addEventListener('DOMContentLoaded', () => {
-//     new SurgicalHeartRateViz();
-// });
-
-
-
-
-
-
-// function processCSV(data) {
-//     return data.map (d => {
-//         const values = d['Solar8000/HR'];
-//         return {
-//             second: Math.round(d['Time']),
-//             hour: d['Time']/3600,
-//             time: secondsToHHMMSS(d['Time']),
-//             heartrate: values
-//         }
-//     });
-// }
-
-// function secondsToHHMMSS(seconds) {
-//     // number of seconds to HH:MM:SS
-
-//     seconds = Math.round(seconds);
-//     const hours = Math.floor(seconds / 3600); // 1 hour = 3600 seconds
-//     const minutes = Math.floor((seconds % 3600) / 60); // 1 minute = 60 seconds
-//     const remainingSeconds = seconds % 60; // Remaining seconds
-
-//     const formattedTime = 
-//         String(hours).padStart(2, '0') + ':' +
-//         String(minutes).padStart(2, '0') + ':' +
-//         String(remainingSeconds).padStart(2, '0');
-
-//     return formattedTime;
-// }
-
-// function currentTime() {
-//     // Time near slider
-//     const timeProgress = slider.value;
-//     const currentTime = timeScale.invert(timeProgress);
-//     current = currentTime
-//     numHours = Math.ceil(currentTime/3600)
-//     const formattedTime = secondsToHHMMSS(currentTime);
-//     sliderTime.textContent = formattedTime.toLocaleString();
-//     // console.log(processedData)
-
-//     // with all the heart rate until cirrentTime
-//     if (currentTime < minTime){
-//         filteredData = processedData.filter(d => d.second === minTime);
-//     } else {
-//         filteredData = processedData.filter(d => d.second <= currentTime);
-//     }
-
-//     if (currentTime >= 900) {
-//         tenMinsAge = currentTime - 900
-//         filteredData = filteredData.filter(d => d.second >= currentTime - 900);
-//         // tenMinsAge = tenMinsAge/3600;
-//     } else {
-//         tenMinsAge = 0;
-//     }
-
-//     currHour = currentTime/3600;
+            // boundary for low to resting
+        lowMax = 40;
+        restinglow = Math.max(40, firstY);
+    }
     
-//     createGraph();
+    // low shading
+    if (firstY < lowMax) {
+        lowLow = Math.max(0, firstY);
+        svg_v.append("rect")
+        .attr("x", xScale_v(tenMinsAge))  // Map the start X value to the scale
+        .attr("y", yScale_v(lowMax))    // Map the end Y value to the scale (invert y-axis)
+        .attr("width", xScale_v(endTime) - xScale_v(tenMinsAge))  // Rectangle width
+        .attr("height", yScale_v(lowLow) - yScale_v(lowMax)) // Rectangle height (invert the height)
+        .attr("fill", "#009AEE")  // Rectangle color
+        .style("opacity", 0.15); 
+    }
 
-//     // Just to get only the heart rate from the last minutes
-//     if (currentTime >= 60) {
-//         filteredData = filteredData.filter(d => d.second >= currentTime - 60);
-//     }
+    // resting shading
 
-//     const currentAverage = Math.round(d3.mean(filteredData, d => d.heartrate))
-//     timeValue.textContent = currentAverage;
-
-//     slider.style.background = `linear-gradient(to right, #7ed957 0%, #7ed957 ${timeProgress}%, #fff ${timeProgress}%, #fff 100%)`;
-
-// }
-
-// function createWholeGraph() {
-//     const margin = { top: 20, right: 30, bottom: 40, left: 40 };
-//     const width = 800 - margin.left - margin.right;
-//     const height = 400 - margin.top - margin.bottom;
-
-//     d3.select("#chart").selectAll("svg").remove();  
-
-//     svg = d3.select("#chart")
-//     .append("svg")
-//     .attr("width", width + margin.left + margin.right)
-//     .attr("height", height + margin.top + margin.bottom)
-//     .append("g")
-//     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-//     // Creates x axis scales
-//     endTime = Math.max(900, current)
-//     xScale = d3.scaleLinear()
-//     .domain([0, maxTime]) // data values for x-axis
-//     .range([0, width]); // pixel range for the graph
-
-//     // Creates y axis scales
-//     firstY = Math.max(0, minRate - 20);
-//     endY = maxRate + 20;
-
-//     yScale = d3.scaleLinear()
-//         .domain([firstY, endY]) // data values for y-axis
-//         .range([height, 0]); // pixel range for the graph
-
-//     // Creates the x and y axis
-
-//     const ticks = d3.range(0, maxTime, 60); 
-
-//     svg.append("g")
-//     .attr("transform", "translate(0," + height + ")")
-//     .call(d3.axisBottom(xScale).tickValues(ticks).tickFormat(d => secondsToHHMMSS(d)));
-
-//     svg.append("g")
-//     .call(d3.axisLeft(yScale));
-
-//     svg.append("g")
-//         .call(d3.axisLeft(yScale).ticks(10));
-
-
-//     // Creates grids
-
-//     svg.append("g")
-//     .attr("class", "grid")
-//     .attr("transform", "translate(0," + height + ")")
-//     .call(d3.axisBottom(xScale)
-//         .tickValues(ticks)  // Number of ticks for gridlines
-//         .tickSize(-height) // Extend the gridlines across the chart
-//         .tickFormat("") // No tick labels
-//     )
-//     .style("stroke", "#ccc") // Color of the gridlines
-//     .style("stroke-width", "2px")
-//     .style("opacity", "20%");
-
-//     const ticksY = d3.range(Math.floor((firstY + 10) / 10) * 10, Math.ceil((endY) / 10) * 10, 10);
+    if (firstY < mod50) {
+        svg_v.append("rect")
+        .attr("x", xScale_v(tenMinsAge))  // Map the start X value to the scale
+        .attr("y", yScale_v(mod50))    // Map the end Y value to the scale (invert y-axis)
+        .attr("width", xScale_v(endTime) - xScale_v(tenMinsAge))  // Rectangle width
+        .attr("height", yScale_v(restinglow) - yScale_v(mod50)) // Rectangle height (invert the height)
+        .attr("fill", "#2db41e")  // Rectangle color
+        .style("opacity", 0.15); 
+    }
     
-//     svg.append("g")
-//     .attr("class", "grid")
-//     .call(d3.axisLeft(yScale)
-//         .tickValues(ticksY)  // Use the generated array of ticks
-//         .tickSize(-width)    // Extend the gridlines across the chart
-//         .tickFormat("")      // Remove tick labels
-//     )
-//     .style("stroke", "#ccc")  // Gridline color
-//     .style("stroke-width", "1px")
-//     .style("opacity", "40%");
+    // moderate shading
+    let modHigh = Math.min(endY, mod70);
+    const lowerY = Math.max(mod50, firstY);
+    svg_v.append("rect")
+    .attr("x", xScale_v(tenMinsAge))  // Map the start X value to the scale
+    .attr("y", yScale_v(modHigh))    // Map the end Y value to the scale (invert y-axis)
+    .attr("width", xScale_v(endTime) - xScale_v(tenMinsAge))  // Rectangle width
+    .attr("height", yScale_v(lowerY) - yScale_v(modHigh)) // Rectangle height (invert the height)
+    .attr("fill", "#FEED53")  // Rectangle color
+    .style("opacity", 0.15); 
 
-//     // Draw the line
 
-//     const line = d3.line()
-//         .x(d => xScale(d.second)) // Map time to the x-axis
-//         .y(d => yScale(d.heartrate));
+    // high shading
+    let higherY = Math.max(vig85, endY);
 
-//     svg.append("path")
-//     .data([processedData]) // Bind the data
-//     .attr("class", "line") // Add a class for styling (optional)
-//     .attr("d", line) // Draw the path based on the data
-//     .style("fill", "none") // No fill for the line
-//     .style("stroke", "#7ed957") // Line color
-//     .style("stroke-width", 2); // Line width
+    if (vig85 > endY) {
+        higherY = endY
+    }
 
+    if (endY > mod70) {
+        svg_v.append("rect")
+        .attr("x", xScale_v(tenMinsAge))  // Map the start X value to the scale
+        .attr("y", yScale_v(higherY))    // Map the end Y value to the scale (invert y-axis)
+        .attr("width", xScale_v(endTime) - xScale_v(tenMinsAge))  // Rectangle width
+        .attr("height", yScale_v(mod70) - yScale_v(higherY)) // Rectangle height (invert the height)
+        .attr("fill", "#F63C4C")  // Rectangle color
+        .style("opacity", 0.15); 
+    }
     
-// }
+}
 
-
-// function createGraph() {
-//     const margin = { top: 20, right: 30, bottom: 40, left: 40 };
-//     const width = 800 - margin.left - margin.right;
-//     const height = 400 - margin.top - margin.bottom;
-
-//     d3.select("#chart").selectAll("svg").remove();  
-
-//     svg = d3.select("#chart")
-//     .append("svg")
-//     .attr("width", width + margin.left + margin.right)
-//     .attr("height", height + margin.top + margin.bottom)
-//     .append("g")
-//     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-//     // Creates x axis scales
-//     endTime = Math.max(900, current)
-//     xScale = d3.scaleLinear()
-//     .domain([tenMinsAge, endTime]) // data values for x-axis
-//     .range([0, width]); // pixel range for the graph
-
-//     // Creates y axis scales
-//     firstY = Math.max(0, minRate - 20);
-//     endY = maxRate + 20;
-
-//     yScale = d3.scaleLinear()
-//         .domain([firstY, endY]) // data values for y-axis
-//         .range([height, 0]); // pixel range for the graph
-
-//     // Creates the x and y axis
-
-//     const ticks = d3.range(tenMinsAge, endTime, 60); 
-
-//     svg.append("g")
-//     .attr("transform", "translate(0," + height + ")")
-//     .call(d3.axisBottom(xScale).tickValues(ticks).tickFormat(d => secondsToHHMMSS(d)));
-
-//     svg.append("g")
-//     .call(d3.axisLeft(yScale));
-
-//     svg.append("g")
-//         .call(d3.axisLeft(yScale).ticks(10));
-
-//     if (Math.ceil(current) >= maxTime) {
-//         shadingRange();
-//     }
-//     // console.log(current)
-
-
-//     // Creates grids
-
-//     svg.append("g")
-//     .attr("class", "grid")
-//     .attr("transform", "translate(0," + height + ")")
-//     .call(d3.axisBottom(xScale)
-//         .tickValues(ticks)  // Number of ticks for gridlines
-//         .tickSize(-height) // Extend the gridlines across the chart
-//         .tickFormat("") // No tick labels
-//     )
-//     .style("stroke", "#ccc") // Color of the gridlines
-//     .style("stroke-width", "2px")
-//     .style("opacity", "20%");
-
-//     const ticksY = d3.range(Math.floor((firstY + 10) / 10) * 10, Math.ceil((endY) / 10) * 10, 10);
+function getPatientInfoByCaseid(caseid) {
     
-//     svg.append("g")
-//     .attr("class", "grid")
-//     .call(d3.axisLeft(yScale)
-//         .tickValues(ticksY)  // Use the generated array of ticks
-//         .tickSize(-width)    // Extend the gridlines across the chart
-//         .tickFormat("")      // Remove tick labels
-//     )
-//     .style("stroke", "#ccc")  // Gridline color
-//     .style("stroke-width", "1px")
-//     .style("opacity", "40%");
+    const patient = patient_info.find(record => record.caseid === caseid.toString());
+    console.log(patient)
+    return patient ? patient : null; // Return patient or null if not found
+}
 
-//     // Draw the line
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ The Magic ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
-//     const line = d3.line()
-//         .x(d => xScale(d.second)) // Map time to the x-axis
-//         .y(d => yScale(d.heartrate));
+function part_two_triggered(selectedCaseID) {
+    // Hide first half containers
+    d3.select("#visualization").style("display", "none");
+    d3.select(".chart-container").style("display", "none");
 
-//     svg.append("path")
-//     .data([filteredData]) // Bind the data
-//     .attr("class", "line") // Add a class for styling (optional)
-//     .attr("d", line) // Draw the path based on the data
-//     .style("fill", "none") // No fill for the line
-//     .style("stroke", "#7ed957") // Line color
-//     .style("stroke-width", 2); // Line width
+    // Show detailed view
+    d3.select("#detailed-view-container").style("display", "block");
 
+    // Set up detailed view
+    setupDetailView();
+
+
+    d3.csv("emergency.csv")
+        .then(patients => {
+            patient_info = patients
+            const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv"
+            return d3.csv(filepath);
+
+        })
+        .then(data => {
+            processedData_v = processCSV(data);
+            console.log(data)
+
+
+            // Scaling the time
+            const startTime = new Date();
+            startTime.setHours(0, 0, 0, 0);
+
+            minTime = d3.min(processedData_v, d => d.second);
+            maxTime_v = d3.max(processedData_v, d => d.second);
+            numHours = Math.ceil(maxTime_v/3600);        
+
+            timeScale = d3.scaleLinear()
+            .domain([0, d3.max(processedData_v, d => d.second)])
+            .range([0, 100]);
+
+            // heart rate values
+            minRate_v = d3.min(processedData_v, d => parseInt(d.heartrate));
+            maxRate_v = d3.max(processedData_v, d => parseInt(d.heartrate));
+
+            // important values
+            patient_details = getPatientInfoByCaseid(selectedCaseID);
+            patientAge = patient_details.age;
+            maxHeartRate = maxHeartRate - patientAge;
+
+            //surgery details
+            surgeryType = patient_details.optype;
+            surgeryInfo.textContent = surgeryDescription[surgeryType];
+            infoTitle.textContent = surgeryType + ' Surgery Info';
+
+            // for shading
+            mod50 = maxHeartRate * 0.5;
+            mod70 = maxHeartRate * 0.7;
+            vig85 = maxHeartRate * 0.85;
+
+            // Set Up
+            slider.step = 1/maxTime_v
+            currentTime();
+            animateSlider();
+                
+            slider.addEventListener('input', () => {
+                currentTime();
+            });
+
+        })
+
+}
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Back Button ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+
+function drawBackBubble() {
+    const backBubble = d3.select("#back-bubble");
+    // Clear previous contents before appending a new SVG
     
-// }
+    // Append new SVG
+    svgCircle = backBubble
+        .append("svg")
+        .attr("width", 600)
+        .attr("height", 75);
 
-// function animateSlider() {
-//     // draws the line
-//     const interval = setInterval(() => {
-//         if (sliderValue >= 100) {
-//             slider.value = 100
-//             clearInterval(interval); // Stop the animation when slider reaches 100
-//             // console.log(maxTime)
+    // console.log(svgCircle)
 
-//         } else {
-//             sliderValue += 0.175; // Increase the slider value (adjust for speed)
-//             slider.value = sliderValue
-//             currentTime(); // Update slider position
-//         }
-//     }, 50);
-// }
+    // Append a circle inside the SVG
+    svgCircle.append("circle")
+        .attr("cx", 260)  // Center the circle
+        .attr("cy", -125)
+        .attr("r", 200)
+        .style("fill", "#333739")
+        .style("opacity", 0.85)
+        .on("mouseover", function(event, d) {
+            d3.select(this)
+                .transition()
+                // .duration(200)
+                .style("fill", "#7ed957")
+                .style("opacity", 1)
+        })
+        .on("mouseout", function(event, d) {
+            d3.select(this)
+                .transition()
+                // .duration(200)
+                .style("fill", "#333739")
+                .style("opacity", 0.85)
+        });
 
-// function shadingRange() {
-//     // resting
-//     const restinglow = Math.max(0, firstY);
-//     svg.append("rect")
-//     .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-//     .attr("y", yScale(mod50))    // Map the end Y value to the scale (invert y-axis)
-//     .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-//     .attr("height", yScale(restinglow) - yScale(mod50)) // Rectangle height (invert the height)
-//     .attr("fill", "green")  // Rectangle color
-//     .style("opacity", 0.2); 
+        svgCircle.append("circle")
+        // ...existing circle attributes...
+        .on("click", function() {
+            // Hide detailed view
+            d3.select("#detailed-view-container").style("display", "none");
+            
+            // Show first half containers
+            d3.select("#visualization").style("display", "block");
+            d3.select(".chart-container").style("display", "block");
+            
+            // Reset to category detail view
+            setupCategoryDetailView(currentCategory);
+        });
 
-//     // moderate-intensity activities
-//     const lowerY = Math.max(mod50, firstY);
-//     svg.append("rect")
-//     .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-//     .attr("y", yScale(mod70))    // Map the end Y value to the scale (invert y-axis)
-//     .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-//     .attr("height", yScale(lowerY) - yScale(mod70)) // Rectangle height (invert the height)
-//     .attr("fill", "yellow")  // Rectangle color
-//     .style("opacity", 0.2); 
+}
 
-//     // vigorous physical activity
-//     const higherY = Math.min(vig85, endY);
-//     svg.append("rect")
-//     .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-//     .attr("y", yScale(higherY))    // Map the end Y value to the scale (invert y-axis)
-//     .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-//     .attr("height", yScale(mod70) - yScale(higherY)) // Rectangle height (invert the height)
-//     .attr("fill", "red")  // Rectangle color
-//     .style("opacity", 0.2); 
-// }
-
-// function getPatientInfoByCaseid(caseid) {
-//     const patient = patient_info.find(record => record.caseid === caseid.toString());
-//     return patient ? patient : null; // Return patient or null if not found
-// }
-
-// d3.csv("emergency.csv")
-//     .then(patients => {
-//         patient_info = patients
-//         const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv"
-//         return d3.csv(filepath);
-
-//     })
-//     .then(data => {
-//         processedData = processCSV(data);
-
-//         // console.log(processedData);
-//         // console.log(patient_info);
-
-//         // Scaling the time
-//         const startTime = new Date();
-//         startTime.setHours(0, 0, 0, 0);
-
-//         minTime = d3.min(processedData, d => d.second);
-//         maxTime = d3.max(processedData, d => d.second);
-//         numHours = Math.ceil(maxTime/3600);        
-
-//         timeScale = d3.scaleLinear()
-//         .domain([0, d3.max(processedData, d => d.second)])
-//         .range([0, 100]);
-
-//         // heart rate values
-//         minRate = d3.min(processedData, d => parseInt(d.heartrate));
-//         maxRate = d3.max(processedData, d => parseInt(d.heartrate));
-
-//         // important values
-//         patient_details = getPatientInfoByCaseid(selectedCaseID);
-//         patientAge = patient_details.age;
-//         maxHeartRate = maxHeartRate - patientAge;
-
-//         //surgery details
-//         surgeryType = patient_details.optype;
-//         surgeryInfo.textContent = surgeryType + ' Surgery Info'
-
-//         // for shading
-//         mod50 = maxHeartRate * 0.5;
-//         mod70 = maxHeartRate * 0.7;
-//         vig85 = maxHeartRate * 0.85;
-
-//         console.log(secondsToHHMMSS(maxTime))
-
-//         // Set Up
-//         slider.step = 1/maxTime
-//         currentTime();
-//         animateSlider();
-               
-//         slider.addEventListener('input', () => {
-//             currentTime();
-//             shadingRange();
-//         });
-
-//     })
+drawBackBubble();
