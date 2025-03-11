@@ -3,10 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>is your heart racing</title>
+    <title>Is Your Heart Racing?</title>
     <link rel="stylesheet" href="style.css">
-    
 </head>
+
+<body>
+
+    <!-- Scrolly-telling -->
+    <section id="story-section">
+        <div class="scrolly-container">
+            <!-- body -->
+            <div id="silhouette" class="silhouette" style="background-image: url('images/body_isolated.png');"></div>
+            
+            <!-- heart rate -->
+            <div class="bpm-container">
+                <div id="bpm-box" class="bpm-box">
+                    <span class="bpm-label"></span>
+                    <div id="heart-rate" class="bpm">--</div>
+                </div>
+                <div id="stage-time" class="time" style="margin-top: 20px;">Time: -- minutes</div>
+            </div>
+            
+            <!-- description  -->
+            <div id="stage-info">
+                <div id="stage-name" class="stage-name">Stage Name</div>
+                <div id="stage-description" class="description">Description of the surgical stage</div>
+            </div>
+        </div>
+        <script src="story.js"></script>
+    </section>
+
+    <!-- Transition Button
+    <button id="to-viz" class="transition-button">Explore Heart Rate Data</button> -->
+
+    <!-- Interactive Visualization Section (Hidden Initially) -->
+    <section id="viz-section" style="display: none;">
+        <h1>Explore Heart Rate Data</h1>
+        <div id="visualization"></div>
+        <div class="chart-container">
+            <div id="chart"></div>
+        </div>
+        <div id="surgery-categories"></div>
+        <div id="patient-graph">
+            <svg id="patient-scatter"></svg>
+            <div class="back-button">Back</div>
+        </div>
+    </section>
+
+    <!--script src="story.js"></script>
+    #<script src="viz.js"></script>-->
+
+</body>
+</html>
+<!--<script src="surgical-heart-rate-viz.js"></script>
+    <script type="module" src="index.js" ></script>
+</body> -->
+
+
+<!--
 <body>
     <div id="back-bubble"></div>
     <div id="everything-else">
@@ -64,7 +118,7 @@
     </div>
     <div id="tooltip" class="tooltip"></div>
 
-    <!-- <div id="stats">
+    <div id="stats">
         <div class="left-side">
             <div id="average">
                 <text id="unit">ecg</text>
@@ -94,10 +148,7 @@
     
         </div>
 
-        <p>So far, we have worked on animating a line plot of the recorded heart rate throughout the surgery for a specific patient. The plot will show the plot up to the current time and within the last 15 minutes which is determined where the thumb is on the slide. To the left of the plot, we have the average heart rate calculated by taking all recorded heart rates within the last minute. This is because heart rate can fluctuate within a short amount of time. By showing the more recent data, anesthesiologists can access and decide what to administer based on current trends.
-            On one branch, “circles,” we’ve started to come up with a way to visualize all cases in our dataset by grouping them into different circles based on their operation type. On another branch, we’ve started implementing a scrollytelling format for our beginning introduction. On a Canva page, we’ve created a draft for the layout and annotations of each slide in the introduction.
-            
-            One challenge was getting the line plot to correspond with the current slider value. In the future, we think the most challenging part to design will be settling on a final design for our main graph. We also have found in the past that combining different branches together can be tedious and time consuming. We think this process might be the source of many bugs. Lastly, we found that the track data was a little wonky, since sometimes data is missing for chunks of time, and we might need to find a way to clean up the heart rate .cs files.
+        <p>
             </p>
     </div>
     <div id="surgery-categories"></div>
@@ -115,12 +166,4 @@
         </div>
     </div>
   -->
-    <script src="surgical-heart-rate-viz.js"></script>
-   
-    <!-- <h1> &lt;3 </h1> -->
     
-    
-    <script type="module" src="index.js" ></script>
-    
-</body>
-</html>

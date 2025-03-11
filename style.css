@@ -1,30 +1,24 @@
-body {
-    background-color: black;
-    font-family: system-ui;
+body, html {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;
-    height: 100vh; /* Ensure full viewport height */
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
 }
-#everything-else {
+
+/* Not sure what this is for */
+
+/*#everything-else {
     padding-top:1em;
     padding-left:5.5em;
     padding-right: 5em;
     font-family: system-ui;
-}
-h1 {
-    color: white;
-}
-color: #7ed957;
+    color: #7ed957;
+}*/
 
-
-h3 {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.75);
-    padding: 0.75em;
-    margin: 1.5em;
-}
+/* Basic headings and stuff */
 
 h1 {
     color: #ebeaea;
@@ -35,6 +29,13 @@ h1 {
     font-size: 3.5em;
 }
 
+h3 {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 0.75em;
+    margin: 1.5em;
+}
+
 h4 {
     color: #ebeaea;
     padding-top: 0.3em;
@@ -43,6 +44,112 @@ h4 {
     text-align: center;
     font-size: 1.75em;
 }
+
+/* Scrolly telling */
+
+.scrolly-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+     align-items: center; 
+    justify-content: space-between;
+    pointer-events: none;
+    padding: 0 50px; 
+}
+.silhouette {
+    flex: 0 0 25%;
+    height: 80%; 
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center left;
+    margin-left: 5%;
+}
+.bpm-container {
+    flex: 0 0 25%;
+    display: grid;
+    grid-template-columns: 1fr, 2fr;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.bpm-box {
+    background-color: rgba(255,255,255,0.1);
+    border: rgb(126, 217, 87, 0.4) 2px solid ;
+    padding: 20px;
+    text-align: right;
+    margin-bottom: 20px;
+}
+.bpm {
+    font-size: 6rem;
+    font-weight: bold;
+}
+
+#unit {
+    text-align: left;
+    opacity: 70%;
+    width: 200px;
+}
+#stage-info {
+    flex: 0 0 40%;
+    padding-right: 30px;
+    /* border: 2px solid, rgb(255, 255, 255); */ 
+
+}
+.stage-name {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #999;
+    margin-top: -80px;
+}
+.time {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+.description {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    width: 75%;
+}
+
+#heart-overlay {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    background: url("heart_isolated.png") no-repeat center center;
+    background-size: contain;
+    top: 30%;
+    left: 15%;
+    z-index: 10;
+    transform-origin: center;
+}
+
+@keyframes heartbeat {
+    0% {
+        transform: scale(1);
+    }
+    15% {
+        transform: scale(1.3);
+    }
+    30% {
+        transform: scale(1);
+    }
+    45% {
+        transform: scale(1.2);
+    }
+    60% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* Main visualization */
 
 .container {
     display: flex;
@@ -243,6 +350,7 @@ h4 {
     
 }
 
+/* Heart rate categories */
 
 #low {
     background-color: rgba(0, 154, 238, 0.2);
@@ -263,8 +371,6 @@ h4 {
     border: rgba(45, 180, 30, 0.15), 2px solid; 
     
 }
-
-
 
 #moderate {
     background-color: rgba(254, 237, 83, 0.2);   

@@ -152,7 +152,7 @@ styleSheet.textContent = `
     position: absolute;
     width: 10%;
     height: 15%;
-    background: url("heart_isolated.png") no-repeat center center;
+    background: url("images/heart_isolated.png") no-repeat center center;
     background-size: contain;
     /* Position relative to the silhouette element */
     top: 37%;
