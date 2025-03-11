@@ -1,7 +1,5 @@
 // Import bubble function
-
-import { initBubbles } from './bubbles_viz.js';
-import { loadData } from './bubbles_viz.js';
+import { refreshVisualization } from './bubbles_viz.js';
 
 // STATIC STORY INFORMATION
 const storyData = [
@@ -253,7 +251,7 @@ function transitionToVisualization() {
         setTimeout(() => {
             document.getElementById('viz-section').style.opacity = '1';
             // Load the visualization (bubbles)
-            loadData();
+            refreshVisualization();
         }, 300);
 
     }, 1000); // Matches fade-out duration

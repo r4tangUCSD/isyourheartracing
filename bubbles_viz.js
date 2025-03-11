@@ -11,7 +11,7 @@ let surgeryCategories = [];
 let patientsByCategoryId = {};
 
 // Load data on page load
-export async function loadData() {
+async function loadData() {
     try {
         // Use d3.csv directly
         d3.csv("emergency_data/emergency_everything.csv")
@@ -54,7 +54,7 @@ export async function loadData() {
                 });
 
                 // Initialize visualization
-                initBubbles();
+                initVisualization();
             })
             .catch(error => {
                 console.error('Error loading data:', error);
@@ -175,7 +175,7 @@ async function loadHeartRateData(caseId) {
     }
 }
 
-export function initBubbles() {
+function initVisualization() {
     const visualizationContainer = d3.select("#visualization");
 
     // Hide chart container initially
@@ -881,6 +881,7 @@ function drawAllCategoryBubbles() {
     currentView = "categories";
 }
 
+
 // Helper function to convert seconds to HH:MM:SS format
 function secondsToHHMMSS(seconds) {
     const hrs = Math.floor(seconds / 3600);
@@ -1042,18 +1043,22 @@ function createWholeGraph() {
 }
 
 // Initialize visualization when the page loads
-//window.addEventListener('load', loadData);
+window.addEventListener('load', loadData);
 window.addEventListener('resize', () => {
+    refreshVisualization();
+});
+
+export function refreshVisualization() {
     // Update dimensions on resize
     const visualizationContainer = d3.select("#visualization");
     const containerRect = visualizationContainer.node().getBoundingClientRect();
     width = containerRect.width;
     height = containerRect.height;
-    
+
     // Resize SVG
     svg.attr("width", width)
-       .attr("height", height);
-    
+    .attr("height", height);
+
     // Redraw based on current view
     if (currentView === "categories") {
         drawCategoryBubbles();
@@ -1067,9 +1072,9 @@ window.addEventListener('resize', () => {
         };
         showCategoryDetail(hierarchyNode);
     }
-    
+
     // Redraw heart rate chart if needed
     if (currentPatient && processedData && processedData.length > 0) {
         createWholeGraph();
     }
-});
+};
