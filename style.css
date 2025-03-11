@@ -156,11 +156,11 @@ h4 {
 } */
 
 /* Transition */
-#story-section, #viz-section {
+#story-section, #bubble-section, #graph-section {
     transition: opacity 1s ease;
 }
 
-#viz-section {
+#viz-section, #graph-section {
     display: none;
     opacity: 0;
 }

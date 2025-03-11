@@ -1,5 +1,7 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 
+import {magic} from "./graph_viz.js";
+
 let svg, xScale, yScale;
 let width, height;
 let processedData, maxTime, minRate, maxRate;
@@ -547,8 +549,10 @@ async function setupCategoryDetailView(category) {
                 .style("opacity", 1)
                 .attr("stroke", "#ff3131")
                 .attr("stroke-width", 2);
+
+                transitionToGraph();
                 
-            // Load and display heart rate data
+            /*// Load and display heart rate data
             currentPatient = d;
             d3.select("#chart").html('<div class="no-data">Loading heart rate data...</div>');
             
@@ -557,12 +561,31 @@ async function setupCategoryDetailView(category) {
                 maxTime = d.duration * 60;
                 [minRate, maxRate] = d3.extent(processedData, d => d.heartrate);
                 createWholeGraph();
-            }
+            }*/
+
 
             
         });
         
     currentView = "category-detail";
+}
+
+function transitionToGraph() {
+    // Fade out the story section
+    document.getElementById('bubble-section').style.opacity = '0';
+
+    setTimeout(() => {
+        // Hide the story and show visualization
+        document.getElementById('bubble-section').style.display = 'none';
+        document.getElementById('graph-section').style.display = 'block';
+
+        // Apply fade-in effect with a slight delay
+        setTimeout(() => {
+            document.getElementById('graph-section').style.opacity = '1';
+            magic(currentPatient.id);
+        }, 300);
+
+    }, 1000); // Matches fade-out duration
 }
 
 // Function to create an empty heart rate graph with instructions
