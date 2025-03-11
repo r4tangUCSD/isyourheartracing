@@ -1,10 +1,14 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 
+import { createWholeGraph } from "./timeline_viz.js";
+
 let svg, xScale, yScale;
 let width, height;
 let processedData, maxTime, minRate, maxRate;
 let currentView = "categories";
 let currentCategory = null;
+
+//IMPORTANT
 let currentPatient = null;
 let allPatients = [];
 let surgeryCategories = [];
@@ -469,7 +473,7 @@ async function setupCategoryDetailView(category) {
     d3.select(".chart-container").style("display", "block");
     
     // Create empty heart rate graph with the message
-    createEmptyHeartRateGraph();
+    /*createEmptyHeartRateGraph();*/
         
     // Add patient bubbles
     gridContainer.selectAll(".patient")
@@ -506,13 +510,13 @@ async function setupCategoryDetailView(category) {
                 .style("opacity", 1);
                 
             // Load and display heart rate data
-            d3.select("#chart").html('<div class="no-data">Loading heart rate data...</div>');
+            //d3.select("#chart").html('<div class="no-data">Loading heart rate data...</div>');
             
             processedData = await loadHeartRateData(d.id);
             if (processedData && processedData.length > 0) {
                 maxTime = d.duration * 60;
                 [minRate, maxRate] = d3.extent(processedData, d => d.heartrate);
-                createWholeGraph();
+                createWholeGraph(d.id);
             }
 
             // Display patient info
@@ -550,13 +554,14 @@ async function setupCategoryDetailView(category) {
                 
             // Load and display heart rate data
             currentPatient = d;
+            console.log(currentPatient);
             d3.select("#chart").html('<div class="no-data">Loading heart rate data...</div>');
             
             processedData = await loadHeartRateData(d.id);
             if (processedData && processedData.length > 0) {
                 maxTime = d.duration * 60;
                 [minRate, maxRate] = d3.extent(processedData, d => d.heartrate);
-                createWholeGraph();
+                createWholeGraph(d.id);
             }
 
             
@@ -566,7 +571,7 @@ async function setupCategoryDetailView(category) {
 }
 
 // Function to create an empty heart rate graph with instructions
-function createEmptyHeartRateGraph() {
+/* function createEmptyHeartRateGraph() {
     const margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const chartContainer = document.getElementById("chart");
     const containerWidth = chartContainer.clientWidth;
@@ -674,12 +679,13 @@ function createEmptyHeartRateGraph() {
         .text("Hover over a patient to view heart rate data");
 
         d3.select("#patient-info-panel").remove(); // Remove the panel completely
-}
+} */
 
 // Update the drawCategoryBubbles function to handle the click event
 function drawCategoryBubbles() {
     // Hide chart container FIRST before doing anything else
     d3.select(".chart-container").style("display", "none");
+    
     d3.select("#patient-info-panel").remove(); // Remove the panel completely
     
     // Only do animation if we're coming from category detail view
@@ -893,7 +899,7 @@ function secondsToHHMMSS(seconds) {
 }
 
 // The createWholeGraph function
-function createWholeGraph() {
+/*function createWholeGraph() {
     if (!processedData || processedData.length === 0) {
         d3.select("#chart").html('<div class="no-data">No heart rate data available for this patient</div>');
         return;
@@ -1041,7 +1047,7 @@ function createWholeGraph() {
         .style("fill", "none")
         .style("stroke", "#7ed957")
         .style("stroke-width", 2);    
-}
+}*/
 
 // Initialize visualization when the page loads
 window.addEventListener('resize', () => {
@@ -1053,7 +1059,7 @@ window.addEventListener('resize', () => {
 
     // Resize SVG
     svg.attr("width", width)
-    .attr("height", height);
+        .attr("height", height);
 
     // Redraw based on current view
     if (currentView === "categories") {
@@ -1071,6 +1077,6 @@ window.addEventListener('resize', () => {
 
     // Redraw heart rate chart if needed
     if (currentPatient && processedData && processedData.length > 0) {
-        createWholeGraph();
+        createWholeGraph(currentPatient.id);
     }
 });
