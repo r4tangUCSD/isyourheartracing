@@ -399,7 +399,7 @@ function animateSlider() {
     numHours = maxTime/3600;
     const durationPerHour = 10000; // Animation duration in milliseconds (e.g., 5 seconds)
     const totalDuration = durationPerHour * numHours/1000;
-    
+    sliderValue = 0;
     animating = true;
 
     const interval = setInterval(() => {
@@ -602,7 +602,7 @@ function drawBackBubble() {
                 .style("fill", "#333739")
                 .style("opacity", 0.85)
         })
-        .on("mouseout", function(event, d) {
+        .on("click", async function(event, d) {
             
             transitionToBubble(d);
         })         
