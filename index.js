@@ -138,7 +138,7 @@ async function showCategoryDetail(category) {
         .attr("r", originalRadius)
         .attr("fill", "#7ed957")
         .attr("stroke", "none")
-        .style("opacity", 0.85)
+        .style("opacity", 0.8)
         .style("pointer-events", "none");
     
     // Hide original content during animation
@@ -473,21 +473,34 @@ async function setupCategoryDetailView(category) {
 
 // Update the drawCategoryBubbles function to handle the click event
 function drawCategoryBubbles() {
+    // Hide chart container FIRST before doing anything else
+    d3.select(".chart-container").style("display", "none");
+    
     // Only do animation if we're coming from category detail view
     if (currentView === "category-detail" && currentCategory) {
         // Get the source category data for animation
         const category = surgeryCategories.find(c => c.id === currentCategory);
-        
-        // Hide chart container when returning to categories view
-        d3.select(".chart-container").style("display", "none");
         
         // Create animation circle at the current large position
         const startX = width * 0.35;
         const startY = height * 0.62;
         const startRadius = Math.min(width, height) * 0.62;
         
-        // Find the target position for animation (where the bubble will end up)
-        // First create bubble layout to calculate positions
+        // Change visualization back to fullscreen mode BEFORE calculating positions
+        d3.select("#visualization")
+            .attr("class", "visualization-fullscreen");
+        
+        // Update width and height NOW based on fullscreen container size
+        const visualizationContainer = d3.select("#visualization");
+        const containerRect = visualizationContainer.node().getBoundingClientRect();
+        width = containerRect.width;
+        height = containerRect.height;
+        
+        // Resize SVG
+        svg.attr("width", width)
+           .attr("height", height);
+        
+        // Now create bubble layout with the UPDATED dimensions
         const bubble = d3.pack()
             .size([width, height * 0.9])
             .padding(20);
@@ -496,14 +509,34 @@ function drawCategoryBubbles() {
         const root = d3.hierarchy(hierarchyData).sum(d => d.count || 0);
         bubble(root);
         
-        // Find the node that matches our category
-        const targetNode = root.children.find(node => node.data.id === category.id);
+        // Calculate vertical offset for centering
         const verticalOffset = (height - root.r * 2) / 2;
         
+        // Find the node that matches our category
+        let targetNode = null;
+        for (const node of root.children) {
+            if (node.data.id === category.id) {
+                targetNode = node;
+                break;
+            }
+        }
+        
         // Target position is where the bubble will shrink to
-        const targetX = targetNode ? targetNode.x: width * 2;
+        // Use default positions as a fallback, but this shouldn't happen
+        const targetX = targetNode ? targetNode.x : width / 2;
         const targetY = targetNode ? targetNode.y + verticalOffset : height / 2;
         const targetRadius = targetNode ? targetNode.r : 50;
+        
+        // For debugging - log the positions 
+        console.log("Animation targets:", {
+            categoryId: category.id,
+            targetNodeFound: !!targetNode,
+            targetX: targetX,
+            targetY: targetY,
+            targetRadius: targetRadius,
+            windowWidth: width,
+            windowHeight: height
+        });
         
         // Clear existing SVG content
         svg.selectAll("*").remove();
@@ -515,8 +548,10 @@ function drawCategoryBubbles() {
             .attr("r", startRadius)
             .attr("fill", "#7ed957")
             .attr("stroke", "none")
-            .style("opacity", 0.8)
+            .style("opacity", 1)
             .style("pointer-events", "none");
+
+        drawAllCategoryBubbles();
             
         // Animate the circle shrinking back to its original position
         animationCircle.transition()
@@ -529,27 +564,11 @@ function drawCategoryBubbles() {
                 // Remove the animation circle
                 animationCircle.remove();
                 
-                // Change visualization back to fullscreen mode
-                d3.select("#visualization")
-                    .attr("class", "visualization-fullscreen");
-                
-                // Update the width and height based on new container size
-                const visualizationContainer = d3.select("#visualization");
-                const containerRect = visualizationContainer.node().getBoundingClientRect();
-                width = containerRect.width;
-                height = containerRect.height;
-                
-                // Resize SVG
-                svg.attr("width", width)
-                   .attr("height", height);
-                
                 // Draw the regular category bubbles
-                drawAllCategoryBubbles();
+                
             });
     } else {
         // If not coming from category detail, just draw bubbles normally
-        d3.select(".chart-container").style("display", "none");
-        
         // Change visualization back to fullscreen mode
         d3.select("#visualization")
             .attr("class", "visualization-fullscreen");
