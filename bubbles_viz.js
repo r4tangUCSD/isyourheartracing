@@ -491,6 +491,11 @@ async function setupCategoryDetailView(category) {
         .style("cursor", "pointer")
         .style("transition", "all 0.2s ease")
         .on("mouseover", async function(event, d) {
+
+            let slider = document.getElementById('slider');
+            slider.value = 0;
+            slider.dispatchEvent(new Event("input")); // Trigger update manually
+
             // Update appearance immediately
             d3.select(this)
                 .attr("fill", "#ff3131")

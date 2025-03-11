@@ -402,6 +402,7 @@ function animateSlider() {
     animating = true;
 
     const interval = setInterval(() => {
+        console.log(sliderValue);
         if (sliderValue >= 100) {
             animating = false;
             slider.value = maxTime;
@@ -419,6 +420,8 @@ function shadingRange() {
     let restinglow;
     let lowMax;
     let lowLow;
+
+    console.log(patientAge);
 
     // too low and resting by age
     if (patientAge < 5) {
