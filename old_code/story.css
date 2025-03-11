@@ -21,6 +21,7 @@ body, html {
     pointer-events: none;
     padding: 0 50px; 
 }
+
 .silhouette {
     flex: 0 0 25%;
     height: 80%; 
@@ -29,6 +30,7 @@ body, html {
     background-position: center left;
     margin-left: 5%;
 }
+
 .bpm-container {
     flex: 0 0 25%;
     display: grid;

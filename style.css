@@ -158,10 +158,13 @@ h4 {
 } */
 
 /* Transition */
+#story-section, #viz-section {
+    transition: opacity 1s ease;
+}
+
 #viz-section {
     display: none;
     opacity: 0;
-    transition: opacity 1s ease-in-out; /* Smooth fade-in */
 }
 
 /* Bubbles */

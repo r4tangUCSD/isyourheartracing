@@ -30,25 +30,28 @@
                 <div id="stage-description" class="description">Description of the surgical stage</div>
             </div>
         </div>
-        <script src="story.js"></script>
+        <script type="module" src="story.js"></script>
     </section>
 
     <!-- Interactive Visualization Section (Hidden Initially) -->
     <section id="viz-section" style="display: none;">
-        <h1>Explore Heart Rate Data</h1>
-        <div id="visualization"></div>
-        <div class="chart-container">
-            <div id="chart"></div>
+        <h1> Let's Explore on Our Own!</h1>
+        <h4> Heart Rate Results Throughout Surgery</h4>
+        <div class="container">
+            <div class="visualization" id="visualization">
+                <div class="loading">Loading visualization data...</div>
+            </div>
+            <div class="chart-container">
+                <div id="chart">
+                    <div class="no-data">Select a patient to view heart rate data</div>
+                </div>
+            </div>
         </div>
-        <div id="surgery-categories"></div>
-        <div id="patient-graph">
-            <svg id="patient-scatter"></svg>
-            <div class="back-button">Back</div>
-        </div>
+        <div id="tooltip" class="tooltip"></div>
     </section>
 
     <!--<script src="viz.js"></script>-->
-
+    <script type="module" src="bubbles_viz.js"></script>
 </body>
 </html>
 <!--<script src="surgical-heart-rate-viz.js"></script>

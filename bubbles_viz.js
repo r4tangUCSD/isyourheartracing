@@ -11,7 +11,7 @@ let surgeryCategories = [];
 let patientsByCategoryId = {};
 
 // Load data on page load
-async function loadData() {
+export async function loadData() {
     try {
         // Use d3.csv directly
         d3.csv("emergency_data/emergency_everything.csv")
@@ -54,7 +54,7 @@ async function loadData() {
                 });
 
                 // Initialize visualization
-                initVisualization();
+                initBubbles();
             })
             .catch(error => {
                 console.error('Error loading data:', error);
@@ -175,7 +175,7 @@ async function loadHeartRateData(caseId) {
     }
 }
 
-function initVisualization() {
+export function initBubbles() {
     const visualizationContainer = d3.select("#visualization");
 
     // Hide chart container initially
@@ -881,7 +881,6 @@ function drawAllCategoryBubbles() {
     currentView = "categories";
 }
 
-
 // Helper function to convert seconds to HH:MM:SS format
 function secondsToHHMMSS(seconds) {
     const hrs = Math.floor(seconds / 3600);
@@ -1043,7 +1042,7 @@ function createWholeGraph() {
 }
 
 // Initialize visualization when the page loads
-window.addEventListener('load', loadData);
+//window.addEventListener('load', loadData);
 window.addEventListener('resize', () => {
     // Update dimensions on resize
     const visualizationContainer = d3.select("#visualization");

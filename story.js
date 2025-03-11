@@ -1,3 +1,8 @@
+// Import bubble function
+
+import { initBubbles } from './bubbles_viz.js';
+import { loadData } from './bubbles_viz.js';
+
 // STATIC STORY INFORMATION
 const storyData = [
     { 
@@ -241,34 +246,17 @@ function transitionToVisualization() {
         // Reset scroll position
         window.scrollTo({ top: 0, behavior: 'instant' });
 
-        // Adjust page height to match the new content
-        document.body.style.height = document.getElementById('viz-section').offsetHeight + "px";
-        document.documentElement.style.overflow = "hidden"; // Prevent extra scrolling
+        // Set overflow to hidden to remove scroll
+        document.body.style.overflow = 'hidden';
 
         // Apply fade-in effect with a slight delay
         setTimeout(() => {
             document.getElementById('viz-section').style.opacity = '1';
-        }, 300); // Delay to ensure smooth fade-in
+            // Load the visualization (bubbles)
+            loadData();
+        }, 300);
 
-        // Load the visualization (bubbles or graph)
-        loadVisualization();
     }, 1000); // Matches fade-out duration
-}
-
-
-// Function to choose between bubbles or graph
-function loadVisualization() {
-    const visualizationType = "bubbles"; // Change to "graph" if needed
-
-    if (visualizationType === "bubbles") {
-        import("./bubbes_old.js").then(module => {
-            console.log("Bubbles visualization loaded");
-        });
-    } else if (visualizationType === "graph") {
-        import("./graph_old.js").then(module => {
-            console.log("Graph visualization loaded");
-        });
-    }
 }
 
 // Add fade effect styles
