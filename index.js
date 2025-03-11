@@ -8,7 +8,7 @@ instruction.style.opacity = 0;
 
 // data processing
 let patient_info;
-let processedData;
+let processedData_v;
 let filteredData;
 
 // surgery descriptions 
@@ -66,26 +66,26 @@ let current;
 
     //time values 
 let minTime;
-let maxTime;
+let maxTime_v;
 let numHours;
 let currHour;
 
 //heart rate values
-let minRate;
-let maxRate;
+let minRate_v;
+let maxRate_v;
 
 let currentAverage;
 
 //graph
-let svg;
+let svg_v;
 
     // x scale
-let xScale;
+let xScale_v;
 let tenMinsAge = 0;
 let endTime;
 
     // y scale
-let yScale;
+let yScale_v;
 let firstY;
 let endY;
 
@@ -142,9 +142,9 @@ function currentTime() {
 
     // with all the heart rate until currentTime
     if (currentTime < minTime){
-        filteredData = processedData.filter(d => d.second === minTime);
+        filteredData = processedData_v.filter(d => d.second === minTime);
     } else {
-        filteredData = processedData.filter(d => d.second <= currentTime);
+        filteredData = processedData_v.filter(d => d.second <= currentTime);
     }
 
     if (currentTime >= 900) {
@@ -244,7 +244,7 @@ function createGraph() {
 
     d3.select("#chart").selectAll("svg").remove();  
 
-    svg = d3.select("#chart")
+    svg_v = d3.select("#chart")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -254,12 +254,12 @@ function createGraph() {
 
     // Creates x axis scales
     endTime = Math.max(900, current)
-    xScale = d3.scaleLinear()
+    xScale_v = d3.scaleLinear()
     .domain([tenMinsAge, endTime]) // data values for x-axis
     .range([0, width]); // pixel range for the graph
 
     // x axis labels
-    svg.append("text")
+    svg_v.append("text")
         .attr("x", width / 2)
         .attr("y", height + 35)
         .attr("text-anchor", "middle")
@@ -269,15 +269,15 @@ function createGraph() {
         .text("Time Since Operation Started (HH:MM:SS)");
 
     // Creates y axis scales
-    firstY = Math.max(0, Math.floor(minRate/10) * 10);
-    endY = (Math.ceil(maxRate/10) * 10);
+    firstY = Math.max(0, Math.floor(minRate_v/10) * 10);
+    endY = (Math.ceil(maxRate_v/10) * 10);
 
-    yScale = d3.scaleLinear()
+    yScale_v = d3.scaleLinear()
         .domain([firstY, endY]) // data values for y-axis
         .range([height, 0]); // pixel range for the graph
 
     // y axis labels
-    svg.append("text")
+    svg_v.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
         .attr("y", -31.5)
@@ -291,30 +291,30 @@ function createGraph() {
 
     const ticks = d3.range(tenMinsAge, endTime, 60); 
 
-    svg.append("g")
+    svg_v.append("g")
     .attr("transform", "translate(0," + height + ")")
     .style("opacity", 0.55)
-    .call(d3.axisBottom(xScale).tickValues(ticks).tickFormat(d => secondsToHHMMSS(d)));
+    .call(d3.axisBottom(xScale_v).tickValues(ticks).tickFormat(d => secondsToHHMMSS(d)));
 
-    svg.append("g")
-    .call(d3.axisLeft(yScale))
+    svg_v.append("g")
+    .call(d3.axisLeft(yScale_v))
     .style("opacity", 0.35);
 
-    svg.append("g")
-        .call(d3.axisLeft(yScale).ticks(10))
+    svg_v.append("g")
+        .call(d3.axisLeft(yScale_v).ticks(10))
         .style("opacity", 0.35);
 
     // add shading
-    if (animating === false || Math.ceil(current) >= maxTime) {
+    if (animating === false || Math.ceil(current) >= maxTime_v) {
         shadingRange();
     }
 
     // Creates grids
         // vertical grids
-    svg.append("g")
+    svg_v.append("g")
     .attr("class", "grid")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(xScale)
+    .call(d3.axisBottom(xScale_v)
         .tickValues(ticks)  // Number of ticks for gridlines
         .tickSize(-height) // Extend the gridlines across the chart
         .tickFormat("") // No tick labels
@@ -326,9 +326,9 @@ function createGraph() {
         // horizontal grids
     const ticksY = d3.range(Math.floor((firstY + 10) / 10) * 10, Math.ceil((endY) / 10) * 10, 10);
     
-    svg.append("g")
+    svg_v.append("g")
     .attr("class", "grid")
-    .call(d3.axisLeft(yScale)
+    .call(d3.axisLeft(yScale_v)
         .tickValues(ticksY)  // Use the generated array of ticks
         .tickSize(-width)    // Extend the gridlines across the chart
         .tickFormat("")      // Remove tick labels
@@ -378,12 +378,12 @@ function createGraph() {
 
     // Plot the line graph
     const line = d3.line()
-        .x(d => xScale(d.second)) // Map time to the x-axis
-        .y(d => yScale(d.heartrate));
+        .x(d => xScale_v(d.second)) // Map time to the x-axis
+        .y(d => yScale_v(d.heartrate));
 
     // Draw each segment
     segments.forEach(segment => {
-        svg.append("path")
+        svg_v.append("path")
         .data([segment]) // Bind the data
         .attr("class", "line") // Add a class for styling (optional)
         .attr("d", line) // Draw the path based on the data
@@ -396,7 +396,7 @@ function createGraph() {
 }
 
 function animateSlider() {
-    numHours = maxTime/3600;
+    numHours = maxTime_v/3600;
     const durationPerHour = 10000; // Animation duration in milliseconds (e.g., 5 seconds)
     const totalDuration = durationPerHour * numHours/1000;
     
@@ -405,7 +405,7 @@ function animateSlider() {
     const interval = setInterval(() => {
         if (sliderValue >= 100) {
             animating = false;
-            slider.value = maxTime;
+            slider.value = maxTime_v;
             instruction.style.opacity = 0.3;
             clearInterval(interval);
         } else {
@@ -448,11 +448,11 @@ function shadingRange() {
     // low shading
     if (firstY < lowMax) {
         lowLow = Math.max(0, firstY);
-        svg.append("rect")
-        .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-        .attr("y", yScale(lowMax))    // Map the end Y value to the scale (invert y-axis)
-        .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-        .attr("height", yScale(lowLow) - yScale(lowMax)) // Rectangle height (invert the height)
+        svg_v.append("rect")
+        .attr("x", xScale_v(tenMinsAge))  // Map the start X value to the scale
+        .attr("y", yScale_v(lowMax))    // Map the end Y value to the scale (invert y-axis)
+        .attr("width", xScale_v(endTime) - xScale_v(tenMinsAge))  // Rectangle width
+        .attr("height", yScale_v(lowLow) - yScale_v(lowMax)) // Rectangle height (invert the height)
         .attr("fill", "#009AEE")  // Rectangle color
         .style("opacity", 0.15); 
     }
@@ -460,11 +460,11 @@ function shadingRange() {
     // resting shading
 
     if (firstY < mod50) {
-        svg.append("rect")
-        .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-        .attr("y", yScale(mod50))    // Map the end Y value to the scale (invert y-axis)
-        .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-        .attr("height", yScale(restinglow) - yScale(mod50)) // Rectangle height (invert the height)
+        svg_v.append("rect")
+        .attr("x", xScale_v(tenMinsAge))  // Map the start X value to the scale
+        .attr("y", yScale_v(mod50))    // Map the end Y value to the scale (invert y-axis)
+        .attr("width", xScale_v(endTime) - xScale_v(tenMinsAge))  // Rectangle width
+        .attr("height", yScale_v(restinglow) - yScale_v(mod50)) // Rectangle height (invert the height)
         .attr("fill", "#2db41e")  // Rectangle color
         .style("opacity", 0.15); 
     }
@@ -472,11 +472,11 @@ function shadingRange() {
     // moderate shading
     let modHigh = Math.min(endY, mod70);
     const lowerY = Math.max(mod50, firstY);
-    svg.append("rect")
-    .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-    .attr("y", yScale(modHigh))    // Map the end Y value to the scale (invert y-axis)
-    .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-    .attr("height", yScale(lowerY) - yScale(modHigh)) // Rectangle height (invert the height)
+    svg_v.append("rect")
+    .attr("x", xScale_v(tenMinsAge))  // Map the start X value to the scale
+    .attr("y", yScale_v(modHigh))    // Map the end Y value to the scale (invert y-axis)
+    .attr("width", xScale_v(endTime) - xScale_v(tenMinsAge))  // Rectangle width
+    .attr("height", yScale_v(lowerY) - yScale_v(modHigh)) // Rectangle height (invert the height)
     .attr("fill", "#FEED53")  // Rectangle color
     .style("opacity", 0.15); 
 
@@ -489,11 +489,11 @@ function shadingRange() {
     }
 
     if (endY > mod70) {
-        svg.append("rect")
-        .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-        .attr("y", yScale(higherY))    // Map the end Y value to the scale (invert y-axis)
-        .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-        .attr("height", yScale(mod70) - yScale(higherY)) // Rectangle height (invert the height)
+        svg_v.append("rect")
+        .attr("x", xScale_v(tenMinsAge))  // Map the start X value to the scale
+        .attr("y", yScale_v(higherY))    // Map the end Y value to the scale (invert y-axis)
+        .attr("width", xScale_v(endTime) - xScale_v(tenMinsAge))  // Rectangle width
+        .attr("height", yScale_v(mod70) - yScale_v(higherY)) // Rectangle height (invert the height)
         .attr("fill", "#F63C4C")  // Rectangle color
         .style("opacity", 0.15); 
     }
@@ -515,23 +515,23 @@ d3.csv("emergency.csv")
 
     })
     .then(data => {
-        processedData = processCSV(data);
+        processedData_v = processCSV(data);
 
         // Scaling the time
         const startTime = new Date();
         startTime.setHours(0, 0, 0, 0);
 
-        minTime = d3.min(processedData, d => d.second);
-        maxTime = d3.max(processedData, d => d.second);
-        numHours = Math.ceil(maxTime/3600);        
+        minTime = d3.min(processedData_v, d => d.second);
+        maxTime_v = d3.max(processedData_v, d => d.second);
+        numHours = Math.ceil(maxTime_v/3600);        
 
         timeScale = d3.scaleLinear()
-        .domain([0, d3.max(processedData, d => d.second)])
+        .domain([0, d3.max(processedData_v, d => d.second)])
         .range([0, 100]);
 
         // heart rate values
-        minRate = d3.min(processedData, d => parseInt(d.heartrate));
-        maxRate = d3.max(processedData, d => parseInt(d.heartrate));
+        minRate_v = d3.min(processedData_v, d => parseInt(d.heartrate));
+        maxRate_v = d3.max(processedData_v, d => parseInt(d.heartrate));
 
         // important values
         patient_details = getPatientInfoByCaseid(selectedCaseID);
@@ -549,7 +549,7 @@ d3.csv("emergency.csv")
         vig85 = maxHeartRate * 0.85;
 
         // Set Up
-        slider.step = 1/maxTime
+        slider.step = 1/maxTime_v
         currentTime();
         animateSlider();
             
@@ -598,91 +598,3 @@ function drawBackBubble() {
 }
 
 drawBackBubble();
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Page ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-
-function createWholeGraph() {
-    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
-    const width = 750 - margin.left - margin.right;
-    const height = 375 - margin.top - margin.bottom;
-
-    d3.select("#chart").selectAll("svg").remove();  
-
-    svg = d3.select("#chart")
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    // Creates x axis scales
-    endTime = Math.max(900, current)
-    xScale = d3.scaleLinear()
-    .domain([0, maxTime]) // data values for x-axis
-    .range([0, width]); // pixel range for the graph
-
-    // Creates y axis scales
-    firstY = Math.max(0, minRate - 20);
-    endY = maxRate + 20;
-
-    yScale = d3.scaleLinear()
-        .domain([0, 220]) // data values for y-axis
-        .range([height, 0]); // pixel range for the graph
-
-    // Creates the x and y axis
-
-    const ticks = d3.range(0, maxTime, 60); 
-
-    svg.append("g")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(xScale).tickValues(ticks).tickFormat(d => secondsToHHMMSS(d)));
-
-    svg.append("g")
-    .call(d3.axisLeft(yScale));
-
-    svg.append("g")
-        .call(d3.axisLeft(yScale).ticks(10));
-
-
-    // Creates grids
-
-    svg.append("g")
-    .attr("class", "grid")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(xScale)
-        .tickValues(ticks)  // Number of ticks for gridlines
-        .tickSize(-height) // Extend the gridlines across the chart
-        .tickFormat("") // No tick labels
-    )
-    .style("stroke", "#ccc") // Color of the gridlines
-    .style("stroke-width", "2px")
-    .style("opacity", "20%");
-
-    const ticksY = d3.range(Math.floor((firstY + 10) / 10) * 10, Math.ceil((endY) / 10) * 10, 10);
-    
-    svg.append("g")
-    .attr("class", "grid")
-    .call(d3.axisLeft(yScale)
-        .tickValues(ticksY)  // Use the generated array of ticks
-        .tickSize(-width)    // Extend the gridlines across the chart
-        .tickFormat("")      // Remove tick labels
-    )
-    .style("stroke", "#ccc")  // Gridline color
-    .style("stroke-width", "1px")
-    .style("opacity", "40%");
-
-    // Draw the line
-
-    const line = d3.line()
-        .x(d => xScale(d.second)) // Map time to the x-axis
-        .y(d => yScale(d.heartrate));
-
-    svg.append("path")
-    .data([processedData]) // Bind the data
-    .attr("class", "line") // Add a class for styling (optional)
-    .attr("d", line) // Draw the path based on the data
-    .style("fill", "none") // No fill for the line
-    .style("stroke", "#7ed957") // Line color
-    .style("stroke-width", 2); // Line width
-    
-}
