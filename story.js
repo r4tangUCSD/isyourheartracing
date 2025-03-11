@@ -208,14 +208,53 @@ function updateStageInfo(stage) {
 function handleScroll() {
     // calculate scroll progress
     const scrollProgress = window.scrollY / (scrollContainer.offsetHeight - window.innerHeight);
-    
+
     // assign stage based on scroll progress
     const stageIndex = Math.floor(scrollProgress * (storyData.length - 1));
     const currentStage = storyData[Math.min(stageIndex, storyData.length - 1)];
-    
+
     // update stage
     updateStageInfo(currentStage);
+
+    // If we are at the last stage, transition to visualization
+    if (stageIndex === storyData.length - 1) {
+        setTimeout(transitionToVisualization, 1500); // Small delay before transition
+    }
 }
+
+// Function to transition to visualization (either bubbles or graph)
+function transitionToVisualization() {
+    document.getElementById('story-section').style.opacity = '0'; // Fade out story
+    setTimeout(() => {
+        document.getElementById('story-section').style.display = 'none'; // Hide story
+        document.getElementById('viz-section').style.display = 'block'; // Show visualization
+        document.getElementById('viz-section').style.opacity = '1'; // Fade in visualization
+
+        // Optionally trigger which visualization to load
+        // loadVisualization();  
+    }, 1000); // Wait for fade-out effect
+}
+
+// Function to choose between bubbles or graph
+function loadVisualization() {
+    const visualizationType = "bubbles"; // Change to "graph" if needed
+
+    if (visualizationType === "bubbles") {
+        import("./bubbes_old.js").then(module => {
+            console.log("Bubbles visualization loaded");
+        });
+    } else if (visualizationType === "graph") {
+        import("./graph_old.js").then(module => {
+            console.log("Graph visualization loaded");
+        });
+    }
+}
+
+// Add fade effect styles
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('story-section').style.transition = "opacity 1s ease";
+    document.getElementById('viz-section').style.transition = "opacity 1s ease";
+});
 
 // scroll event listener
 window.addEventListener('scroll', handleScroll);
