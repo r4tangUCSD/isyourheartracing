@@ -255,7 +255,7 @@ async function setupCategoryDetailView(category) {
     const backButtonGroup = svg.append("g")
         .attr("class", "back-button")
         .attr("transform", `translate(${width * 0.05}, ${height * 0.06})`)
-        .on("click", drawCategoryBubbles)  // Uses the updated drawCategoryBubbles
+        .on("click", drawCategoryBubbles)
         .on("mouseover", function() {
             d3.select(this).select("circle")
                 .transition()
@@ -382,6 +382,12 @@ async function setupCategoryDetailView(category) {
     const sortedPatients = [...patients].sort((a, b) => 
         sizeScale(b.duration) - sizeScale(a.duration)
     );
+    
+    // Show an empty heart rate graph with instructions
+    d3.select(".chart-container").style("display", "block");
+    
+    // Create empty heart rate graph with the message
+    createEmptyHeartRateGraph();
         
     // Add patient bubbles
     gridContainer.selectAll(".patient")
@@ -469,6 +475,115 @@ async function setupCategoryDetailView(category) {
         });
         
     currentView = "category-detail";
+}
+
+// Function to create an empty heart rate graph with instructions
+function createEmptyHeartRateGraph() {
+    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+    const chartContainer = document.getElementById("chart");
+    const containerWidth = chartContainer.clientWidth;
+    const containerHeight = chartContainer.clientHeight;
+
+    const width = 750 - margin.left - margin.right;
+    const height = 375 - margin.top - margin.bottom - 40;
+
+    d3.select("#chart").selectAll("*").remove();
+
+    const svg = d3.select("#chart")
+        .append("svg")
+        .attr("width", containerWidth)
+        .attr("height", containerHeight)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add axis labels
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + 30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#7ed957")
+        .style("font-weight", "bold")
+        .text("Time Since Operation Started (HH:MM)");
+
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -35)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#7ed957")
+        .style("font-weight", "bold")
+        .text("Heart Rate (bpm)");
+
+    // Create x-axis scale
+    const xScale = d3.scaleLinear()
+        .domain([0, 7200]) // 2 hours in seconds
+        .range([0, width]);
+
+    // Create y-axis scale
+    const yScale = d3.scaleLinear()
+        .domain([0, 240])  // 0 to 240 bpm
+        .range([height, 0]);
+
+    // Generate evenly spaced tick values
+    const xTicks = d3.range(0, 7200 + 600, 600);  // Every 10 minutes
+    const yTicks = d3.range(0, 240 + 20, 20);     // Every 20 bpm
+
+    // Format time labels
+    function secondsToHHMM(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        return `${hours}:${remainingMinutes.toString().padStart(2, "0")}`;
+    }
+
+    // Create x and y axes
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)
+            .tickValues(xTicks)
+            .tickFormat(d => secondsToHHMM(d))
+        );
+
+    svg.append("g")
+        .call(d3.axisLeft(yScale)
+            .tickValues(yTicks)
+        );
+
+    // Create gridlines
+    svg.append("g")
+        .attr("class", "grid")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)
+            .tickValues(xTicks)
+            .tickSize(-height)
+            .tickFormat("")
+        )
+        .style("stroke", "#ccc")
+        .style("stroke-width", "2px")
+        .style("opacity", "20%");
+
+    svg.append("g")
+        .attr("class", "grid")
+        .call(d3.axisLeft(yScale)
+            .tickValues(yTicks)
+            .tickSize(-width)
+            .tickFormat("")
+        )
+        .style("stroke", "#ccc")
+        .style("stroke-width", "1px")
+        .style("opacity", "40%");
+    
+    // Add instruction message in the center of the chart
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height / 2)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .style("font-size", "16px")
+        .style("fill", "#a5a2a2")
+        .text("Hover over a patient to view heart rate data");
 }
 
 // Update the drawCategoryBubbles function to handle the click event
