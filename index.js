@@ -119,118 +119,56 @@ function initVisualization() {
     drawCategoryBubbles();
 }
 
-function drawCategoryBubbles() {
-    // Hide chart container when returning to categories view
-    d3.select(".chart-container").style("display", "none");
-
-    // Change visualization back to fullscreen mode
-    d3.select("#visualization")
-        .attr("class", "visualization-fullscreen");
+// Update the showCategoryDetail function to include animation
+async function showCategoryDetail(category) {
+    // Store the original category circle position and radius for animation
+    const originalX = category.x;
+    const originalY = category.y;
+    const originalRadius = category.r;
     
-    // Update the width and height based on new container size
-    const visualizationContainer = d3.select("#visualization");
-    const containerRect = visualizationContainer.node().getBoundingClientRect();
-    width = containerRect.width;
-    height = containerRect.height;
+    // Target position (where the large green container circle will be)
+    const targetX = width * 0.175;
+    const targetY = height * 0.62;
+    const targetRadius = Math.min(width, height) * 0.62;
     
-    // Resize SVG
-    svg.attr("width", width)
-       .attr("height", height);
-
-    d3.select("#chart").html(""); // Clear heart rate graph
-    currentPatient = null;
-    svg.selectAll("*").remove();
-
-    // Define available space and create bubble layout
-    const bubble = d3.pack()
-        .size([width, height * 0.9])  // Reduce height to keep bubbles centered
-        .padding(20);
-
-    // Prepare hierarchy data
-    const hierarchyData = { children: surgeryCategories };
-    const root = d3.hierarchy(hierarchyData).sum(d => d.count || 0);
-
-    // Apply layout
-    bubble(root);
-
-    // Calculate vertical offset for centering
-    const verticalOffset = (height - root.r * 2) / 2;
-
-    // Create bubble groups
-    const bubbleGroups = svg.selectAll(".bubble")
-        .data(root.children)
-        .enter()
-        .append("g")
-        .attr("class", "bubble")
-        .attr("transform", d => `translate(${d.x},${d.y + verticalOffset})`)  // Apply centering offset
-        .style("cursor", "pointer");
-
-    // Add circles
-    bubbleGroups.append("circle")
-        .attr("r", d => d.r)
-        .attr("fill", "#333739")
+    // First create a copy of the clicked bubble for animation
+    const animationCircle = svg.append("circle")
+        .attr("cx", originalX)
+        .attr("cy", originalY)
+        .attr("r", originalRadius)
+        .attr("fill", "#7ed957")
         .attr("stroke", "none")
-        .attr("stroke-width", 0)
-        .style("opacity", 0.75)
-        .on("mouseover", function(event, d) {
-            d3.select(this).transition().duration(200).attr("fill", "#7ed957").style("opacity", 1);
-
-            // Show tooltip
-            d3.select("#tooltip")
-                .style("left", `${event.pageX + 10}px`)
-                .style("top", `${event.pageY - 10}px`)
-                .html(`<strong>${d.data.name}</strong><br>${d.data.count} surgeries`)
-                .style("opacity", 1);
-
-            d3.select(this.parentNode).selectAll("text")
-                .transition()
-                .duration(200)
-                .attr("fill", "#363336");    
-        })
-        .on("mouseout", function() {
-            d3.select(this).transition().duration(200).attr("fill", "#333739").style("opacity", 0.85);
-            d3.select("#tooltip").style("opacity", 0);
-
-            d3.select(this.parentNode).selectAll("text")
-                .transition()
-                .duration(200)
-                .attr("fill", "#a5a2a2");
-        })
-        .on("click", function(event, d) {
-            currentCategory = d.data.id;
-            d3.select("#tooltip").style("opacity", 0);
-            showCategoryDetail(d);
+        .style("opacity", 0.85)
+        .style("pointer-events", "none");
+    
+    // Hide original content during animation
+    svg.selectAll(".bubble").style("opacity", 0);
+    
+    // Animate the circle
+    animationCircle.transition()
+        .duration(750)
+        .attr("cx", targetX)
+        .attr("cy", targetY)
+        .attr("r", targetRadius)
+        .style("opacity", 0.8)
+        .on("end", function() {
+            // Show chart container when animation completes
+            d3.select(".chart-container").style("display", "block");
+            
+            // Change visualization class to split mode
+            d3.select("#visualization")
+                .attr("class", "visualization-split");
+            
+            // Remove the animation circle
+            animationCircle.remove();
+            
+            // Continue with category detail view setup
+            setupCategoryDetailView(category);
         });
-
-    // Add category name labels
-    bubbleGroups.append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", "-.2em")
-        .attr("fill", "#a5a2a2")
-        .style("font-size", d => Math.min(2.5 * d.r / (d.data.name.length), 18) + "px")
-        .style("pointer-events", "none")
-        .text(d => d.data.name);
-
-    // Add case count labels
-    bubbleGroups.append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", "1.5em")
-        .attr("fill", "#a5a2a2")
-        .style("font-size", d => Math.min(1.75 * d.r / 10, 14) + "px")
-        .style("pointer-events", "none")
-        .text(d => d.data.count > 0 ? `${d.data.count} cases` : "");
-
-    currentView = "categories";
 }
 
-async function showCategoryDetail(category) {
-    // Show chart container when a category is selected
-    d3.select(".chart-container").style("display", "block");
-
-    // Change visualization class to split mode
-    d3.select("#visualization")
-        .attr("class", "visualization-split");
-
+// Extract the setup functionality into a separate function
+async function setupCategoryDetailView(category) {
     // Clear previous content
     svg.selectAll("*").remove();
 
@@ -317,7 +255,7 @@ async function showCategoryDetail(category) {
     const backButtonGroup = svg.append("g")
         .attr("class", "back-button")
         .attr("transform", `translate(${width * 0.05}, ${height * 0.06})`)
-        .on("click", drawCategoryBubbles)
+        .on("click", drawCategoryBubbles)  // Uses the updated drawCategoryBubbles
         .on("mouseover", function() {
             d3.select(this).select("circle")
                 .transition()
@@ -533,6 +471,191 @@ async function showCategoryDetail(category) {
     currentView = "category-detail";
 }
 
+// Update the drawCategoryBubbles function to handle the click event
+function drawCategoryBubbles() {
+    // Only do animation if we're coming from category detail view
+    if (currentView === "category-detail" && currentCategory) {
+        // Get the source category data for animation
+        const category = surgeryCategories.find(c => c.id === currentCategory);
+        
+        // Hide chart container when returning to categories view
+        d3.select(".chart-container").style("display", "none");
+        
+        // Create animation circle at the current large position
+        const startX = width * 0.35;
+        const startY = height * 0.62;
+        const startRadius = Math.min(width, height) * 0.62;
+        
+        // Find the target position for animation (where the bubble will end up)
+        // First create bubble layout to calculate positions
+        const bubble = d3.pack()
+            .size([width, height * 0.9])
+            .padding(20);
+            
+        const hierarchyData = { children: surgeryCategories };
+        const root = d3.hierarchy(hierarchyData).sum(d => d.count || 0);
+        bubble(root);
+        
+        // Find the node that matches our category
+        const targetNode = root.children.find(node => node.data.id === category.id);
+        const verticalOffset = (height - root.r * 2) / 2;
+        
+        // Target position is where the bubble will shrink to
+        const targetX = targetNode ? targetNode.x: width * 2;
+        const targetY = targetNode ? targetNode.y + verticalOffset : height / 2;
+        const targetRadius = targetNode ? targetNode.r : 50;
+        
+        // Clear existing SVG content
+        svg.selectAll("*").remove();
+        
+        // Create the animation circle
+        const animationCircle = svg.append("circle")
+            .attr("cx", startX)
+            .attr("cy", startY)
+            .attr("r", startRadius)
+            .attr("fill", "#7ed957")
+            .attr("stroke", "none")
+            .style("opacity", 0.8)
+            .style("pointer-events", "none");
+            
+        // Animate the circle shrinking back to its original position
+        animationCircle.transition()
+            .duration(750)
+            .attr("cx", targetX)
+            .attr("cy", targetY)
+            .attr("r", targetRadius)
+            .style("opacity", 0.5)
+            .on("end", function() {
+                // Remove the animation circle
+                animationCircle.remove();
+                
+                // Change visualization back to fullscreen mode
+                d3.select("#visualization")
+                    .attr("class", "visualization-fullscreen");
+                
+                // Update the width and height based on new container size
+                const visualizationContainer = d3.select("#visualization");
+                const containerRect = visualizationContainer.node().getBoundingClientRect();
+                width = containerRect.width;
+                height = containerRect.height;
+                
+                // Resize SVG
+                svg.attr("width", width)
+                   .attr("height", height);
+                
+                // Draw the regular category bubbles
+                drawAllCategoryBubbles();
+            });
+    } else {
+        // If not coming from category detail, just draw bubbles normally
+        d3.select(".chart-container").style("display", "none");
+        
+        // Change visualization back to fullscreen mode
+        d3.select("#visualization")
+            .attr("class", "visualization-fullscreen");
+        
+        // Update the width and height based on new container size
+        const visualizationContainer = d3.select("#visualization");
+        const containerRect = visualizationContainer.node().getBoundingClientRect();
+        width = containerRect.width;
+        height = containerRect.height;
+        
+        // Resize SVG
+        svg.attr("width", width)
+           .attr("height", height);
+        
+        d3.select("#chart").html(""); // Clear heart rate graph
+        currentPatient = null;
+        svg.selectAll("*").remove();
+        
+        drawAllCategoryBubbles();
+    }
+}
+
+// Create a separate function for drawing the category bubbles
+function drawAllCategoryBubbles() {
+    // Define available space and create bubble layout
+    const bubble = d3.pack()
+        .size([width, height * 0.9])  // Reduce height to keep bubbles centered
+        .padding(20);
+
+    // Prepare hierarchy data
+    const hierarchyData = { children: surgeryCategories };
+    const root = d3.hierarchy(hierarchyData).sum(d => d.count || 0);
+
+    // Apply layout
+    bubble(root);
+
+    // Calculate vertical offset for centering
+    const verticalOffset = (height - root.r * 2) / 2;
+
+    // Create bubble groups
+    const bubbleGroups = svg.selectAll(".bubble")
+        .data(root.children)
+        .enter()
+        .append("g")
+        .attr("class", "bubble")
+        .attr("transform", d => `translate(${d.x},${d.y + verticalOffset})`)  // Apply centering offset
+        .style("cursor", "pointer");
+
+    // Add circles
+    bubbleGroups.append("circle")
+        .attr("r", d => d.r)
+        .attr("fill", "#333739")
+        .attr("stroke", "none")
+        .attr("stroke-width", 0)
+        .style("opacity", 0.75)
+        .on("mouseover", function(event, d) {
+            d3.select(this).transition().duration(200).attr("fill", "#7ed957").style("opacity", 1);
+
+            // Show tooltip
+            d3.select("#tooltip")
+                .style("left", `${event.pageX + 10}px`)
+                .style("top", `${event.pageY - 10}px`)
+                .html(`<strong>${d.data.name}</strong><br>${d.data.count} surgeries`)
+                .style("opacity", 1);
+
+            d3.select(this.parentNode).selectAll("text")
+                .transition()
+                .duration(200)
+                .attr("fill", "#363336");    
+        })
+        .on("mouseout", function() {
+            d3.select(this).transition().duration(200).attr("fill", "#333739").style("opacity", 0.85);
+            d3.select("#tooltip").style("opacity", 0);
+
+            d3.select(this.parentNode).selectAll("text")
+                .transition()
+                .duration(200)
+                .attr("fill", "#a5a2a2");
+        })
+        .on("click", function(event, d) {
+            currentCategory = d.data.id;
+            d3.select("#tooltip").style("opacity", 0);
+            showCategoryDetail(d);
+        });
+
+    // Add category name labels
+    bubbleGroups.append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "-.2em")
+        .attr("fill", "#a5a2a2")
+        .style("font-size", d => Math.min(2.5 * d.r / (d.data.name.length), 18) + "px")
+        .style("pointer-events", "none")
+        .text(d => d.data.name);
+
+    // Add case count labels
+    bubbleGroups.append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "1.5em")
+        .attr("fill", "#a5a2a2")
+        .style("font-size", d => Math.min(1.75 * d.r / 10, 14) + "px")
+        .style("pointer-events", "none")
+        .text(d => d.data.count > 0 ? `${d.data.count} cases` : "");
+
+    currentView = "categories";
+}
+
 
 // Helper function to convert seconds to HH:MM:SS format
 function secondsToHHMMSS(seconds) {
@@ -691,18 +814,7 @@ function createWholeGraph() {
         .attr("d", line)
         .style("fill", "none")
         .style("stroke", "#7ed957")
-        .style("stroke-width", 2);
-
-    // Add title
-    svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", -10)
-        .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .style("fill", "#7ed957")
-        .text(`Heart Rate Data for Patient ${currentPatient.id}`);
-
-    
+        .style("stroke-width", 2);    
 }
 
 // Initialize visualization when the page loads
