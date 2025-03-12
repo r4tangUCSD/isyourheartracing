@@ -1,36 +1,35 @@
 // Import bubble function
-//import { refreshVisualization } from './bubbles_viz.js';
 import { loadData } from './bubbles_viz.js';
 
 // STATIC STORY INFORMATION
 const storyData = [
     { 
         time: 0, 
-        heartRate: 72, 
+        heartRate: 61, 
         stage: 'Initial Status', 
         description: 'Introduce Case 32 - who the patient is, type of surgery' 
     },
     { 
         time: 15, 
-        heartRate: 105, 
+        heartRate: 100, 
         stage: 'Stage 1', 
         description: 'Describe spike' 
     },
     { 
         time: 45, 
-        heartRate: 65, 
+        heartRate: 123, 
         stage: 'Stage 2', 
         description: 'Describe dip' 
     },
     { 
         time: 90, 
-        heartRate: 45, 
+        heartRate: 160, 
         stage: 'Stage 3', 
         description: 'Describe further dip' 
     },
     { 
         time: 120, 
-        heartRate: 70, 
+        heartRate: 55, 
         stage: 'Stage 4', 
         description: 'Describe return to acceptable speed' 
     },
