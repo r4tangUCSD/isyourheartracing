@@ -630,11 +630,13 @@ function createEmptyHeartRateGraph() {
     const xScale = d3.scaleLinear()
         .domain([0, 7200]) // 2 hours in seconds
         .range([0, width]);
+        
 
     // Create y-axis scale
     const yScale = d3.scaleLinear()
         .domain([0, 240])  // 0 to 240 bpm
         .range([height, 0]);
+        
 
     // Generate evenly spaced tick values
     const xTicks = d3.range(0, 7200 + 600, 600);  // Every 10 minutes
@@ -654,12 +656,14 @@ function createEmptyHeartRateGraph() {
         .call(d3.axisBottom(xScale)
             .tickValues(xTicks)
             .tickFormat(d => secondsToHHMM(d))
-        );
+        )
+        .style("color", "#7ed957");
 
     svg.append("g")
         .call(d3.axisLeft(yScale)
             .tickValues(yTicks)
-        );
+        )
+        .style("color", "#7ed957");
 
     // Create gridlines
     svg.append("g")
@@ -672,7 +676,8 @@ function createEmptyHeartRateGraph() {
         )
         .style("stroke", "#ccc")
         .style("stroke-width", "2px")
-        .style("opacity", "20%");
+        .style("opacity", "20%")
+        .style("color", "#7ed957");
 
     svg.append("g")
         .attr("class", "grid")
@@ -683,7 +688,8 @@ function createEmptyHeartRateGraph() {
         )
         .style("stroke", "#ccc")
         .style("stroke-width", "1px")
-        .style("opacity", "40%");
+        .style("opacity", "40%")
+        .style("color", "#7ed957");
     
     // Add instruction message in the center of the chart
     svg.append("text")
