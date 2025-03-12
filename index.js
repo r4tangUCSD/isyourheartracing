@@ -1172,11 +1172,11 @@ async function initializeDetailedView() {
     const data = await d3.csv(filepath);
     processedData = processCSV(data);
     
-    console.log('dfshfkjsh', processedData)
+    // console.log('dfshfkjsh', processedData)
 
     // Load patient info
     patient_info = await d3.csv("emergency.csv");
-    console.log("Loaded Patient Info:", patient_info);
+    // console.log("Loaded Patient Info:", patient_info);
     
     // Initialize time scales and patient details
     minTime = d3.min(processedData, d => d.second);
@@ -1357,15 +1357,17 @@ function handlingMissing() {
     checkPrev = filteredData;
 }
 
+document.addEventListener("DOMContentLoaded", createGraph);
+
 function createGraph() {
     const margin = { top: 20, right: 30, bottom: 40, left: 40 };
     const width = 750 - margin.left - margin.right;
     const height = 375 - margin.top - margin.bottom;
 
-    d3.select("#chart").selectAll("svg").remove();  
+    d3.select("#chart2").selectAll("svg").remove();  
    
 
-    svg_v = d3.select("#chart")
+    svg_v = d3.select("#chart2")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -1524,7 +1526,7 @@ function createGraph() {
         .style("stroke-width", 2); // Line width
     });
 
-    
+    // console.log(document.querySelector("#chart2"))
 
 }
 
@@ -1689,7 +1691,7 @@ function part_two_triggered(selectedCaseID) {
             // Set up slider
             slider.step = 1 / maxTime_v;
             currentTime();
-            // animateSlider();
+            animateSlider();
             
             slider.addEventListener('input', () => {
                 currentTime();
