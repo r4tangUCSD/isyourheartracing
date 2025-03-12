@@ -1728,6 +1728,8 @@ function part_two_triggered(selectedCaseID) {
 function drawBackBubble() {
     const backBubble = d3.select("#back-bubble");
     // Clear previous contents before appending a new SVG
+
+    backBubble.select("*").remove();
     
     // Append new SVG
     svgCircle = backBubble
