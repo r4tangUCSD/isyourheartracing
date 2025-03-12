@@ -220,7 +220,6 @@ function showPatientInfo() {
     d3.select("#patient-info-panel").style("display", "flex");
 }
 
-
 // Helper to format category names
 function formatCategoryName(categoryId) {
     return categoryId
@@ -251,6 +250,474 @@ async function loadHeartRateData(caseId) {
         d3.select("#chart").html('<div class="no-data">Error processing heart rate data</div>');
         return [];
     }
+}
+
+
+// Function to create an empty heart rate graph with instructions
+function createEmptyHeartRateGraph() {
+    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+    const chartContainer = document.getElementById("chart");
+    const containerWidth = chartContainer.clientWidth;
+    const containerHeight = chartContainer.clientHeight;
+
+    const width = 750 - margin.left - margin.right;
+    const height = 375 - margin.top - margin.bottom - 40;
+
+    d3.select("#chart").selectAll("*").remove();
+
+    const svg = d3.select("#chart")
+        .append("svg")
+        .attr("width", containerWidth)
+        .attr("height", containerHeight)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add axis labels
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + 30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#7ed957")
+        .style("font-weight", "bold")
+        .text("Time Since Operation Started (HH:MM)");
+
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -35)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#7ed957")
+        .style("font-weight", "bold")
+        .text("Heart Rate (bpm)");
+
+    // Create x-axis scale
+    const xScale = d3.scaleLinear()
+        .domain([0, 7200]) // 2 hours in seconds
+        .range([0, width]);
+
+    // Create y-axis scale
+    const yScale = d3.scaleLinear()
+        .domain([0, 240])  // 0 to 240 bpm
+        .range([height, 0]);
+
+    // Generate evenly spaced tick values
+    const xTicks = d3.range(0, 7200 + 600, 600);  // Every 10 minutes
+    const yTicks = d3.range(0, 240 + 20, 20);     // Every 20 bpm
+
+    // Format time labels
+    function secondsToHHMM(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        return `${hours}:${remainingMinutes.toString().padStart(2, "0")}`;
+    }
+
+    // Create x and y axes
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)
+            .tickValues(xTicks)
+            .tickFormat(d => secondsToHHMM(d))
+        );
+
+    svg.append("g")
+        .call(d3.axisLeft(yScale)
+            .tickValues(yTicks)
+        );
+
+    // Create gridlines
+    svg.append("g")
+        .attr("class", "grid")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)
+            .tickValues(xTicks)
+            .tickSize(-height)
+            .tickFormat("")
+        )
+        .style("stroke", "#ccc")
+        .style("stroke-width", "2px")
+        .style("opacity", "20%");
+
+    svg.append("g")
+        .attr("class", "grid")
+        .call(d3.axisLeft(yScale)
+            .tickValues(yTicks)
+            .tickSize(-width)
+            .tickFormat("")
+        )
+        .style("stroke", "#ccc")
+        .style("stroke-width", "1px")
+        .style("opacity", "40%");
+    
+    // Add instruction message in the center of the chart
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height / 2)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .style("font-size", "16px")
+        .style("fill", "#a5a2a2")
+        .text("Hover over a patient to view heart rate data");
+
+        d3.select("#patient-info-panel").remove(); // Remove the panel completely
+}
+
+// Update the drawCategoryBubbles function to handle the click event
+function drawCategoryBubbles() {
+    // Hide chart container FIRST before doing anything else
+    d3.select(".chart-container").style("display", "none");
+    d3.select("#patient-info-panel").remove(); // Remove the panel completely
+    
+    // Only do animation if we're coming from category detail view
+    if (currentView === "category-detail" && currentCategory) {
+        // Get the source category data for animation
+        const category = surgeryCategories.find(c => c.id === currentCategory);
+        
+        // Create animation circle at the current large position
+        const startX = width * 0.35;
+        const startY = height * 0.62;
+        const startRadius = Math.min(width, height) * 0.62;
+        
+        // Change visualization back to fullscreen mode BEFORE calculating positions
+        d3.select("#visualization")
+            .attr("class", "visualization-fullscreen");
+        
+        // Update width and height NOW based on fullscreen container size
+        const visualizationContainer = d3.select("#visualization");
+        const containerRect = visualizationContainer.node().getBoundingClientRect();
+        width = containerRect.width;
+        height = containerRect.height;
+        
+        // Resize SVG
+        svg.attr("width", width)
+           .attr("height", height);
+        
+        // Now create bubble layout with the UPDATED dimensions
+        const bubble = d3.pack()
+            .size([width, height * 0.9])
+            .padding(20);
+            
+        const hierarchyData = { children: surgeryCategories };
+        const root = d3.hierarchy(hierarchyData).sum(d => d.count || 0);
+        bubble(root);
+        
+        // Calculate vertical offset for centering
+        const verticalOffset = (height - root.r * 2) / 2;
+        
+        // Find the node that matches our category
+        let targetNode = null;
+        for (const node of root.children) {
+            if (node.data.id === category.id) {
+                targetNode = node;
+                break;
+            }
+        }
+        
+        // Target position is where the bubble will shrink to
+        // Use default positions as a fallback, but this shouldn't happen
+        const targetX = targetNode ? targetNode.x : width / 2;
+        const targetY = targetNode ? targetNode.y + verticalOffset : height / 2;
+        const targetRadius = targetNode ? targetNode.r : 50;
+        
+        // For debugging - log the positions 
+        console.log("Animation targets:", {
+            categoryId: category.id,
+            targetNodeFound: !!targetNode,
+            targetX: targetX,
+            targetY: targetY,
+            targetRadius: targetRadius,
+            windowWidth: width,
+            windowHeight: height
+        });
+        
+        // Clear existing SVG content
+        svg.selectAll("*").remove();
+        
+        // Create the animation circle
+        const animationCircle = svg.append("circle")
+            .attr("cx", startX)
+            .attr("cy", startY)
+            .attr("r", startRadius)
+            .attr("fill", "#7ed957")
+            .attr("stroke", "none")
+            .style("opacity", 1)
+            .style("pointer-events", "none");
+
+        drawAllCategoryBubbles();
+            
+        // Animate the circle shrinking back to its original position
+        animationCircle.transition()
+            .duration(750)
+            .attr("cx", targetX)
+            .attr("cy", targetY)
+            .attr("r", targetRadius)
+            .style("opacity", 0.5)
+            .on("end", function() {
+                // Remove the animation circle
+                animationCircle.remove();
+                
+                // Draw the regular category bubbles
+                
+            });
+    } else {
+        // If not coming from category detail, just draw bubbles normally
+        // Change visualization back to fullscreen mode
+        d3.select("#visualization")
+            .attr("class", "visualization-fullscreen");
+        
+        // Update the width and height based on new container size
+        const visualizationContainer = d3.select("#visualization");
+        const containerRect = visualizationContainer.node().getBoundingClientRect();
+        width = containerRect.width;
+        height = containerRect.height;
+        
+        // Resize SVG
+        svg.attr("width", width)
+           .attr("height", height);
+        
+        d3.select("#chart").html(""); // Clear heart rate graph
+        currentPatient = null;
+        svg.selectAll("*").remove();
+        
+        drawAllCategoryBubbles();
+    }
+}
+
+// Create a separate function for drawing the category bubbles
+function drawAllCategoryBubbles() {
+    // Define available space and create bubble layout
+    const bubble = d3.pack()
+        .size([width, height * 0.9])  // Reduce height to keep bubbles centered
+        .padding(20);
+
+    // Prepare hierarchy data
+    const hierarchyData = { children: surgeryCategories };
+    const root = d3.hierarchy(hierarchyData).sum(d => d.count || 0);
+
+    // Apply layout
+    bubble(root);
+
+    // Calculate vertical offset for centering
+    const verticalOffset = (height - root.r * 2) / 2;
+
+    // Create bubble groups
+    const bubbleGroups = svg.selectAll(".bubble")
+        .data(root.children)
+        .enter()
+        .append("g")
+        .attr("class", "bubble")
+        .attr("transform", d => `translate(${d.x},${d.y + verticalOffset})`)  // Apply centering offset
+        .style("cursor", "pointer");
+
+    // Add circles
+    bubbleGroups.append("circle")
+        .attr("r", d => d.r)
+        .attr("fill", "#333739")
+        .attr("stroke", "none")
+        .attr("stroke-width", 0)
+        .style("opacity", 0.75)
+        .on("mouseover", function(event, d) {
+            d3.select(this).transition().duration(200).attr("fill", "#7ed957").style("opacity", 1);
+
+            // Show tooltip
+            d3.select("#tooltip")
+                .style("left", `${event.pageX + 10}px`)
+                .style("top", `${event.pageY - 10}px`)
+                .html(`<strong>${d.data.name}</strong><br>${d.data.count} surgeries`)
+                .style("opacity", 1);
+
+            d3.select(this.parentNode).selectAll("text")
+                .transition()
+                .duration(200)
+                .attr("fill", "#363336");    
+        })
+        .on("mouseout", function() {
+            d3.select(this).transition().duration(200).attr("fill", "#333739").style("opacity", 0.85);
+            d3.select("#tooltip").style("opacity", 0);
+
+            d3.select(this.parentNode).selectAll("text")
+                .transition()
+                .duration(200)
+                .attr("fill", "#a5a2a2");
+        })
+        .on("click", function(event, d) {
+            currentCategory = d.data.id;
+            d3.select("#tooltip").style("opacity", 0);
+            showCategoryDetail(d);
+        });
+
+    // Add category name labels
+    bubbleGroups.append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "-.2em")
+        .attr("fill", "#a5a2a2")
+        .style("font-size", d => Math.min(2.5 * d.r / (d.data.name.length), 18) + "px")
+        .style("pointer-events", "none")
+        .text(d => d.data.name);
+
+    // Add case count labels
+    bubbleGroups.append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "1.5em")
+        .attr("fill", "#a5a2a2")
+        .style("font-size", d => Math.min(1.75 * d.r / 10, 14) + "px")
+        .style("pointer-events", "none")
+        .text(d => d.data.count > 0 ? `${d.data.count} cases` : "");
+
+    currentView = "categories";
+}
+
+// The createWholeGraph function
+function createWholeGraph() {
+    if (!processedData || processedData.length === 0) {
+        d3.select("#chart").html('<div class="no-data">No heart rate data available for this patient</div>');
+        return;
+    }
+    
+    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+    const chartContainer = document.getElementById("chart");
+    const containerWidth = chartContainer.clientWidth;
+    const containerHeight = chartContainer.clientHeight;
+
+    const width = 750 - margin.left - margin.right;
+    const height = 375 - margin.top - margin.bottom - 40;
+
+    d3.select("#chart").selectAll("*").remove();
+
+    const svg = d3.select("#chart")
+        .append("svg")
+        .attr("width", containerWidth)
+        .attr("height", containerHeight)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add axis labels
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + 30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#7ed957")
+        .style("font-weight", "bold")
+        .text("Time Since Operation Started (HH:MM)");
+
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -35)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#7ed957")
+        .style("font-weight", "bold")
+        .text("Heart Rate (bpm)");
+    
+        // Ensure we use the full dataset range without filtering NaN values
+    const fullData = processedData; 
+
+    if (fullData.length === 0) {
+        d3.select("#chart").html('<div class="no-data">No valid heart rate data available for this patient</div>');
+        return;
+    }
+
+    // Find max time value without slicing or filtering
+    const maxTime = d3.max(fullData, d => d.second);
+
+    // Creates x-axis scale
+    const xScale = d3.scaleLinear()
+        .domain([0, maxTime]) 
+        .range([0, width]);
+
+    // Generate exactly 15 evenly spaced tick values
+    const xTickInterval = Math.ceil(maxTime / 14); // Dividing full range into 14 equal segments
+    const xTicks = d3.range(0, maxTime + xTickInterval, xTickInterval)
+        .slice(0, 15); // Ensure exactly 15 ticks
+
+    // Ensure last tick is exactly at maxTime if not included
+    if (!xTicks.includes(maxTime)) {
+        xTicks[xTicks.length - 1] = maxTime;
+    }
+
+    // Fixes inconsistent time labeling by ensuring proper HH:MM formatting
+    function secondsToHHMM(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        return `${hours}:${remainingMinutes.toString().padStart(2, "0")}`;
+    }
+
+    // Determine max heart rate value dynamically without slicing
+    const dataMaxRate = d3.max(fullData, d => d.heartrate);
+
+    // Set y-axis ticks in steps of 20 up to at least 240
+    const maxTickValue = Math.max(240, Math.ceil(dataMaxRate / 20) * 20);
+    const yTicks = d3.range(0, maxTickValue + 20, 20);
+
+    const yScale = d3.scaleLinear()
+        .domain([0, maxTickValue])
+        .range([height, 0]);
+
+    // Create x and y axes
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)
+            .tickValues(xTicks)
+            .tickFormat(d => secondsToHHMM(d))
+        );
+
+    svg.append("g")
+        .call(d3.axisLeft(yScale)
+            .tickValues(yTicks)
+        );
+
+    // Create gridlines
+    svg.append("g")
+        .attr("class", "grid")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)
+            .tickValues(xTicks)
+            .tickSize(-height)
+            .tickFormat("")
+        )
+        .style("stroke", "#ccc")
+        .style("stroke-width", "2px")
+        .style("opacity", "20%");
+
+    svg.append("g")
+        .attr("class", "grid")
+        .call(d3.axisLeft(yScale)
+            .tickValues(yTicks)
+            .tickSize(-width)
+            .tickFormat("")
+        )
+        .style("stroke", "#ccc")
+        .style("stroke-width", "1px")
+        .style("opacity", "40%");
+
+    // Clip path to keep the line inside the graph area
+    svg.append("defs").append("clipPath")
+        .attr("id", "clip-path")
+        .append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("x", 0)
+        .attr("y", 0);
+
+    // Draw the line graph without filtering NaN values
+    const line = d3.line()
+        .defined(d => !isNaN(d.heartrate)) // Only exclude NaN points from being drawn, but keep them in the dataset
+        .x(d => xScale(d.second))
+        .y(d => yScale(d.heartrate));
+
+    svg.append("path")
+        .datum(fullData)
+        .attr("class", "line")
+        .attr("clip-path", "url(#clip-path)")
+        .attr("d", line)
+        .style("fill", "none")
+        .style("stroke", "#7ed957")
+        .style("stroke-width", 2);    
 }
 
 function initVisualization() {
@@ -326,6 +793,42 @@ async function showCategoryDetail(category) {
             setupCategoryDetailView(category);
         });
 }
+
+
+
+
+// Initialize visualization when the page loads
+window.addEventListener('load', loadData);
+window.addEventListener('resize', () => {
+    // Update dimensions on resize
+    const visualizationContainer = d3.select("#visualization");
+    const containerRect = visualizationContainer.node().getBoundingClientRect();
+    width = containerRect.width;
+    height = containerRect.height;
+    
+    // Resize SVG
+    svg.attr("width", width)
+       .attr("height", height);
+    
+    // Redraw based on current view
+    if (currentView === "categories") {
+        drawCategoryBubbles();
+    } else if (currentView === "category-detail" && currentCategory) {
+        const category = surgeryCategories.find(c => c.id === currentCategory);
+        const hierarchyNode = {
+            data: category,
+            x: width / 2,
+            y: height / 2,
+            r: Math.min(width, height) * 0.45
+        };
+        showCategoryDetail(hierarchyNode);
+    }
+    
+    // Redraw heart rate chart if needed
+    if (currentPatient && processedData && processedData.length > 0) {
+        createWholeGraph();
+    }
+});
 
 // Extract the setup functionality into a separate function
 async function setupCategoryDetailView(category) {
@@ -660,6 +1163,10 @@ async function initializeDetailedView() {
     const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv";
     const data = await d3.csv(filepath);
     processedData = processCSV(data);
+    part_two_triggered(selectedCaseID);
+
+    patient_info = d3.csv("emergency.csv");
+    console.log(patient_info)
     
     // Initialize time scales and patient details
     minTime = d3.min(processedData, d => d.second);
@@ -671,6 +1178,7 @@ async function initializeDetailedView() {
         .range([0, 100]);
 
     // Set up patient details
+    // console.log(patient_details)
     patientAge = patient_details.age;
     maxHeartRate = 220 - patientAge;
     
@@ -685,512 +1193,7 @@ async function initializeDetailedView() {
     vig85 = maxHeartRate * 0.85;
 
     
-    part_two_triggered(selectedCaseID);
-    patient_details = getPatientInfoByCaseid(selectedCaseID);
 }
-
-// Function to create an empty heart rate graph with instructions
-function createEmptyHeartRateGraph() {
-    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
-    const chartContainer = document.getElementById("chart");
-    const containerWidth = chartContainer.clientWidth;
-    const containerHeight = chartContainer.clientHeight;
-
-    const width = 750 - margin.left - margin.right;
-    const height = 375 - margin.top - margin.bottom - 40;
-
-    d3.select("#chart").selectAll("*").remove();
-
-    const svg = d3.select("#chart")
-        .append("svg")
-        .attr("width", containerWidth)
-        .attr("height", containerHeight)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    // Add axis labels
-    svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height + 30)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#7ed957")
-        .style("font-weight", "bold")
-        .text("Time Since Operation Started (HH:MM)");
-
-    svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -35)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#7ed957")
-        .style("font-weight", "bold")
-        .text("Heart Rate (bpm)");
-
-    // Create x-axis scale
-    const xScale = d3.scaleLinear()
-        .domain([0, 7200]) // 2 hours in seconds
-        .range([0, width]);
-
-    // Create y-axis scale
-    const yScale = d3.scaleLinear()
-        .domain([0, 240])  // 0 to 240 bpm
-        .range([height, 0]);
-
-    // Generate evenly spaced tick values
-    const xTicks = d3.range(0, 7200 + 600, 600);  // Every 10 minutes
-    const yTicks = d3.range(0, 240 + 20, 20);     // Every 20 bpm
-
-    // Format time labels
-    function secondsToHHMM(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const remainingMinutes = minutes % 60;
-        return `${hours}:${remainingMinutes.toString().padStart(2, "0")}`;
-    }
-
-    // Create x and y axes
-    svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xScale)
-            .tickValues(xTicks)
-            .tickFormat(d => secondsToHHMM(d))
-        );
-
-    svg.append("g")
-        .call(d3.axisLeft(yScale)
-            .tickValues(yTicks)
-        );
-
-    // Create gridlines
-    svg.append("g")
-        .attr("class", "grid")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xScale)
-            .tickValues(xTicks)
-            .tickSize(-height)
-            .tickFormat("")
-        )
-        .style("stroke", "#ccc")
-        .style("stroke-width", "2px")
-        .style("opacity", "20%");
-
-    svg.append("g")
-        .attr("class", "grid")
-        .call(d3.axisLeft(yScale)
-            .tickValues(yTicks)
-            .tickSize(-width)
-            .tickFormat("")
-        )
-        .style("stroke", "#ccc")
-        .style("stroke-width", "1px")
-        .style("opacity", "40%");
-    
-    // Add instruction message in the center of the chart
-    svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height / 2)
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .style("font-size", "16px")
-        .style("fill", "#a5a2a2")
-        .text("Hover over a patient to view heart rate data");
-
-        d3.select("#patient-info-panel").remove(); // Remove the panel completely
-}
-
-// Update the drawCategoryBubbles function to handle the click event
-function drawCategoryBubbles() {
-    // Hide chart container FIRST before doing anything else
-    d3.select(".chart-container").style("display", "none");
-    d3.select("#patient-info-panel").remove(); // Remove the panel completely
-    
-    // Only do animation if we're coming from category detail view
-    if (currentView === "category-detail" && currentCategory) {
-        // Get the source category data for animation
-        const category = surgeryCategories.find(c => c.id === currentCategory);
-        
-        // Create animation circle at the current large position
-        const startX = width * 0.35;
-        const startY = height * 0.62;
-        const startRadius = Math.min(width, height) * 0.62;
-        
-        // Change visualization back to fullscreen mode BEFORE calculating positions
-        d3.select("#visualization")
-            .attr("class", "visualization-fullscreen");
-        
-        // Update width and height NOW based on fullscreen container size
-        const visualizationContainer = d3.select("#visualization");
-        const containerRect = visualizationContainer.node().getBoundingClientRect();
-        width = containerRect.width;
-        height = containerRect.height;
-        
-        // Resize SVG
-        svg.attr("width", width)
-           .attr("height", height);
-        
-        // Now create bubble layout with the UPDATED dimensions
-        const bubble = d3.pack()
-            .size([width, height * 0.9])
-            .padding(20);
-            
-        const hierarchyData = { children: surgeryCategories };
-        const root = d3.hierarchy(hierarchyData).sum(d => d.count || 0);
-        bubble(root);
-        
-        // Calculate vertical offset for centering
-        const verticalOffset = (height - root.r * 2) / 2;
-        
-        // Find the node that matches our category
-        let targetNode = null;
-        for (const node of root.children) {
-            if (node.data.id === category.id) {
-                targetNode = node;
-                break;
-            }
-        }
-        
-        // Target position is where the bubble will shrink to
-        // Use default positions as a fallback, but this shouldn't happen
-        const targetX = targetNode ? targetNode.x : width / 2;
-        const targetY = targetNode ? targetNode.y + verticalOffset : height / 2;
-        const targetRadius = targetNode ? targetNode.r : 50;
-        
-        // For debugging - log the positions 
-        console.log("Animation targets:", {
-            categoryId: category.id,
-            targetNodeFound: !!targetNode,
-            targetX: targetX,
-            targetY: targetY,
-            targetRadius: targetRadius,
-            windowWidth: width,
-            windowHeight: height
-        });
-        
-        // Clear existing SVG content
-        svg.selectAll("*").remove();
-        
-        // Create the animation circle
-        const animationCircle = svg.append("circle")
-            .attr("cx", startX)
-            .attr("cy", startY)
-            .attr("r", startRadius)
-            .attr("fill", "#7ed957")
-            .attr("stroke", "none")
-            .style("opacity", 1)
-            .style("pointer-events", "none");
-
-        drawAllCategoryBubbles();
-            
-        // Animate the circle shrinking back to its original position
-        animationCircle.transition()
-            .duration(750)
-            .attr("cx", targetX)
-            .attr("cy", targetY)
-            .attr("r", targetRadius)
-            .style("opacity", 0.5)
-            .on("end", function() {
-                // Remove the animation circle
-                animationCircle.remove();
-                
-                // Draw the regular category bubbles
-                
-            });
-    } else {
-        // If not coming from category detail, just draw bubbles normally
-        // Change visualization back to fullscreen mode
-        d3.select("#visualization")
-            .attr("class", "visualization-fullscreen");
-        
-        // Update the width and height based on new container size
-        const visualizationContainer = d3.select("#visualization");
-        const containerRect = visualizationContainer.node().getBoundingClientRect();
-        width = containerRect.width;
-        height = containerRect.height;
-        
-        // Resize SVG
-        svg.attr("width", width)
-           .attr("height", height);
-        
-        d3.select("#chart").html(""); // Clear heart rate graph
-        currentPatient = null;
-        svg.selectAll("*").remove();
-        
-        drawAllCategoryBubbles();
-    }
-}
-
-// Create a separate function for drawing the category bubbles
-function drawAllCategoryBubbles() {
-    // Define available space and create bubble layout
-    const bubble = d3.pack()
-        .size([width, height * 0.9])  // Reduce height to keep bubbles centered
-        .padding(20);
-
-    // Prepare hierarchy data
-    const hierarchyData = { children: surgeryCategories };
-    const root = d3.hierarchy(hierarchyData).sum(d => d.count || 0);
-
-    // Apply layout
-    bubble(root);
-
-    // Calculate vertical offset for centering
-    const verticalOffset = (height - root.r * 2) / 2;
-
-    // Create bubble groups
-    const bubbleGroups = svg.selectAll(".bubble")
-        .data(root.children)
-        .enter()
-        .append("g")
-        .attr("class", "bubble")
-        .attr("transform", d => `translate(${d.x},${d.y + verticalOffset})`)  // Apply centering offset
-        .style("cursor", "pointer");
-
-    // Add circles
-    bubbleGroups.append("circle")
-        .attr("r", d => d.r)
-        .attr("fill", "#333739")
-        .attr("stroke", "none")
-        .attr("stroke-width", 0)
-        .style("opacity", 0.75)
-        .on("mouseover", function(event, d) {
-            d3.select(this).transition().duration(200).attr("fill", "#7ed957").style("opacity", 1);
-
-            // Show tooltip
-            d3.select("#tooltip")
-                .style("left", `${event.pageX + 10}px`)
-                .style("top", `${event.pageY - 10}px`)
-                .html(`<strong>${d.data.name}</strong><br>${d.data.count} surgeries`)
-                .style("opacity", 1);
-
-            d3.select(this.parentNode).selectAll("text")
-                .transition()
-                .duration(200)
-                .attr("fill", "#363336");    
-        })
-        .on("mouseout", function() {
-            d3.select(this).transition().duration(200).attr("fill", "#333739").style("opacity", 0.85);
-            d3.select("#tooltip").style("opacity", 0);
-
-            d3.select(this.parentNode).selectAll("text")
-                .transition()
-                .duration(200)
-                .attr("fill", "#a5a2a2");
-        })
-        .on("click", function(event, d) {
-            currentCategory = d.data.id;
-            d3.select("#tooltip").style("opacity", 0);
-            showCategoryDetail(d);
-        });
-
-    // Add category name labels
-    bubbleGroups.append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", "-.2em")
-        .attr("fill", "#a5a2a2")
-        .style("font-size", d => Math.min(2.5 * d.r / (d.data.name.length), 18) + "px")
-        .style("pointer-events", "none")
-        .text(d => d.data.name);
-
-    // Add case count labels
-    bubbleGroups.append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", "1.5em")
-        .attr("fill", "#a5a2a2")
-        .style("font-size", d => Math.min(1.75 * d.r / 10, 14) + "px")
-        .style("pointer-events", "none")
-        .text(d => d.data.count > 0 ? `${d.data.count} cases` : "");
-
-    currentView = "categories";
-}
-
-
-
-
-// The createWholeGraph function
-function createWholeGraph() {
-    if (!processedData || processedData.length === 0) {
-        d3.select("#chart").html('<div class="no-data">No heart rate data available for this patient</div>');
-        return;
-    }
-    
-    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
-    const chartContainer = document.getElementById("chart");
-    const containerWidth = chartContainer.clientWidth;
-    const containerHeight = chartContainer.clientHeight;
-
-    const width = 750 - margin.left - margin.right;
-    const height = 375 - margin.top - margin.bottom - 40;
-
-    d3.select("#chart").selectAll("*").remove();
-
-    const svg = d3.select("#chart")
-        .append("svg")
-        .attr("width", containerWidth)
-        .attr("height", containerHeight)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    // Add axis labels
-    svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height + 30)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#7ed957")
-        .style("font-weight", "bold")
-        .text("Time Since Operation Started (HH:MM)");
-
-    svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -35)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#7ed957")
-        .style("font-weight", "bold")
-        .text("Heart Rate (bpm)");
-    
-        // Ensure we use the full dataset range without filtering NaN values
-    const fullData = processedData; 
-
-    if (fullData.length === 0) {
-        d3.select("#chart").html('<div class="no-data">No valid heart rate data available for this patient</div>');
-        return;
-    }
-
-    // Find max time value without slicing or filtering
-    const maxTime = d3.max(fullData, d => d.second);
-
-    // Creates x-axis scale
-    const xScale = d3.scaleLinear()
-        .domain([0, maxTime]) 
-        .range([0, width]);
-
-    // Generate exactly 15 evenly spaced tick values
-    const xTickInterval = Math.ceil(maxTime / 14); // Dividing full range into 14 equal segments
-    const xTicks = d3.range(0, maxTime + xTickInterval, xTickInterval)
-        .slice(0, 15); // Ensure exactly 15 ticks
-
-    // Ensure last tick is exactly at maxTime if not included
-    if (!xTicks.includes(maxTime)) {
-        xTicks[xTicks.length - 1] = maxTime;
-    }
-
-    // Fixes inconsistent time labeling by ensuring proper HH:MM formatting
-    function secondsToHHMM(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const remainingMinutes = minutes % 60;
-        return `${hours}:${remainingMinutes.toString().padStart(2, "0")}`;
-    }
-
-    // Determine max heart rate value dynamically without slicing
-    const dataMaxRate = d3.max(fullData, d => d.heartrate);
-
-    // Set y-axis ticks in steps of 20 up to at least 240
-    const maxTickValue = Math.max(240, Math.ceil(dataMaxRate / 20) * 20);
-    const yTicks = d3.range(0, maxTickValue + 20, 20);
-
-    const yScale = d3.scaleLinear()
-        .domain([0, maxTickValue])
-        .range([height, 0]);
-
-    // Create x and y axes
-    svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xScale)
-            .tickValues(xTicks)
-            .tickFormat(d => secondsToHHMM(d))
-        );
-
-    svg.append("g")
-        .call(d3.axisLeft(yScale)
-            .tickValues(yTicks)
-        );
-
-    // Create gridlines
-    svg.append("g")
-        .attr("class", "grid")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xScale)
-            .tickValues(xTicks)
-            .tickSize(-height)
-            .tickFormat("")
-        )
-        .style("stroke", "#ccc")
-        .style("stroke-width", "2px")
-        .style("opacity", "20%");
-
-    svg.append("g")
-        .attr("class", "grid")
-        .call(d3.axisLeft(yScale)
-            .tickValues(yTicks)
-            .tickSize(-width)
-            .tickFormat("")
-        )
-        .style("stroke", "#ccc")
-        .style("stroke-width", "1px")
-        .style("opacity", "40%");
-
-    // Clip path to keep the line inside the graph area
-    svg.append("defs").append("clipPath")
-        .attr("id", "clip-path")
-        .append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("x", 0)
-        .attr("y", 0);
-
-    // Draw the line graph without filtering NaN values
-    const line = d3.line()
-        .defined(d => !isNaN(d.heartrate)) // Only exclude NaN points from being drawn, but keep them in the dataset
-        .x(d => xScale(d.second))
-        .y(d => yScale(d.heartrate));
-
-    svg.append("path")
-        .datum(fullData)
-        .attr("class", "line")
-        .attr("clip-path", "url(#clip-path)")
-        .attr("d", line)
-        .style("fill", "none")
-        .style("stroke", "#7ed957")
-        .style("stroke-width", 2);    
-}
-
-// Initialize visualization when the page loads
-window.addEventListener('load', loadData);
-window.addEventListener('resize', () => {
-    // Update dimensions on resize
-    const visualizationContainer = d3.select("#visualization");
-    const containerRect = visualizationContainer.node().getBoundingClientRect();
-    width = containerRect.width;
-    height = containerRect.height;
-    
-    // Resize SVG
-    svg.attr("width", width)
-       .attr("height", height);
-    
-    // Redraw based on current view
-    if (currentView === "categories") {
-        drawCategoryBubbles();
-    } else if (currentView === "category-detail" && currentCategory) {
-        const category = surgeryCategories.find(c => c.id === currentCategory);
-        const hierarchyNode = {
-            data: category,
-            x: width / 2,
-            y: height / 2,
-            r: Math.min(width, height) * 0.45
-        };
-        showCategoryDetail(hierarchyNode);
-    }
-    
-    // Redraw heart rate chart if needed
-    if (currentPatient && processedData && processedData.length > 0) {
-        createWholeGraph();
-    }
-});
 
 // GLOBAL VARIABLES
 
@@ -1226,7 +1229,6 @@ function processCSV(data) {
         }
     });
 }
-
 
 function secondsToHHMMSS(seconds) {
     // number of seconds to HH:MM:SS
@@ -1353,7 +1355,6 @@ function handlingMissing() {
 
     checkPrev = filteredData;
 }
-
 
 function createGraph() {
     const margin = { top: 20, right: 30, bottom: 40, left: 40 };
@@ -1619,9 +1620,9 @@ function shadingRange() {
 }
 
 function getPatientInfoByCaseid(caseid) {
-    
+    console.log(patient_info)
     const patient = patient_info.find(record => record.caseid === caseid.toString());
-    console.log(patient)
+    
     return patient ? patient : null; // Return patient or null if not found
 }
 
@@ -1636,7 +1637,7 @@ function part_two_triggered(selectedCaseID) {
     d3.select("#detailed-view-container").style("display", "block");
 
     // Set up detailed view
-    setupDetailView();
+    // setupDetailView();
 
 
     d3.csv("emergency.csv")
@@ -1647,8 +1648,9 @@ function part_two_triggered(selectedCaseID) {
 
         })
         .then(data => {
+            // console.log(patient)
             processedData_v = processCSV(data);
-            console.log(data)
+            // console.log(data)
 
 
             // Scaling the time
