@@ -88,6 +88,15 @@ let patientsByCategoryId = {};
     //back bubble
     let svgCircle;
 
+    let animating = true;
+let instruction = document.getElementById('post-animate');
+instruction.style.opacity = 0;
+
+// data processing
+let patient_info = [];
+let processedData_v;
+let filteredData;
+
 // Load data on page load
 async function loadData() {
     try {
@@ -795,8 +804,6 @@ async function showCategoryDetail(category) {
 }
 
 
-
-
 // Initialize visualization when the page loads
 window.addEventListener('load', loadData);
 window.addEventListener('resize', () => {
@@ -1128,13 +1135,14 @@ async function setupCategoryDetailView(category) {
                 .style("opacity", 1)
                 .attr("stroke", "#ff3131")
                 .attr("stroke-width", 2);
+            d3.select('#first-view').style("display", "none");
 
             // Hide first half containers
-            d3.select("#visualization").style("display", "none");
-            d3.select(".chart-container").style("display", "none");
+            // d3.select("#visualization").style("display", "none");
+            // d3.select(".chart-container").style("display", "none");
             
             // Show second half containers
-            d3.select("#detailed-view-container").style("display", "block");
+            d3.select("#detailed-view").style("display", "flex");
                 
             // Set selected case ID and trigger detailed view
             selectedCaseID = d.id;
@@ -1160,51 +1168,45 @@ async function initializeDetailedView() {
     missingID = 0;
     
     // Load and process data for selected patient
-    const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv";
+    const filepath = `./heart_rate_data/case_${selectedCaseID}.csv`;
     const data = await d3.csv(filepath);
     processedData = processCSV(data);
-    part_two_triggered(selectedCaseID);
+    
+    console.log('dfshfkjsh', processedData)
 
-    patient_info = d3.csv("emergency.csv");
-    console.log(patient_info)
+    // Load patient info
+    patient_info = await d3.csv("emergency.csv");
+    console.log("Loaded Patient Info:", patient_info);
     
     // Initialize time scales and patient details
     minTime = d3.min(processedData, d => d.second);
     maxTime = d3.max(processedData, d => d.second);
-    numHours = Math.ceil(maxTime/3600);
+    numHours = Math.ceil(maxTime / 3600);
     
     timeScale = d3.scaleLinear()
         .domain([0, maxTime])
         .range([0, 100]);
-
-    // Set up patient details
-    // console.log(patient_details)
+    
+    // Get patient details
+    const patient_details = getPatientInfoByCaseid(selectedCaseID);
+    // console.log('ahhhh', patient_details)
     patientAge = patient_details.age;
     maxHeartRate = 220 - patientAge;
     
     // Update surgery info
     surgeryType = patient_details.optype;
     surgeryInfo.textContent = surgeryDescription[surgeryType];
-    infoTitle.textContent = surgeryType + ' Surgery Info';
+    infoTitle.textContent = `${surgeryType} Surgery Info`;
     
     // Calculate heart rate zones
     mod50 = maxHeartRate * 0.5;
     mod70 = maxHeartRate * 0.7;
     vig85 = maxHeartRate * 0.85;
-
-    
+    await part_two_triggered(selectedCaseID);
 }
-
 // GLOBAL VARIABLES
 
-let animating = true;
-let instruction = document.getElementById('post-animate');
-instruction.style.opacity = 0;
 
-// data processing
-let patient_info;
-let processedData_v;
-let filteredData;
 
 // surgery descriptions 
 const response = await fetch('./description.json');
@@ -1212,9 +1214,9 @@ if (!response.ok) {
     throw new Error(`Failed to fetch projects: ${response.statusText}`);
 }
 
+
+
 const surgeryDescription = await response.json();
-
-
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Functions ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
@@ -1259,7 +1261,7 @@ function currentTime() {
     sliderTime.textContent = formattedTime.toLocaleString();
 
     // with all the heart rate until currentTime
-    
+
     
     if (currentTime < minTime){
         filteredData = processedData_v.filter(d => d.second === minTime);
@@ -1282,7 +1284,6 @@ function currentTime() {
     if (currentTime >= 60) {
         filteredData = filteredData.filter(d => d.second >= currentTime - 60);
     }
-
     handlingMissing();
     
 
@@ -1362,6 +1363,7 @@ function createGraph() {
     const height = 375 - margin.top - margin.bottom;
 
     d3.select("#chart").selectAll("svg").remove();  
+   
 
     svg_v = d3.select("#chart")
     .append("svg")
@@ -1370,6 +1372,8 @@ function createGraph() {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    console.log(d3.select('#chart'))    
+
 
     // Creates x axis scales
     endTime = Math.max(900, current)
@@ -1377,6 +1381,7 @@ function createGraph() {
     .domain([tenMinsAge, endTime]) // data values for x-axis
     .range([0, width]); // pixel range for the graph
 
+ 
     // x axis labels
     svg_v.append("text")
         .attr("x", width / 2)
@@ -1387,6 +1392,7 @@ function createGraph() {
         .style("fill", "rgb(126, 217, 87, 0.6)")
         .text("Time Since Operation Started (HH:MM:SS)");
 
+
     // Creates y axis scales
     firstY = Math.max(0, Math.floor(minRate_v/10) * 10);
     endY = (Math.ceil(maxRate_v/10) * 10);
@@ -1395,6 +1401,7 @@ function createGraph() {
         .domain([firstY, endY]) // data values for y-axis
         .range([height, 0]); // pixel range for the graph
 
+    
     // y axis labels
     svg_v.append("text")
         .attr("transform", "rotate(-90)")
@@ -1423,10 +1430,13 @@ function createGraph() {
         .call(d3.axisLeft(yScale_v).ticks(10))
         .style("opacity", 0.35);
 
+
+
     // add shading
     if (animating === false || Math.ceil(current) >= maxTime_v) {
         shadingRange();
     }
+
 
     // Creates grids
         // vertical grids
@@ -1455,6 +1465,7 @@ function createGraph() {
     .style("stroke", "#ccc")  // Gridline color
     .style("stroke-width", "1px")
     .style("opacity", "40%");
+
 
     // create differet segments
     let segments = [];
@@ -1495,13 +1506,25 @@ function createGraph() {
         segments = [filteredData];
     }
 
+
+
     // Plot the line graph
     const line = d3.line()
         .x(d => xScale_v(d.second)) // Map time to the x-axis
         .y(d => yScale_v(d.heartrate));
 
+    // console.log(processedData_v.second)
+
     // Draw each segment
     segments.forEach(segment => {
+        console.log('secs', segment.second)
+        console.log('hr', segment.heartrate)
+
+        if (isNaN(segment.second) || isNaN(segment.heartrate)) {
+            console.error("Invalid data point detected:", segment);
+            
+
+        }
         svg_v.append("path")
         .data([segment]) // Bind the data
         .attr("class", "line") // Add a class for styling (optional)
@@ -1511,6 +1534,7 @@ function createGraph() {
         .style("stroke-width", 2); // Line width
     });
 
+    
 
 }
 
@@ -1620,7 +1644,6 @@ function shadingRange() {
 }
 
 function getPatientInfoByCaseid(caseid) {
-    console.log(patient_info)
     const patient = patient_info.find(record => record.caseid === caseid.toString());
     
     return patient ? patient : null; // Return patient or null if not found
@@ -1632,69 +1655,58 @@ function part_two_triggered(selectedCaseID) {
     // Hide first half containers
     d3.select("#visualization").style("display", "none");
     d3.select(".chart-container").style("display", "none");
-
+    
     // Show detailed view
-    d3.select("#detailed-view-container").style("display", "block");
-
-    // Set up detailed view
-    // setupDetailView();
-
-
+    d3.select("#detailed-view").style("display", "flex");
+    
     d3.csv("emergency.csv")
         .then(patients => {
-            patient_info = patients
-            const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv"
+            patient_info = patients;
+            const filepath = `./heart_rate_data/case_${selectedCaseID}.csv`;
             return d3.csv(filepath);
-
         })
         .then(data => {
-            // console.log(patient)
             processedData_v = processCSV(data);
-            // console.log(data)
-
-
-            // Scaling the time
-            const startTime = new Date();
-            startTime.setHours(0, 0, 0, 0);
-
             minTime = d3.min(processedData_v, d => d.second);
             maxTime_v = d3.max(processedData_v, d => d.second);
-            numHours = Math.ceil(maxTime_v/3600);        
-
+            numHours = Math.ceil(maxTime_v / 3600);
+            
             timeScale = d3.scaleLinear()
-            .domain([0, d3.max(processedData_v, d => d.second)])
-            .range([0, 100]);
+                .domain([0, maxTime_v])
+                .range([0, 100]);
 
-            // heart rate values
+            // Get heartrates
+
             minRate_v = d3.min(processedData_v, d => parseInt(d.heartrate));
             maxRate_v = d3.max(processedData_v, d => parseInt(d.heartrate));
-
-            // important values
-            patient_details = getPatientInfoByCaseid(selectedCaseID);
+            
+            // Get patient details
+            const patient_details = getPatientInfoByCaseid(selectedCaseID);
             patientAge = patient_details.age;
-            maxHeartRate = maxHeartRate - patientAge;
-
-            //surgery details
+            maxHeartRate = 220 - patientAge;
+            
+            console.log('here')
+            // Update surgery info
             surgeryType = patient_details.optype;
             surgeryInfo.textContent = surgeryDescription[surgeryType];
-            infoTitle.textContent = surgeryType + ' Surgery Info';
-
-            // for shading
+            infoTitle.textContent = `${surgeryType} Surgery Info`;
+            
+            // Calculate heart rate zones
             mod50 = maxHeartRate * 0.5;
             mod70 = maxHeartRate * 0.7;
             vig85 = maxHeartRate * 0.85;
-
-            // Set Up
-            slider.step = 1/maxTime_v
+            
+            // Set up slider
+            slider.step = 1 / maxTime_v;
             currentTime();
-            animateSlider();
-                
+            // animateSlider();
+            
             slider.addEventListener('input', () => {
                 currentTime();
             });
+        });
 
-        })
-
+    // console.log('whattt', processedData_v)
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Back Button ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
@@ -1737,7 +1749,7 @@ function drawBackBubble() {
         // ...existing circle attributes...
         .on("click", function() {
             // Hide detailed view
-            d3.select("#detailed-view-container").style("display", "none");
+            d3.select("#detailed-view").style("display", "none");
             
             // Show first half containers
             d3.select("#visualization").style("display", "block");
