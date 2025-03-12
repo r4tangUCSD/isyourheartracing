@@ -8,31 +8,31 @@ const storyData = [
         time: 0, 
         heartRate: 72, 
         stage: 'Initial Status', 
-        description: 'The human heart continuously adapts to surgical conditions, speeding up or slowing down in response to various factors. ' 
+        description: 'Introduce Case 32 - who the patient is, type of surgery' 
     },
     { 
         time: 15, 
-        heartRate: 85, 
+        heartRate: 105, 
         stage: 'Stage 1', 
-        description: 'Before a patient goes under, their heart rate might be more elevated than usual due to feeling anxious about the surgery. As the patient slowly drifts into unconsciousness, deep anesthesia might suppress the nervous system and decrease heart rate.' 
+        description: 'Describe spike' 
     },
     { 
         time: 45, 
         heartRate: 65, 
         stage: 'Stage 2', 
-        description: 'Even while the patient is under anesthesia, the body’s autonomic nervous system can still respond to stress and pain signals. Painful procedures like incisions may trigger a stress response and make a patient’s heart beat faster.' 
+        description: 'Describe dip' 
     },
     { 
         time: 90, 
         heartRate: 45, 
         stage: 'Stage 3', 
-        description: 'Heart rate may also increase due to a drop in blood pressure or oxygen levels. The heart will pump faster and harder to circulate blood around the body. This also helps deliver oxygen to the rest of the body.' 
+        description: 'Describe further dip' 
     },
     { 
         time: 120, 
         heartRate: 70, 
         stage: 'Stage 4', 
-        description: 'As a patient wakes up, their heart rate might rise due to the pain and discomfort caused by the procedure. Waking up from anesthesia also increase adrenaline levels. Post operation, a patient’s heart rate will slowly return to baseline levels. Yippee' 
+        description: 'Describe return to acceptable speed' 
     },
     { 
         time: 150, 
@@ -153,7 +153,7 @@ function animateHeart(heartRate) {
     const minRate = 45;  // lowest rate in your data
     const maxRate = 90;  // highest reasonable rate
     const minSize = 15;  // minimum size (%)
-    const maxSize = 25;  // maximum size (%)
+    const maxSize = 20;  // maximum size (%)
     
     // calculate the size as a percentage between minSize and maxSize
     const sizePercent = minSize + (Math.min(Math.max(heartRate - minRate, 0), maxRate - minRate) / (maxRate - minRate)) * (maxSize - minSize);
