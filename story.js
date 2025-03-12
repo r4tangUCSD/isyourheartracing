@@ -7,31 +7,31 @@ const storyData = [
         time: 0, 
         heartRate: 61, 
         stage: 'Initial Status', 
-        description: 'Introduce Case 32 - who the patient is, type of surgery' 
+        description: 'Given Patient 32\'s old age and his previous history of hypertension (high blood pressure), doctors decided to remove these stones with a laparoscopic cholecystectomy - a minimally invasive procedure to remove the gallbladder' 
     },
     { 
         time: 15, 
         heartRate: 100, 
         stage: 'Stage 1', 
-        description: 'Describe spike' 
+        description: 'After settling from general anesthesia, Patient 32\'s heart rate starts to spike.' 
     },
     { 
         time: 45, 
         heartRate: 123, 
         stage: 'Stage 2', 
-        description: 'Describe dip' 
+        description: 'Patient 32’s abdomen was inflated with carbon dioxide to create space for the surgeons to work. If his body absorbed too much carbon dioxide, his blood chemistry could be altered.' 
     },
     { 
         time: 90, 
         heartRate: 160, 
         stage: 'Stage 3', 
-        description: 'Describe further dip' 
+        description: 'The gallbladder is relatively close to the diaphragm, which is closely linked to heart rate regulation; it was irritated during the procedure, it might have caused bursts of increased heart rate before the body could stabilize' 
     },
     { 
         time: 120, 
         heartRate: 55, 
         stage: 'Stage 4', 
-        description: 'Describe return to acceptable speed' 
+        description: 'He has hypertension, making him more susecptible to blood pressure changes. Thankfully, this surgery was successful! goodbye to your gallbladder, patient 32!' 
     },
     { 
         time: 150, 
