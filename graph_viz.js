@@ -511,7 +511,7 @@ export function magic(caseId) {
 
     selectedCaseID = caseId;
 
-    d3.csv("emergency_data/emergency.csv")
+    d3.csv("emergency_data/emergency_premium.csv")
     .then(patients => {
         patient_info = patients
         const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv"
