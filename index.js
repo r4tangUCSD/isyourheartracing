@@ -9,6 +9,9 @@ let currentPatient = null;
 let allPatients = [];
 let surgeryCategories = [];
 let patientsByCategoryId = {};
+let backToCategory;
+let patients;
+let categoryName;
 
 // working with missing data
     // anything previous
@@ -862,8 +865,16 @@ async function setupCategoryDetailView(category) {
         .text("Loading patient data...");
     
     // Get patients for this category
-    const patients = patientsByCategoryId[category.data.id];
+    // console.log(patientsByCategoryId)
+
+
+    if (patients) {
+        backToCategory = patients;
+    } else {
+        patients = patientsByCategoryId[category.data.id];
+    }
     
+
     // Calculate scales
     const ageExtent = d3.extent(patients, d => d.age);
     const hrExtent = d3.extent(patients, d => d.max_hr);
@@ -912,6 +923,9 @@ async function setupCategoryDetailView(category) {
         .attr("r", circleRadius + 35);
         
     // Add category title
+    if (!categoryName) {
+        categoryName = category.data.name;
+    }
     svg.append("text")
         .attr("x", width / 2 - 100)
         .attr("y", height * 0.15)
@@ -919,7 +933,7 @@ async function setupCategoryDetailView(category) {
         .attr("fill", "#dcdcdc")
         .style("font-size", "38px")
         .style("font-weight", "bold")
-        .text(category.data.name);
+        .text(categoryName);
         
     // Add back button
     const backButtonGroup = svg.append("g")
@@ -1735,22 +1749,18 @@ function drawBackBubble() {
                 // .duration(200)
                 .style("fill", "#333739")
                 .style("opacity", 0.85)
-        });
-
-        svgCircle.append("circle")
-        // ...existing circle attributes...
+        })
         .on("click", function() {
             // Hide detailed view
             d3.select("#detailed-view").style("display", "none");
+            d3.select("#visualization").style("display", "block");
             
             // Show first half containers
-            d3.select("#visualization").style("display", "block");
-            d3.select(".chart-container").style("display", "block");
+            d3.select('#first-view').style("display", "block");
             
             // Reset to category detail view
             setupCategoryDetailView(currentCategory);
         });
-
 }
 
 drawBackBubble();
