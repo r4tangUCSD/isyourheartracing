@@ -454,7 +454,7 @@ function shadingRange() {
         .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
         .attr("height", yScale(lowLow) - yScale(lowMax)) // Rectangle height (invert the height)
         .attr("fill", "#009AEE")  // Rectangle color
-        .style("opacity", 0.15); 
+        .style("opacity", 0.25); 
     }
 
     // resting shading
@@ -466,7 +466,7 @@ function shadingRange() {
         .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
         .attr("height", yScale(restinglow) - yScale(mod50)) // Rectangle height (invert the height)
         .attr("fill", "#2db41e")  // Rectangle color
-        .style("opacity", 0.15); 
+        .style("opacity", 0.25); 
     }
     
     // moderate shading
@@ -478,7 +478,7 @@ function shadingRange() {
     .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
     .attr("height", yScale(lowerY) - yScale(modHigh)) // Rectangle height (invert the height)
     .attr("fill", "#FEED53")  // Rectangle color
-    .style("opacity", 0.15); 
+    .style("opacity", 0.25); 
 
 
     // high shading
@@ -495,7 +495,7 @@ function shadingRange() {
         .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
         .attr("height", yScale(mod70) - yScale(higherY)) // Rectangle height (invert the height)
         .attr("fill", "#F63C4C")  // Rectangle color
-        .style("opacity", 0.15); 
+        .style("opacity", 0.25); 
     }
     
 }
