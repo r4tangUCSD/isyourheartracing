@@ -17,35 +17,48 @@ export async function loadData() {
     try {
         // Use d3.csv directly
         d3.csv("emergency_data/emergency_everything.csv")
-            .then(patientData => {
-                allPatients = patientData
-                    .filter(d => d.optype !== "Others") // Exclude 'Other' category
-                    .map(d => ({
-                        id: d.case_id,
-                        age: +(d.age || 0),
-                        max_hr: +(d.max_hr || 0),
-                        duration: Math.round(+(d.duration || 0) / 60), // Convert seconds to minutes
-                        category: d.optype,
-                        sex: d.sex,
-                        bmi: +(d.bmi || 0),
-                        position: d.position,
-                        death_inhosp: d.death_inhosp === "1" ? "Yes" : "No",
-                        preop_htn: d.preop_htn === "1" ? "Yes" : "No", 
-                        preop_dm: d.preop_dm === "1" ? "Yes" : "No"
-                    }));
+    .then(patientData => {
+        allPatients = patientData
+            .filter(d => d.optype !== "Others") // Exclude 'Other' category
+            .map(d => ({
+                id: d.case_id,
+                age: +(d.age || 0),
+                max_hr: +(d.max_hr || 0),
+                avg_hr: +(d.ave_hr || 0), // Add average heart rate
+                duration: Math.round(+(d.duration || 0) / 60), // Convert seconds to minutes
+                category: d.optype,
+                sex: d.sex,
+                bmi: +(d.bmi || 0),
+                position: d.position,
+                death_inhosp: d.death_inhosp === "1" ? "Yes" : "No",
+                preop_htn: d.preop_htn === "1" ? "Yes" : "No", 
+                preop_dm: d.preop_dm === "1" ? "Yes" : "No"
+            }));
+        
+        // Rest of the loadData function...
 
-                // Extract surgery categories
+                // Extract surgery categories with avg BPM
                 const categoryMap = {};
                 allPatients.forEach(patient => {
                     if (!categoryMap[patient.category]) {
                         categoryMap[patient.category] = {
                             id: patient.category,
                             name: formatCategoryName(patient.category),
-                            count: 0
+                            count: 0,
+                            totalBPM: 0,
+                            avgBPM: 0
                         };
                     }
                     categoryMap[patient.category].count++;
+                    categoryMap[patient.category].totalBPM += patient.avg_hr;
                 });
+                
+                // Calculate average BPM for each category
+                for (const category in categoryMap) {
+                    if (categoryMap[category].count > 0) {
+                        categoryMap[category].avgBPM = Math.round(categoryMap[category].totalBPM / categoryMap[category].count);
+                    }
+                }
 
                 surgeryCategories = Object.values(categoryMap);
 
@@ -280,7 +293,7 @@ async function setupCategoryDetailView(category) {
     
     // Calculate scales
     const ageExtent = d3.extent(patients, d => d.age);
-    const hrExtent = d3.extent(patients, d => d.max_hr);
+    const hrExtent = d3.extent(patients, d => d.avg_hr); // Changed to avg_hr
     const durationExtent = d3.extent(patients, d => d.duration);
     
     // Add padding to extents
@@ -289,7 +302,7 @@ async function setupCategoryDetailView(category) {
     hrExtent[0] = Math.max(0, hrExtent[0] - 5);
     hrExtent[1] = hrExtent[1] + 5;
     
-    // Create scales - age is x-axis, max_hr is y-axis
+    // Create scales - age is x-axis, avg_hr is y-axis
     const xScale = d3.scaleLinear()
         .domain(ageExtent)
         .range([width * 0.15, width * 0.85]);
@@ -452,7 +465,7 @@ async function setupCategoryDetailView(category) {
         .style("opacity", 0.9)
         .text("Patient Age");
         
-    // Add y-axis label
+    // Add y-axis label - Updated to Average Heart Rate
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
@@ -461,8 +474,8 @@ async function setupCategoryDetailView(category) {
         .attr("fill", "#dcdcdc")
         .style("font-size", "14px")
         .style("opacity", 0.8)
-        .text("Max Heart Rate (bpm)");
-
+        .text("Average Heart Rate (bpm)");
+    
     const sortedPatients = [...patients].sort((a, b) => 
         sizeScale(b.duration) - sizeScale(a.duration)
     );
@@ -473,17 +486,17 @@ async function setupCategoryDetailView(category) {
     // Create empty heart rate graph with the message
     createEmptyHeartRateGraph();
         
-    // Add patient bubbles
+    // Add patient bubbles - keeping original coloring but using avg_hr for y-axis
     gridContainer.selectAll(".patient")
         .data(sortedPatients)
         .enter()
         .append("circle")
         .attr("class", "patient")
         .attr("cx", d => xScale(d.age))
-        .attr("cy", d => yScale(d.max_hr))
+        .attr("cy", d => yScale(d.avg_hr)) // Changed to avg_hr
         .attr("r", d => sizeScale(d.duration))
-        .attr("fill", "#7b7878")
-        .attr("stroke", "#7b7878")
+        .attr("fill", "#7b7878") // Original color
+        .attr("stroke", "#7b7878") // Original stroke color
         .attr("stroke-width", 1)
         .style("opacity", 0.7)
         .style("cursor", "pointer")
@@ -503,7 +516,7 @@ async function setupCategoryDetailView(category) {
                 .style("top", `${event.pageY - 10}px`)
                 .html(`<strong>Patient ID:</strong> ${d.id}<br>
                        <strong>Age:</strong> ${d.age}<br>
-                       <strong>Max HR:</strong> ${d.max_hr} bpm<br>
+                       <strong>Avg HR:</strong> ${d.avg_hr} bpm<br>
                        <strong>Duration:</strong> ${d.duration} min`)
                 .style("opacity", 1);
                 
@@ -550,21 +563,7 @@ async function setupCategoryDetailView(category) {
                 .attr("stroke", "#ff3131")
                 .attr("stroke-width", 2);
 
-                transitionToGraph(d);
-                
-            /*// Load and display heart rate data
-            currentPatient = d;
-            d3.select("#chart").html('<div class="no-data">Loading heart rate data...</div>');
-            
-            processedData = await loadHeartRateData(d.id);
-            if (processedData && processedData.length > 0) {
-                maxTime = d.duration * 60;
-                [minRate, maxRate] = d3.extent(processedData, d => d.heartrate);
-                createWholeGraph();
-            }*/
-
-
-            
+            transitionToGraph(d);
         });
         
     currentView = "category-detail";
@@ -862,7 +861,7 @@ function drawAllCategoryBubbles() {
             d3.select("#tooltip")
                 .style("left", `${event.pageX + 10}px`)
                 .style("top", `${event.pageY - 10}px`)
-                .html(`<strong>${d.data.name}</strong><br>${d.data.count} surgeries`)
+                .html(`<strong>${d.data.name}</strong><br>${d.data.count} surgeries<br>Avg. BPM: ${d.data.avgBPM}`)
                 .style("opacity", 1);
 
             d3.select(this.parentNode).selectAll("text")
@@ -894,14 +893,14 @@ function drawAllCategoryBubbles() {
         .style("pointer-events", "none")
         .text(d => d.data.name);
 
-    // Add case count labels
+    // Add average BPM labels
     bubbleGroups.append("text")
         .attr("text-anchor", "middle")
         .attr("dy", "1.5em")
         .attr("fill", "#a5a2a2")
         .style("font-size", d => Math.min(1.75 * d.r / 10, 14) + "px")
         .style("pointer-events", "none")
-        .text(d => d.data.count > 0 ? `${d.data.count} cases` : "");
+        .text(d => d.data.avgBPM > 0 ? `Avg. BPM: ${d.data.avgBPM}` : "");
 
     currentView = "categories";
 }
@@ -1006,16 +1005,18 @@ function createWholeGraph() {
 
     // Create x and y axes
     svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xScale)
-            .tickValues(xTicks)
-            .tickFormat(d => secondsToHHMM(d))
-        );
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(xScale)
+        .tickValues(xTicks)
+        .tickFormat(d => secondsToHHMM(d))
+    )
+    .style("color", "#7ed957"); 
 
     svg.append("g")
         .call(d3.axisLeft(yScale)
             .tickValues(yTicks)
-        );
+        )
+        .style("color", "#7ed957");
 
     // Create gridlines
     svg.append("g")
@@ -1028,6 +1029,7 @@ function createWholeGraph() {
         )
         .style("stroke", "#ccc")
         .style("stroke-width", "2px")
+        .style("color", "#7ed957")
         .style("opacity", "20%");
 
     svg.append("g")
@@ -1039,6 +1041,7 @@ function createWholeGraph() {
         )
         .style("stroke", "#ccc")
         .style("stroke-width", "1px")
+        .style("color", "#7ed957")
         .style("opacity", "40%");
 
     // Clip path to keep the line inside the graph area
