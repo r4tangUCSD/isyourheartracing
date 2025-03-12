@@ -1372,8 +1372,6 @@ function createGraph() {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    console.log(d3.select('#chart'))    
-
 
     // Creates x axis scales
     endTime = Math.max(900, current)
@@ -1517,14 +1515,6 @@ function createGraph() {
 
     // Draw each segment
     segments.forEach(segment => {
-        console.log('secs', segment.second)
-        console.log('hr', segment.heartrate)
-
-        if (isNaN(segment.second) || isNaN(segment.heartrate)) {
-            console.error("Invalid data point detected:", segment);
-            
-
-        }
         svg_v.append("path")
         .data([segment]) // Bind the data
         .attr("class", "line") // Add a class for styling (optional)
