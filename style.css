@@ -367,7 +367,7 @@ h4 {
 /* Heart rate categories */
 
 #low {
-    background-color: rgba(0, 154, 238, 0.2);
+    background-color: rgba(0, 154, 238, 0.25);
     width: 175px;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -378,7 +378,7 @@ h4 {
 }
 
 #resting {
-    background-color: rgba(45, 180, 30, 0.2);
+    background-color: rgba(45, 180, 30, 0.25);
     width: 175px;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -388,7 +388,7 @@ h4 {
 }
 
 #moderate {
-    background-color: rgba(254, 237, 83, 0.2);   
+    background-color: rgba(254, 237, 83, 0.25);   
     width: 175px;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -397,7 +397,7 @@ h4 {
 }
 
 #high {
-    background-color: rgb(246, 60, 76, 0.2);
+    background-color: rgb(246, 60, 76, 0.25);
     width: 175px;
     padding-top: 10px;
     padding-bottom: 10px;
