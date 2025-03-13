@@ -488,12 +488,14 @@ function shadingRange() {
         higherY = endY
     }
 
+    let lowHigh = Math.max(mod70, firstY);
+
     if (endY > mod70) {
         svg.append("rect")
         .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
         .attr("y", yScale(higherY))    // Map the end Y value to the scale (invert y-axis)
         .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-        .attr("height", yScale(mod70) - yScale(higherY)) // Rectangle height (invert the height)
+        .attr("height", yScale(lowHigh) - yScale(higherY)) // Rectangle height (invert the height)
         .attr("fill", "#F63C4C")  // Rectangle color
         .style("opacity", 0.25); 
     }
@@ -511,7 +513,7 @@ export function magic(caseId) {
 
     selectedCaseID = caseId;
 
-    d3.csv("emergency_data/emergency.csv")
+    d3.csv("emergency_data/emergency_premium.csv")
     .then(patients => {
         patient_info = patients
         const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv"
@@ -542,10 +544,27 @@ export function magic(caseId) {
         patientAge = patient_details.age;
         maxHeartRate = maxHeartRate - patientAge;
 
+        const averageHeartRate = Math.round(d3.mean(processedData, d => d.heartrate));
+        // console.log(d3.mean(processedData, d => d.heartrate))
+
         //surgery details
         surgeryType = patient_details.optype;
-        surgeryInfo.textContent = surgeryDescription[surgeryType];
-        infoTitle.textContent = surgeryType + ' Surgery Info';
+        infoTitle.textContent = 'Case ' + selectedCaseID;
+        surgeryInfo.innerHTML = `
+        <div id="left">
+            <p>Age: ${patientAge}</p>
+            <p>Sex: ${patient_details.sex}</p>
+            <p>Weight: ${patient_details.weight} kg</p>
+            <p>Height: ${patient_details.height} cm</p>
+        </div>
+
+        <div id="right">
+            <p>Average Heart Rate: ${averageHeartRate}</p>
+            <p>Hypertension: ${patient_details.preop_htn === "1" ? "Yes" : "No"}</p>
+            <p>Diabetes: ${patient_details.preop_dm === "1" ? "Yes" : "No"}</p>
+            <p>Mortality: ${patient_details.death_inhosp === "1" ? "Yes" : "No"}</p>
+        </div>`;
+        
 
         // for shading
         mod50 = maxHeartRate * 0.5;
