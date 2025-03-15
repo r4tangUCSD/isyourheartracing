@@ -554,14 +554,16 @@ export function magic(caseId) {
         <div id="left">
             <p>Age: ${patientAge}</p>
             <p>Sex: ${patient_details.sex}</p>
-            <p>Weight: ${patient_details.weight} kg</p>
-            <p>Height: ${patient_details.height} cm</p>
+            <p>Height: ${patient_details.height} kg</p>
+            <p>Weight: ${patient_details.weight} cm</p>
+            <p>BMI: ${patient_details.bmi} cm</p>
         </div>
 
         <div id="right">
-            <p>Average Heart Rate: ${averageHeartRate}</p>
             <p>Hypertension: ${patient_details.preop_htn === "1" ? "Yes" : "No"}</p>
             <p>Diabetes: ${patient_details.preop_dm === "1" ? "Yes" : "No"}</p>
+            <p>Average Heart Rate: ${averageHeartRate}</p>
+            <p>Hospital Stay: ${Math.round((patient_details.dis - patient_details.adm)/3600)} days</p>
             <p>Mortality: ${patient_details.death_inhosp === "1" ? "Yes" : "No"}</p>
         </div>`;
 
