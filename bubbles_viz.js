@@ -604,7 +604,7 @@ function createEmptyHeartRateGraph() {
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("fill", "#7ed957")
-        .style("opacity", "0.55")
+        .style("opacity", "0.6")
         .style("font-weight", "bold")
         .text("Time Since Operation Started (HH:MM)");
 
@@ -615,7 +615,7 @@ function createEmptyHeartRateGraph() {
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("fill", "#7ed957")
-        .style("opacity", "0.55")
+        .style("opacity", "0.6")
         .style("font-weight", "bold")
         .text("Heart Rate (bpm)");
 
