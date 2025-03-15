@@ -1075,6 +1075,7 @@ window.addEventListener('resize', () => {
     height = containerRect.height;
 
     // Resize SVG
+    console.log(width)
     svg.attr("width", width)
     .attr("height", height);
 
