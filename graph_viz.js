@@ -488,12 +488,14 @@ function shadingRange() {
         higherY = endY
     }
 
+    let lowHigh = Math.max(mod70, firstY);
+
     if (endY > mod70) {
         svg.append("rect")
         .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
         .attr("y", yScale(higherY))    // Map the end Y value to the scale (invert y-axis)
         .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-        .attr("height", yScale(mod70) - yScale(higherY)) // Rectangle height (invert the height)
+        .attr("height", yScale(lowHigh) - yScale(higherY)) // Rectangle height (invert the height)
         .attr("fill", "#F63C4C")  // Rectangle color
         .style("opacity", 0.25); 
     }
@@ -540,7 +542,7 @@ export function magic(caseId) {
         // important values
         patient_details = getPatientInfoByCaseid(selectedCaseID);
         patientAge = patient_details.age;
-        maxHeartRate = maxHeartRate - patientAge;
+        maxHeartRate = 220 - patientAge;
 
         const averageHeartRate = Math.round(d3.mean(processedData, d => d.heartrate));
         // console.log(d3.mean(processedData, d => d.heartrate))
