@@ -554,8 +554,8 @@ export function magic(caseId) {
         <div id="left">
             <p>Age: ${patientAge}</p>
             <p>Sex: ${patient_details.sex}</p>
-            <p>Height: ${patient_details.height} kg</p>
-            <p>Weight: ${patient_details.weight} cm</p>
+            <p>Height: ${patient_details.height} cm</p>
+            <p>Weight: ${patient_details.weight} kg</p>
             <p>BMI: ${patient_details.bmi} cm</p>
         </div>
 
