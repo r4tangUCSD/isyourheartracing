@@ -2,9 +2,8 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 
 // GLOBAL VARIABLES
 
-let animating = true;
+let animating;
 let instruction = document.getElementById('post-animate');
-instruction.style.opacity = 0;
 
 // data processing
 let patient_info;
@@ -257,6 +256,7 @@ function createGraph() {
     xScale = d3.scaleLinear()
     .domain([tenMinsAge, endTime]) // data values for x-axis
     .range([0, width]); // pixel range for the graph
+
 
     // x axis labels
     svg.append("text")
@@ -573,6 +573,8 @@ export function magic(caseId) {
         // Set Up
         slider.step = 1/maxTime
         currentTime();
+        instruction.style.opacity = 0;
+        animating = true;
         animateSlider();
             
         slider.addEventListener('input', () => {

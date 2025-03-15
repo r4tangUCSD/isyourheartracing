@@ -11,7 +11,7 @@ let currentPatient = null;
 let allPatients = [];
 let surgeryCategories = [];
 let patientsByCategoryId = {};
-
+let selectedCaseID;
 // Load data on page load
 export async function loadData() {
     try {
@@ -495,6 +495,7 @@ async function setupCategoryDetailView(category) {
                 .style("opacity", 1)
                 .attr("stroke", "#ff3131")
                 .attr("stroke-width", 2);
+            selectedCaseID = d.id;
             
             // Show tooltip
             const tooltip = d3.select("#tooltip");
@@ -551,17 +552,6 @@ async function setupCategoryDetailView(category) {
                 .attr("stroke-width", 2);
 
                 transitionToGraph(d);
-                
-            /*// Load and display heart rate data
-            currentPatient = d;
-            d3.select("#chart").html('<div class="no-data">Loading heart rate data...</div>');
-            
-            processedData = await loadHeartRateData(d.id);
-            if (processedData && processedData.length > 0) {
-                maxTime = d.duration * 60;
-                [minRate, maxRate] = d3.extent(processedData, d => d.heartrate);
-                createWholeGraph();
-            }*/
 
 
             
@@ -614,6 +604,7 @@ function createEmptyHeartRateGraph() {
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("fill", "#7ed957")
+        .style("opacity", "0.55")
         .style("font-weight", "bold")
         .text("Time Since Operation Started (HH:MM)");
 
@@ -624,6 +615,7 @@ function createEmptyHeartRateGraph() {
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("fill", "#7ed957")
+        .style("opacity", "0.55")
         .style("font-weight", "bold")
         .text("Heart Rate (bpm)");
 
@@ -655,12 +647,14 @@ function createEmptyHeartRateGraph() {
         .call(d3.axisBottom(xScale)
             .tickValues(xTicks)
             .tickFormat(d => secondsToHHMM(d))
-        );
+        )
+        .style("opacity", "0.6");
 
     svg.append("g")
         .call(d3.axisLeft(yScale)
             .tickValues(yTicks)
-        );
+        )
+        .style("opacity", "0.6");
 
     // Create gridlines
     svg.append("g")
@@ -945,7 +939,7 @@ function createWholeGraph() {
         .attr("y", height + 30)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
-        .style("fill", "#7ed957")
+        .style("fill", "rgb(126, 217, 87, 0.6)")
         .style("font-weight", "bold")
         .text("Time Since Operation Started (HH:MM)");
 
@@ -955,9 +949,17 @@ function createWholeGraph() {
         .attr("y", -35)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
-        .style("fill", "#7ed957")
+        .style("fill", "rgb(126, 217, 87, 0.6)")
         .style("font-weight", "bold")
         .text("Heart Rate (bpm)");
+
+    svg.append("text")
+    .attr("x", width / 2 - 40)
+    .attr("y", height - 280)
+    .style("fill", "rgb(126, 217, 87, 0.6)")
+    .style("font-weight", "bold")
+    .text('Case ' + selectedCaseID);
+
     
         // Ensure we use the full dataset range without filtering NaN values
     const fullData = processedData; 
@@ -1010,12 +1012,14 @@ function createWholeGraph() {
         .call(d3.axisBottom(xScale)
             .tickValues(xTicks)
             .tickFormat(d => secondsToHHMM(d))
-        );
+        )
+        .style("opacity", 0.55);
 
     svg.append("g")
         .call(d3.axisLeft(yScale)
             .tickValues(yTicks)
-        );
+        )
+        .style("opacity", 0.55);
 
     // Create gridlines
     svg.append("g")
