@@ -29,10 +29,11 @@ h1 {
 
 h3 {
     text-align: center;
-    color: rgba(255, 255, 255, 0.75);
-    padding: 0.75em;
-    margin: 1.5em;
+    color: rgba(255, 255, 255, 0.5);
+    /* padding: 0.75em; */
+    /* margin: 1.5em; */
 }
+
 
 h4 {
     color: #ebeaea;
@@ -253,15 +254,24 @@ h4 {
         text-align: center;
         font-weight: bold;
         font-style: italic;
-        color:rgba(255, 255, 255, 0.8);
+        color:rgba(255, 255, 255, 0.6);
     }
-    margin-top: 1em;
+    margin-top: 3em;
     padding: 0.5em;
-    line-height: 20pt;
-    color: rgba(255, 255, 255, 0.75);
-    border: rgba(255, 255, 255, 0.4), 2px, solid;
+    color: rgba(255, 255, 255, 0.5);
+    
+    /* border: rgba(255, 255, 255, 0.4), 2px, solid; */
     width: 430px;
-    /* background-color: rgba(255,255,255,0.1); */
+}
+
+#surgery-info {
+    line-height: 8px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+
+    #left, #right {
+        text-align: center;
+    }
 }
 
 #label {
