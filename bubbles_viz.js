@@ -14,7 +14,7 @@ let patientsByCategoryId = {};
 let selectedCaseID;
 
 let tooltip = d3.select('#tooltip');
-let caseTooltip = d3.select('#case-tooltip').style('display', 'none');
+let caseTooltip = d3.select('#case-tooltip');
 
 // surgery descriptions 
 const response = await fetch('./description.json');
