@@ -614,6 +614,7 @@ function createEmptyHeartRateGraph() {
         .style("font-size", "12px")
         .style("fill", "#7ed957")
         .style("font-weight", "bold")
+        .style("opacity", 0.6)
         .text("Time Since Operation Started (HH:MM)");
 
     svg.append("text")
@@ -623,6 +624,7 @@ function createEmptyHeartRateGraph() {
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("fill", "#7ed957")
+        .style("opacity", 0.6)
         .style("font-weight", "bold")
         .text("Heart Rate (bpm)");
 
@@ -657,12 +659,14 @@ function createEmptyHeartRateGraph() {
             .tickValues(xTicks)
             .tickFormat(d => secondsToHHMM(d))
         )
+        .style("opacity", 0.55)
         .style("color", "#7ed957");
 
     svg.append("g")
         .call(d3.axisLeft(yScale)
             .tickValues(yTicks)
         )
+        .style("opacity", 0.55)
         .style("color", "#7ed957");
 
     // Create gridlines
@@ -952,6 +956,7 @@ function createWholeGraph() {
         .style("font-size", "12px")
         .style("fill", "#7ed957")
         .style("font-weight", "bold")
+        .style("opacity", 0.6)
         .text("Time Since Operation Started (HH:MM)");
 
     svg.append("text")
@@ -962,6 +967,7 @@ function createWholeGraph() {
         .style("font-size", "12px")
         .style("fill", "#7ed957")
         .style("font-weight", "bold")
+        .style("opacity", 0.6)
         .text("Heart Rate (bpm)");
     
         // Ensure we use the full dataset range without filtering NaN values
@@ -1016,12 +1022,14 @@ function createWholeGraph() {
         .tickValues(xTicks)
         .tickFormat(d => secondsToHHMM(d))
     )
+    .style("opacity", 0.55)
     .style("color", "#7ed957"); 
 
     svg.append("g")
         .call(d3.axisLeft(yScale)
             .tickValues(yTicks)
         )
+        .style("opacity", 0.55)
         .style("color", "#7ed957");
 
     // Create gridlines
