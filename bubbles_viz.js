@@ -13,6 +13,9 @@ let surgeryCategories = [];
 let patientsByCategoryId = {};
 let selectedCaseID;
 
+let tooltip = d3.select('#tooltip');
+let caseTooltip = d3.select('#case-tooltip');
+
 // surgery descriptions 
 const response = await fetch('./description.json');
 if (!response.ok) {
@@ -536,10 +539,10 @@ async function setupCategoryDetailView(category) {
             }
             
             // Show tooltip
-            const tooltip = d3.select("#tooltip");
-            tooltip
+            
+            caseTooltip
                 .style("left", `${event.pageX + 10}px`)
-                .style("top", `${event.pageY - 10}px`)
+                .style("top", `${event.pageY -75}px`)
                 .html(`<strong>Patient ID:</strong> ${d.id}<br>
                        <strong>Age:</strong> ${d.age}<br>
                        <strong>Average HR:</strong> ${Math.floor(d.avg_hr)} bpm<br>
@@ -571,8 +574,7 @@ async function setupCategoryDetailView(category) {
             }
             
             // Hide tooltip
-            d3.select("#tooltip")
-                .style("opacity", 0);
+            caseTooltip.style("opacity", 0);
         })
         .on("click", async function(event, d) {
             // Reset all patient circles
@@ -896,11 +898,13 @@ function drawAllCategoryBubbles() {
             d3.select(this).transition().duration(200).attr("fill", "#7ed957").style("opacity", 1);
 
             // Show tooltip
-            d3.select("#tooltip")
+            tooltip
                 .style("left", `${event.pageX + 10}px`)
                 .style("top", `${event.pageY - 10}px`)
                 .html(`<strong>${d.data.name}</strong><br>${d.data.count} surgeries<br>Avg. BPM: ${d.data.avgBPM}`)
                 .style("opacity", 1);
+
+            console.log(tooltip)
 
             d3.select(this.parentNode).selectAll("text")
                 .transition()
@@ -909,7 +913,9 @@ function drawAllCategoryBubbles() {
         })
         .on("mouseout", function() {
             d3.select(this).transition().duration(200).attr("fill", "#333739").style("opacity", 0.75);
-            d3.select("#tooltip").style("opacity", 0);
+            tooltip.style("opacity", 0);
+            console.log(tooltip)
+
 
             d3.select(this.parentNode).selectAll("text")
                 .transition()
@@ -918,7 +924,9 @@ function drawAllCategoryBubbles() {
         })
         .on("click", function(event, d) {
             currentCategory = d.data.id;
-            d3.select("#tooltip").style("opacity", 0);
+            tooltip.style("opacity", 0);
+            console.log('girlie')
+
             showCategoryDetail(d);
 
             let surgeryContainer = d3.select("#surgery-description")
@@ -932,7 +940,6 @@ function drawAllCategoryBubbles() {
             .attr("id", "words")
             .text(surgeryDescription[currentCategory]);
 
-            console.log(currentCategory)
         });
 
     
@@ -1030,7 +1037,6 @@ function createWholeGraph() {
     // Find max time value without slicing or filtering
     const maxTime = d3.max(fullData, d => d.second);
     // let maxTimeMins = Math.floor(maxTime/60)
-    console.log(fullData)
 
     // Creates x-axis scale
     const xScale = d3.scaleLinear()

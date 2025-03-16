@@ -175,7 +175,7 @@ h4 {
     padding-top: 40px;
 }
 
-.tooltip {
+.tooltip, #case-tooltip {
     position: absolute;
     background-color: rgba(61, 61, 61, 0.9);
     color: rgba(255, 255, 255, 0.8);
@@ -183,7 +183,7 @@ h4 {
     border-radius: 15px;
     border: rgba(126, 217, 87, 0.5) solid 1.5px;
     pointer-events: none;
-    opacity: 0;
+    /* opacity: 0; */
     transition: opacity 0.3s;
     z-index: 100;
     text-align: center;
