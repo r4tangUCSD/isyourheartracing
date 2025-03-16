@@ -585,31 +585,29 @@ function drawBackBubble() {
     backBubble.selectAll("*").remove();
     
     // Append new SVG
-    svgCircle = backBubble
+    const svgCircle = backBubble
         .append("svg")
         .attr("width", 500)
         .attr("height", 75);
 
-    // Append a circle inside the SVG
+    // Append a circle inside the SVG (with your requested changes)
     svgCircle.append("circle")
         .attr("cx", 260)  // Center the circle
-        .attr("cy", -125)
-        .attr("r", 200)
+        .attr("cy", -125) // Keeps the same positioning as requested
+        .attr("r", 200)  // Large circle size as specified
         .style("fill", "#333739")
         .style("opacity", 0.85)
-        .on("mouseover", function(event, d) {
+        .on("mouseover", function(event) {
             d3.select(this)
                 .transition()
-                // .duration(200)
                 .style("fill", "#7ed957")
-                .style("opacity", 1)
+                .style("opacity", 1);
         })
-        .on("mouseout", function(event, d) {
+        .on("mouseout", function(event) {
             d3.select(this)
                 .transition()
-                // .duration(200)
                 .style("fill", "#333739")
-                .style("opacity", 0.85)
+                .style("opacity", 0.85);
         })
         .on("click", async function(event, d) {
             transitionToBubble(d);
@@ -618,13 +616,13 @@ function drawBackBubble() {
     // Add text inside the circle
     svgCircle.append("text")
         .attr("x", 260)  // Center the text horizontally
-        .attr("y", 30) // Set the vertical position
+        .attr("y", 30) // Adjusted for better centering
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .style("fill", "white")
         .style("font-size", "16px")
         .style("font-weight", "bold")
-        .style("pointer-events", "none")
+        .style("pointer-events", "none")  // Prevents text from blocking clicks
         .text("Select a different case");
 
     // Add text to the right of the SVG
@@ -648,7 +646,6 @@ function transitionToBubble(d) {
             
             // Remove all elements created by the magic function
             d3.selectAll("#graph svg").remove();
-            d3.selectAll("#tooltip").remove();
             d3.selectAll("#back-bubble svg").remove();
 
             // Call the magic function with the caseid
