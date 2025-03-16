@@ -459,12 +459,14 @@ function shadingRange() {
 
     // resting shading
 
+    let restingHigh = Math.min(endY, mod50);
+
     if (firstY < mod50) {
         svg.append("rect")
         .attr("x", xScale(tenMinsAge))  // Map the start X value to the scale
-        .attr("y", yScale(mod50))    // Map the end Y value to the scale (invert y-axis)
+        .attr("y", yScale(restingHigh))    // Map the end Y value to the scale (invert y-axis)
         .attr("width", xScale(endTime) - xScale(tenMinsAge))  // Rectangle width
-        .attr("height", yScale(restinglow) - yScale(mod50)) // Rectangle height (invert the height)
+        .attr("height", yScale(restinglow) - yScale(restingHigh)) // Rectangle height (invert the height)
         .attr("fill", "#2db41e")  // Rectangle color
         .style("opacity", 0.25); 
     }
