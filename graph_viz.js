@@ -641,7 +641,7 @@ function transitionToBubble(d) {
             
             // Remove all elements created by the magic function
             d3.selectAll("#graph svg").remove();
-            d3.selectAll("#tooltip").remove();
+            // d3.selectAll("#tooltip").remove();
             d3.selectAll("#back-bubble svg").remove();
 
             // Call the magic function with the caseid
