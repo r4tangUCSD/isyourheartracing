@@ -502,15 +502,13 @@ function getPatientInfoByCaseid(caseid) {
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ The Magic ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 export function magic(caseId) {
-
     selectedCaseID = caseId;
 
     d3.csv("emergency_data/emergency_premium.csv")
     .then(patients => {
-        patient_info = patients
-        const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv"
+        patient_info = patients;
+        const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv";
         return d3.csv(filepath);
-
     })
     .then(data => {
         processedData = processCSV(data);
@@ -521,7 +519,7 @@ export function magic(caseId) {
 
         minTime = d3.min(processedData, d => d.second);
         maxTime = d3.max(processedData, d => d.second);
-        numHours = Math.ceil(maxTime/3600);        
+        numHours = Math.ceil(maxTime / 3600);
 
         timeScale = d3.scaleLinear()
         .domain([0, d3.max(processedData, d => d.second)])
@@ -537,11 +535,10 @@ export function magic(caseId) {
         maxHeartRate = 220 - patientAge;
 
         const averageHeartRate = Math.round(d3.mean(processedData, d => d.heartrate));
-        // console.log(d3.mean(processedData, d => d.heartrate))
 
-        //surgery details
+        // surgery details
         surgeryType = patient_details.optype;
-        infoTitle.textContent = 'Case ' + selectedCaseID;
+        infoTitle.textContent = 'Details for Case ' + selectedCaseID;
         surgeryInfo.innerHTML = `
         <div id="left">
             <p>Age: ${patientAge}</p>
@@ -555,7 +552,7 @@ export function magic(caseId) {
             <p>Hypertension: ${patient_details.preop_htn === "1" ? "Yes" : "No"}</p>
             <p>Diabetes: ${patient_details.preop_dm === "1" ? "Yes" : "No"}</p>
             <p>Average Heart Rate: ${averageHeartRate}</p>
-            <p>Hospital Stay: ${Math.round((patient_details.dis - patient_details.adm)/3600)} days</p>
+            <p>Hospital Stay: ${Math.round((patient_details.dis - patient_details.adm) / 3600)} days</p>
             <p>Mortality: ${patient_details.death_inhosp === "1" ? "Yes" : "No"}</p>
         </div>`;
 
@@ -565,35 +562,33 @@ export function magic(caseId) {
         vig85 = maxHeartRate * 0.85;
 
         // Set Up
-        slider.step = 1/maxTime
+        slider.step = 1 / maxTime;
         currentTime();
         instruction.style.opacity = 0;
         animating = true;
         animateSlider();
-            
+
         slider.addEventListener('input', () => {
             currentTime();
         });
 
-    })
-
-    drawBackBubble();
+        // Call drawBackBubble after updating selectedCaseID
+        drawBackBubble();
+    });
 }
-
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Back Button ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 function drawBackBubble() {
     const backBubble = d3.select("#back-bubble");
     // Clear previous contents before appending a new SVG
+    backBubble.selectAll("*").remove();
     
     // Append new SVG
     svgCircle = backBubble
         .append("svg")
-        .attr("width", 600)
+        .attr("width", 500)
         .attr("height", 75);
-
-    // console.log(svgCircle)
 
     // Append a circle inside the SVG
     svgCircle.append("circle")
@@ -617,10 +612,25 @@ function drawBackBubble() {
                 .style("opacity", 0.85)
         })
         .on("click", async function(event, d) {
-            
             transitionToBubble(d);
-        })         
+        });
 
+    // Add text inside the circle
+    svgCircle.append("text")
+        .attr("x", 260)  // Center the text horizontally
+        .attr("y", 30) // Set the vertical position
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .style("fill", "white")
+        .style("font-size", "16px")
+        .style("font-weight", "bold")
+        .style("pointer-events", "none")
+        .text("Select a different case");
+
+    // Add text to the right of the SVG
+    backBubble.append("h1")
+        .attr("id", "case-text")
+        .text(`Case ${selectedCaseID}`);
 }
 
 function transitionToBubble(d) {

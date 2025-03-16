@@ -220,6 +220,15 @@ h4 {
 
 /* Graph (Vivian's CSS) */
 
+
+#back-bubble h1 {
+    display: inline;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    margin-top: 10px;
+}
+
 #slider {
     width: 100%;
 }
