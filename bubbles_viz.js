@@ -11,6 +11,7 @@ let currentPatient = null;
 let allPatients = [];
 let surgeryCategories = [];
 let patientsByCategoryId = {};
+let selectedCaseID;
 
 // Load data on page load
 export async function loadData() {
@@ -502,6 +503,7 @@ async function setupCategoryDetailView(category) {
         .style("cursor", "pointer")
         .style("transition", "all 0.2s ease")
         .on("mouseover", async function(event, d) {
+            selectedCaseID = d.id;
             // Update appearance immediately
             d3.select(this)
                 .attr("fill", "#ff3131")
@@ -694,6 +696,8 @@ function createEmptyHeartRateGraph() {
         .style("stroke-width", "1px")
         .style("opacity", "40%")
         .style("color", "#7ed957");
+
+    
     
     // Add instruction message in the center of the chart
     svg.append("text")
@@ -969,6 +973,13 @@ function createWholeGraph() {
         .style("font-weight", "bold")
         .style("opacity", 0.6)
         .text("Heart Rate (bpm)");
+
+    svg.append("text")
+        .attr("x", width / 2 - 40)
+        .attr("y", height - 280)
+        .style("fill", "rgb(126, 217, 87, 0.65)")
+        .style("font-weight", "bold")
+        .text('Case ' + selectedCaseID);
     
         // Ensure we use the full dataset range without filtering NaN values
     const fullData = processedData; 
