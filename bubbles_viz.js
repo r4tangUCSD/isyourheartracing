@@ -13,6 +13,14 @@ let surgeryCategories = [];
 let patientsByCategoryId = {};
 let selectedCaseID;
 
+// surgery descriptions 
+const response = await fetch('./description.json');
+if (!response.ok) {
+    throw new Error(`Failed to fetch projects: ${response.statusText}`);
+}
+
+const surgeryDescription = await response.json();
+
 // Load data on page load
 export async function loadData() {
     try {
@@ -549,8 +557,8 @@ async function setupCategoryDetailView(category) {
             }
 
             // Display patient info
-            displayPatientInfo(d);
-            showPatientInfo();
+            // displayPatientInfo(d);
+            // showPatientInfo();
         })
         .on("mouseout", function(event, d) {
             // Only reset appearance if this isn't the selected patient
@@ -732,7 +740,8 @@ function drawCategoryBubbles() {
     // Hide chart container FIRST before doing anything else
     d3.select(".chart-container").style("display", "none");
     d3.select("#patient-info-panel").remove(); // Remove the panel completely
-    
+
+
     // Only do animation if we're coming from category detail view
     if (currentView === "category-detail" && currentCategory) {
         // Get the source category data for animation
@@ -911,8 +920,22 @@ function drawAllCategoryBubbles() {
             currentCategory = d.data.id;
             d3.select("#tooltip").style("opacity", 0);
             showCategoryDetail(d);
+
+            let surgeryContainer = d3.select("#surgery-description")
+            surgeryContainer.select("*").remove();
+            surgeryContainer.select("*").remove();
+            surgeryContainer.append('div')
+            .attr('id', 'surgery-name')
+            .text(currentCategory + ' Surgery Info');
+
+            surgeryContainer.append('div')
+            .attr("id", "words")
+            .text(surgeryDescription[currentCategory]);
+
+            console.log(currentCategory)
         });
 
+    
     // Add category name labels
     bubbleGroups.append("text")
         .attr("text-anchor", "middle")

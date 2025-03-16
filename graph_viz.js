@@ -10,13 +10,6 @@ let patient_info;
 let processedData;
 let filteredData;
 
-// surgery descriptions 
-const response = await fetch('./description.json');
-if (!response.ok) {
-    throw new Error(`Failed to fetch projects: ${response.statusText}`);
-}
-
-const surgeryDescription = await response.json();
 
 // working with missing data
     // anything previous
