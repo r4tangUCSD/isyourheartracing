@@ -14,7 +14,7 @@ let patientsByCategoryId = {};
 let selectedCaseID;
 
 let tooltip = d3.select('#tooltip');
-let caseTooltip = d3.select('#case-tooltip');
+let caseTooltip = d3.select('#case-tooltip').style('display', 'none');
 
 // surgery descriptions 
 const response = await fetch('./description.json');
@@ -551,7 +551,8 @@ async function setupCategoryDetailView(category) {
                        <strong>Age:</strong> ${d.age}<br>
                        <strong>Average HR:</strong> ${Math.floor(d.avg_hr)} bpm<br>
                        <strong>Duration:</strong> ${durationTime}`)
-                .style("opacity", 1);
+                .style("opacity", 1)
+                .style('display', 'block');
                 
             // Load and display heart rate data
             d3.select("#chart").html('<div class="no-data">Loading heart rate data...</div>');
@@ -578,7 +579,7 @@ async function setupCategoryDetailView(category) {
             }
             
             // Hide tooltip
-            caseTooltip.style("opacity", 0);
+            caseTooltip.style("opacity", 0).style('display', 'none');
         })
         .on("click", async function(event, d) {
             // Reset all patient circles
