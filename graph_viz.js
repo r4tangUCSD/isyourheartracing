@@ -3,7 +3,7 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 // GLOBAL VARIABLES
 
 let animating;
-let instruction = document.getElementById('post-animate');
+let instruction = d3.select('#post-animate');
 
 // data processing
 let patient_info;
@@ -67,9 +67,13 @@ let minRate;
 let maxRate;
 
 let currentAverage;
+let averageHeartRate;
 
 //graph
 let svg;
+const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+const width = 750 - margin.left - margin.right;
+const height = 375 - margin.top - margin.bottom;
 
     // x scale
 let xScale;
@@ -230,10 +234,6 @@ function handlingMissing() {
 
 
 function createGraph() {
-    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
-    const width = 750 - margin.left - margin.right;
-    const height = 375 - margin.top - margin.bottom;
-
     d3.select("#graph").selectAll("svg").remove();  
 
     svg = d3.select("#graph")
@@ -539,7 +539,7 @@ export function magic(caseId) {
         patientAge = patient_details.age;
         maxHeartRate = 220 - patientAge;
 
-        const averageHeartRate = Math.round(d3.mean(processedData, d => d.heartrate));
+        averageHeartRate = Math.round(d3.mean(processedData, d => d.heartrate));
         // console.log(d3.mean(processedData, d => d.heartrate))
 
         //surgery details
@@ -566,6 +566,8 @@ export function magic(caseId) {
         mod50 = maxHeartRate * 0.5;
         mod70 = maxHeartRate * 0.7;
         vig85 = maxHeartRate * 0.85;
+
+        // instruction.append('svg').append('line').attr("width", 100);
 
         // Set Up
         slider.step = 1/maxTime
