@@ -900,7 +900,7 @@ function drawAllCategoryBubbles() {
             // Show tooltip
             tooltip
                 .style("left", `${event.pageX + 10}px`)
-                .style("top", `${event.pageY - 10}px`)
+                .style("top", `${event.pageY - 75}px`)
                 .html(`<strong>${d.data.name}</strong><br>${d.data.count} surgeries<br>Avg. BPM: ${d.data.avgBPM}`)
                 .style("opacity", 1);
 
