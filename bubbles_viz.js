@@ -542,8 +542,8 @@ async function setupCategoryDetailView(category) {
                 .style("top", `${event.pageY - 10}px`)
                 .html(`<strong>Patient ID:</strong> ${d.id}<br>
                        <strong>Age:</strong> ${d.age}<br>
-                       <strong>Avg HR:</strong> ${Math.floor(d.avg_hr)} bpm<br>
-                       <strong>Duration (HH:MM):</strong> ${durationTime}`)
+                       <strong>Average HR:</strong> ${Math.floor(d.avg_hr)} bpm<br>
+                       <strong>Duration:</strong> ${durationTime}`)
                 .style("opacity", 1);
                 
             // Load and display heart rate data
