@@ -175,7 +175,7 @@ async function loadHeartRateData(caseId) {
             .then(hrData => {
                 // Process the data to the format needed by the graph
                 return hrData.map((d, i) => ({
-                    second: i * 10, // Assuming readings every 10 seconds
+                    second: +d['Time'], // Assuming readings every 10 seconds
                     heartrate: +d['Solar8000/HR']
                 })).filter(d => !isNaN(d.heartrate)); // Filter out invalid readings
             })
@@ -510,6 +510,22 @@ async function setupCategoryDetailView(category) {
                 .style("opacity", 1)
                 .attr("stroke", "#ff3131")
                 .attr("stroke-width", 2);
+
+            const durationHours = Math.floor(d.duration/60);
+            const durationMins = d.duration % 60;
+            let durationTime;
+
+            if (durationHours < 10){
+                durationTime = '0' + durationHours + ':';
+            } else {
+                durationTime = durationHours + ':'
+            }
+
+            if (durationMins < 10) {
+                durationTime += '0' + durationMins;
+            } else {
+                durationTime += durationMins;
+            }
             
             // Show tooltip
             const tooltip = d3.select("#tooltip");
@@ -518,8 +534,8 @@ async function setupCategoryDetailView(category) {
                 .style("top", `${event.pageY - 10}px`)
                 .html(`<strong>Patient ID:</strong> ${d.id}<br>
                        <strong>Age:</strong> ${d.age}<br>
-                       <strong>Avg HR:</strong> ${d.avg_hr} bpm<br>
-                       <strong>Duration:</strong> ${d.duration} min`)
+                       <strong>Avg HR:</strong> ${Math.floor(d.avg_hr)} bpm<br>
+                       <strong>Duration (HH:MM):</strong> ${durationTime}`)
                 .style("opacity", 1);
                 
             // Load and display heart rate data
@@ -629,7 +645,6 @@ function createEmptyHeartRateGraph() {
         .style("opacity", 0.6)
         .style("font-weight", "bold")
         .text("Heart Rate (bpm)");
-
     // Create x-axis scale
     const xScale = d3.scaleLinear()
         .domain([0, 7200]) // 2 hours in seconds
@@ -991,6 +1006,8 @@ function createWholeGraph() {
 
     // Find max time value without slicing or filtering
     const maxTime = d3.max(fullData, d => d.second);
+    // let maxTimeMins = Math.floor(maxTime/60)
+    console.log(fullData)
 
     // Creates x-axis scale
     const xScale = d3.scaleLinear()
@@ -1012,7 +1029,8 @@ function createWholeGraph() {
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
         const remainingMinutes = minutes % 60;
-        return `${hours}:${remainingMinutes.toString().padStart(2, "0")}`;
+        console.log(hours, remainingMinutes)
+        return `${hours.toString().padStart(2, "0")}:${remainingMinutes.toString().padStart(2, "0")}`;
     }
 
     // Determine max heart rate value dynamically without slicing
