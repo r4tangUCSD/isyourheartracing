@@ -231,7 +231,8 @@ function handlingMissing() {
 
 function createGraph() {
     const margin = { top: 20, right: 30, bottom: 40, left: 40 };
-    const width = 750 - margin.left - margin.right;
+    const container = d3.select("#graph").node();
+    const width = container.getBoundingClientRect().width - margin.left - margin.right;
     const height = 375 - margin.top - margin.bottom;
 
     d3.select("#graph").selectAll("svg").remove();  
@@ -243,13 +244,11 @@ function createGraph() {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
     // Creates x axis scales
     endTime = Math.max(900, current)
     xScale = d3.scaleLinear()
     .domain([tenMinsAge, endTime]) // data values for x-axis
     .range([0, width]); // pixel range for the graph
-
 
     // x axis labels
     svg.append("text")
@@ -330,7 +329,7 @@ function createGraph() {
     .style("stroke-width", "1px")
     .style("opacity", "40%");
 
-    // create differet segments
+    // create different segments
     let segments = [];
     let segment;
     let segEnd;
@@ -384,8 +383,6 @@ function createGraph() {
         .style("stroke", "#7ed957") // Line color
         .style("stroke-width", 2); // Line width
     });
-
-
 }
 
 function animateSlider() {

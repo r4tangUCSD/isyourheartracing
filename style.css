@@ -134,6 +134,12 @@ h4 {
     opacity: 0;
 }
 
+#graph-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 /* Bubbles */
 
 .container {
@@ -218,6 +224,15 @@ h4 {
     width: 100%;
 }
 
+.left-side {
+    flex: 1;
+    margin-right: 20px; /* Adjust as needed */
+}
+
+#animation {
+    flex: 2;
+}
+
 #stats{
     display: grid;
     grid-template-columns: auto 1fr;
@@ -266,7 +281,7 @@ h4 {
         padding: 0.25em;
 
     }
-    margin-top: 3em;
+    margin-top: 10px;
     padding: 0.5em;
     color: rgba(255, 255, 255, 0.5);
     
@@ -407,3 +422,4 @@ h4 {
     line-height: 30px;
     opacity: 0.7
 }
+
