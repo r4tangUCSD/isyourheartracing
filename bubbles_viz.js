@@ -278,8 +278,10 @@ async function showCategoryDetail(category) {
 
 // Extract the setup functionality into a separate function
 async function setupCategoryDetailView(category) {
+    tooltip.style("opacity", 0);
     // Clear previous content
     svg.selectAll("*").remove();
+
 
     // Update the width and height based on new container size
     const visualizationContainer = d3.select("#visualization");
@@ -309,10 +311,10 @@ async function setupCategoryDetailView(category) {
     const durationExtent = d3.extent(patients, d => d.duration);
     
     // Add padding to extents
-    ageExtent[0] = Math.max(0, ageExtent[0] - 5);
-    ageExtent[1] = ageExtent[1] + 5;
-    hrExtent[0] = Math.max(0, hrExtent[0] - 5);
-    hrExtent[1] = hrExtent[1] + 5;
+    ageExtent[0] = Math.floor(ageExtent[0]/10) * 10;
+    ageExtent[1] = Math.ceil(ageExtent[1]/10) *10;
+    hrExtent[0] = Math.floor(hrExtent[0]/10) * 10;
+    hrExtent[1] = Math.ceil(hrExtent[1]/10) * 10;
     
     // Create scales - age is x-axis, avg_hr is y-axis
     const xScale = d3.scaleLinear()
@@ -346,7 +348,7 @@ async function setupCategoryDetailView(category) {
         .append("clipPath")
         .attr("id", "circle-clip")
         .append("circle")
-        .attr("cx", width * 0.33)
+        .attr("cx", width * 0.33 + 15)
         .attr("cy", height * 0.57)
         .attr("r", circleRadius + 35);
         
@@ -404,7 +406,7 @@ async function setupCategoryDetailView(category) {
     // Create grid container that will be clipped
     const gridContainer = svg.append("g")
         .attr("clip-path", "url(#circle-clip)")
-        .attr("transform", `translate(${width * - 0.05}, ${height * 0.07})`); // Move the entire chart down and left
+        .attr("transform", `translate(${width * - 0.05 - 12}, ${height * 0.07})`); // Move the entire chart down and left
 
     // Add grid lines
     // Vertical grid lines (for x-axis)
@@ -469,23 +471,25 @@ async function setupCategoryDetailView(category) {
         
     // Add x-axis label
     svg.append("text")
-        .attr("x", width / 2 - 30)
-        .attr("y", height * 0.90)
+        .attr("x", width / 2 - 30 - 12)
+        .attr("y", height * 0.90 - 7)
         .attr("text-anchor", "middle")
         .attr("fill", "#dcdcdc")
         .style("font-size", "14px")
         .style("opacity", 0.9)
+        .style("font-weight", 'bold')
         .text("Patient Age");
         
     // Add y-axis label - Updated to Average Heart Rate
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
-        .attr("y", width * 0.04)
+        .attr("y", width * 0.04 - 2)
         .attr("text-anchor", "middle")
         .attr("fill", "#dcdcdc")
         .style("font-size", "14px")
         .style("opacity", 0.8)
+        .style("font-weight", 'bold')
         .text("Average Heart Rate (bpm)");
     
     const sortedPatients = [...patients].sort((a, b) => 

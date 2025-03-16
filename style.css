@@ -181,7 +181,7 @@ h4 {
     color: rgba(255, 255, 255, 0.8);
     padding: 8px;
     border-radius: 15px;
-    border: rgba(126, 217, 87, 0.5) solid 1.5px;
+    border: rgba(255, 255, 255, 0.6) dotted 2px;
     pointer-events: none;
     /* opacity: 0; */
     transition: opacity 0.3s;
