@@ -44,7 +44,9 @@ export async function loadData() {
                 position: d.position,
                 death_inhosp: d.death_inhosp === "1" ? "Yes" : "No",
                 preop_htn: d.preop_htn === "1" ? "Yes" : "No", 
-                preop_dm: d.preop_dm === "1" ? "Yes" : "No"
+                preop_dm: d.preop_dm === "1" ? "Yes" : "No",
+                dx: d.dx, // Add dx attribute
+                opname: d.opname // Add opname attribute
             }));
         
         // Rest of the loadData function...
@@ -514,9 +516,11 @@ async function setupCategoryDetailView(category) {
                 .style("left", `${event.pageX + 10}px`)
                 .style("top", `${event.pageY -75}px`)
                 .html(`<strong>Patient ID:</strong> ${d.id}<br>
-                       <strong>Age:</strong> ${d.age}<br>
-                       <strong>Average HR:</strong> ${Math.floor(d.avg_hr)} bpm<br>
-                       <strong>Duration:</strong> ${durationTime}`)
+                        <strong>Age:</strong> ${d.age}<br>
+                        <strong>Average HR:</strong> ${Math.floor(d.avg_hr)} bpm<br>
+                        <strong>Duration:</strong> ${durationTime}<br>
+                        <strong>Description:</strong> ${d.dx}<br>
+                        <strong>Surgery name:</strong> ${d.opname}`)
                 .style("opacity", 1)
                 .style('display', 'block');
                 
