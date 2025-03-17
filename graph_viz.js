@@ -642,6 +642,13 @@ function drawBackBubble() {
         .text(`Case ${selectedCaseID}`);
 }
 
+function drawDoneBubble() {
+    const doneBubble = d3.select("#done-bubble");
+    doneBubble.select('*').remove();
+
+     
+}
+
 function transitionToBubble(d) {
     // Fade out the graph section
     document.getElementById('graph-section').style.opacity = '0';
