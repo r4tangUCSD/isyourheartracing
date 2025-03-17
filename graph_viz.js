@@ -407,7 +407,7 @@ function animateSlider() {
             // instruction.style.opacity = 0.3;
             clearInterval(interval);
         } else {
-            sliderValue += 0.175; // Adjust step size based on range
+            sliderValue += 0.2; // Adjust step size based on range
             slider.value = sliderValue;
             currentTime(); // Update slider position
         }
