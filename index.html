@@ -8,9 +8,30 @@
 </head>
 
 <body>
+    <!-- Project Intro -->
+    <section id="intro-section" class="active">
+        <div class="heartbeat-container">
+            <svg id="heartbeat-svg" width="80%" height="100" viewBox="0 0 1000 100" preserveAspectRatio="xMinYMid meet">
+              <path id="heartbeat-path" d="M0,50 L0,50" stroke="#4CAF50" stroke-width="3" fill="none" />
+            </svg>
+        </div>
+        <div id="intro-text" class="intro-text">
+            <h1>Is Your Heart Racing?</h1>
+            <p>An interactive exploration of heart rates during surgery</p>
+        </div>
+    </section>
+
+    <!-- Case Intro -->
+    <section id="intro-second" class="hidden">
+        <div class="intro-text">
+            <h2>Every surgery tells a story through the heart</h2>
+            <p>Let's look at one together!</p>
+            <button id="start-button" class="action-button">Start</button>
+        </div>
+    </section>
 
     <!-- Scrolly-telling -->
-    <section id="story-section">
+    <section id="story-section" class="hidden">
         <div class="scrolly-container">
             <!-- body -->
             <div id="silhouette" class="silhouette" style="background-image: url('images/body_isolated.png');"></div>
@@ -35,6 +56,9 @@
 
     <!-- Bubble Section (Hidden Initially) -->
     <section id="bubble-section" style="display: none;">
+        <div class="end-button-container">
+            <button id="done-button" class="action-button">I'm all done!</button>
+        </div>
         <h1>Explore on your own</h1>
         <h4>There are hundreds of surgeries, all unique.</h4>
         <div class="container">
@@ -50,7 +74,6 @@
         </div>
         <div id="case-tooltip"></div>
         <div id="tooltip" class="tooltip"></div>
-        
     </section>
 
     <!-- Graph Section (Hidden Initially) -->
@@ -70,27 +93,17 @@
                         <div id="details"></div>
                         <div id="surgery-info"></div>
                     </div>
-                    
                 </div>
-                
-        
                 <div id="animation">
                     <h3>Heart Rate Over the Course of the Surgery</h3>
-                    <div id="graph">
-                    </div>
-                    
-        
+                    <div id="graph"></div>
                     <label id="label">
                         <div id="tracker">
                             <div id="percent"></div>
                             <div id="time-label"><time id="selected-time"></time></div>
                         </div>
-                        
                         <input type="range" id="slider" min="0" max="100" value="0" step="0.01">
-                        
                     </label>
-        
-        
                     <div class="legend">
                         <text id="legend-title">Legend:</text>
                         <div id="categories">
@@ -101,12 +114,20 @@
                         </div>
                     </div>
                 </div>
-                
-        
             </div>
         </div>
     </section>
+
+    <!-- Final Section -->
+    <section id="final-section" class="hidden">
+        <div class="intro-text">
+            <h1>So...is your heart racing?</h1>
+            <p>Conclusion</p>
+            <p>Insights</p>
+        </div>
+    </section>
+
+    <script type="module" src="intro.js"></script>
     <script type="module" src="bubbles_viz.js"></script>
 </body>
 </html>
-    
