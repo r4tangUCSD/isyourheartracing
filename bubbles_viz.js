@@ -451,7 +451,7 @@ async function setupCategoryDetailView(category) {
             .attr("x", 40)
             .attr("y", 5)
             .attr("text-anchor", "start")
-            .attr("fill", "white")
+            .attr("fill", "#dcdcdc")
             .style("opacity", 0.7)
             .style("font-size", "14px")
             .style("font-weight", 'bold')
@@ -558,13 +558,14 @@ async function setupCategoryDetailView(category) {
                 .attr("stroke-width", 1);
             
             // Highlight selected patient
-            d3.select(this)
+            const clickedCircle = d3.select(this);
+            clickedCircle
                 .attr("fill", "#ff3131")
                 .style("opacity", 1)
                 .attr("stroke", "#ff3131")
                 .attr("stroke-width", 2);
-
-            transitionToGraph(d);
+            
+            transitionToGraph(d, clickedCircle);
         });
         
     currentView = "category-detail";
@@ -587,6 +588,7 @@ function transitionToGraph(d) {
 
     }, 1000); // Matches fade-out duration
 }
+
 
 // Function to create an empty heart rate graph with instructions
 function createEmptyHeartRateGraph() {
@@ -870,11 +872,19 @@ function drawAllCategoryBubbles() {
         .on("mouseover", function(event, d) {
             d3.select(this).transition().duration(200).attr("fill", "#7ed957").style("opacity", 1);
 
+             // Calculate standard deviation for this category
+            const categoryPatients = patientsByCategoryId[d.data.id];
+            const stdDev = d3.deviation(categoryPatients, p => p.avg_hr);
+            const roundedStdDev = Math.round(stdDev * 10) / 10;
+
             // Show tooltip
             tooltip
                 .style("left", `${event.pageX + 10}px`)
                 .style("top", `${event.pageY - 75}px`)
-                .html(`<strong>${d.data.name}</strong><br>${d.data.count} surgeries<br>Avg. BPM: ${d.data.avgBPM}`)
+                .html(`<strong>${d.data.name}</strong><br>
+                    ${d.data.count} surgeries<br>
+                    Avg. BPM: ${d.data.avgBPM}<br>
+                    Avg. Std. Dev: ±${roundedStdDev}`)
                 .style("opacity", 1);
 
             console.log(tooltip)
@@ -898,13 +908,12 @@ function drawAllCategoryBubbles() {
         .on("click", function(event, d) {
             currentCategory = d.data.id;
             tooltip.style("opacity", 0);
-            console.log('girlie')
 
             showCategoryDetail(d);
 
             let surgeryContainer = d3.select("#surgery-description")
-            surgeryContainer.select("*").remove();
-            surgeryContainer.select("*").remove();
+            surgeryContainer.selectAll("*").remove();
+            
             surgeryContainer.append('div')
             .attr('id', 'surgery-name');
             //.text(currentCategory + ' Surgery Info');
@@ -913,6 +922,9 @@ function drawAllCategoryBubbles() {
             .attr("id", "words")
             .text(surgeryDescription[currentCategory]);
 
+            surgeryContainer.append('div')
+            .attr('id', 'click-more')
+            .text('Click Patient for More Details');
         });
 
     
@@ -1173,7 +1185,7 @@ function createWholeGraph() {
         .style("fill", "white")
         .style("font-weight", "bold")
         .style("opacity", 0.5)
-        .text(`Mean BPM: ${Math.round(mean)}    Confidence Interval [${ciLower}, ${ciUpper}]`);
+        .text(`Mean BPM: ${Math.round(mean)}    Two Std. Confidence Interval [${ciLower}, ${ciUpper}]`);
 
     legendSvg.append("text")
         .attr("x", margin.left + width/2)
@@ -1183,7 +1195,7 @@ function createWholeGraph() {
         .style("fill", "white")
         .style("font-weight", "bold")
         .style("opacity", 0.5)
-        .text(`95% of BPM fall within ±${bpmRange} of the Mean`);
+        .text(`75-95% of BPM fall within ±${bpmRange} of the Mean`);
 }
 
 // Initialize visualization when the page loads
