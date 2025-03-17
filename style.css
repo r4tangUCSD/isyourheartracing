@@ -186,8 +186,8 @@ h4 {
     background-color: rgba(61, 61, 61, 0.9);
     color: rgba(255, 255, 255, 0.7);
     padding: 8px;
-    border-radius: 15px;
-    border: rgba(255, 255, 255, 0.2) dotted 2px;
+    border-radius: 25px;
+    border: rgba(255, 255, 255, 0.3) dotted 2px;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s;
@@ -201,8 +201,8 @@ h4 {
     color: rgba(255, 255, 255, 0.7);
     padding-left: 15px;
     padding-right: 15px;
-    border-radius: 15px;
-    border: rgba(255, 255, 255, 0.3) dotted 2px;
+    border-radius: 10px;
+    border: rgba(255, 255, 255, 0.3) dotted 2.5px;
     pointer-events: none;
     opacity: 0.6;
     transition: opacity 0.3s;
