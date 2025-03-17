@@ -234,6 +234,11 @@ function handlingMissing() {
 
 
 function createGraph() {
+    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const container = d3.select("#graph").node();
+    const width = container.getBoundingClientRect().width - margin.left - margin.right;
+    const height = 375 - margin.top - margin.bottom;
+
     d3.select("#graph").selectAll("svg").remove();  
 
     svg = d3.select("#graph")
@@ -243,13 +248,11 @@ function createGraph() {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
     // Creates x axis scales
     endTime = Math.max(900, current)
     xScale = d3.scaleLinear()
     .domain([tenMinsAge, endTime]) // data values for x-axis
     .range([0, width]); // pixel range for the graph
-
 
     // x axis labels
     svg.append("text")
@@ -330,7 +333,7 @@ function createGraph() {
     .style("stroke-width", "1px")
     .style("opacity", "40%");
 
-    // create differet segments
+    // create different segments
     let segments = [];
     let segment;
     let segEnd;
@@ -384,8 +387,6 @@ function createGraph() {
         .style("stroke", "#7ed957") // Line color
         .style("stroke-width", 2); // Line width
     });
-
-
 }
 
 function animateSlider() {
@@ -505,15 +506,13 @@ function getPatientInfoByCaseid(caseid) {
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ The Magic ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 export function magic(caseId) {
-
     selectedCaseID = caseId;
 
     d3.csv("emergency_data/emergency_premium.csv")
     .then(patients => {
-        patient_info = patients
-        const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv"
+        patient_info = patients;
+        const filepath = "./heart_rate_data/case_" + selectedCaseID + ".csv";
         return d3.csv(filepath);
-
     })
     .then(data => {
         processedData = processCSV(data);
@@ -524,7 +523,7 @@ export function magic(caseId) {
 
         minTime = d3.min(processedData, d => d.second);
         maxTime = d3.max(processedData, d => d.second);
-        numHours = Math.ceil(maxTime/3600);        
+        numHours = Math.ceil(maxTime / 3600);
 
         timeScale = d3.scaleLinear()
         .domain([0, d3.max(processedData, d => d.second)])
@@ -540,11 +539,10 @@ export function magic(caseId) {
         maxHeartRate = 220 - patientAge;
 
         averageHeartRate = Math.round(d3.mean(processedData, d => d.heartrate));
-        // console.log(d3.mean(processedData, d => d.heartrate))
 
-        //surgery details
+        // surgery details
         surgeryType = patient_details.optype;
-        infoTitle.textContent = 'Case ' + selectedCaseID;
+        infoTitle.textContent = 'Details for Case ' + selectedCaseID;
         surgeryInfo.innerHTML = `
         <div id="left">
             <p>Age: ${patientAge}</p>
@@ -558,7 +556,7 @@ export function magic(caseId) {
             <p>Hypertension: ${patient_details.preop_htn === "1" ? "Yes" : "No"}</p>
             <p>Diabetes: ${patient_details.preop_dm === "1" ? "Yes" : "No"}</p>
             <p>Average Heart Rate: ${averageHeartRate}</p>
-            <p>Hospital Stay: ${Math.round((patient_details.dis - patient_details.adm)/3600)} days</p>
+            <p>Hospital Stay: ${Math.round((patient_details.dis - patient_details.adm) / 3600)} days</p>
             <p>Mortality: ${patient_details.death_inhosp === "1" ? "Yes" : "No"}</p>
         </div>`;
 
@@ -570,62 +568,73 @@ export function magic(caseId) {
         // instruction.append('svg').append('line').attr("width", 100);
 
         // Set Up
-        slider.step = 1/maxTime
+        slider.step = 1 / maxTime;
         currentTime();
         instruction.style.opacity = 0;
         animating = true;
         animateSlider();
-            
+
         slider.addEventListener('input', () => {
             currentTime();
         });
 
-    })
-
-    drawBackBubble();
+        // Call drawBackBubble after updating selectedCaseID
+        drawBackBubble();
+    });
 }
-
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Back Button ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 function drawBackBubble() {
     const backBubble = d3.select("#back-bubble");
     // Clear previous contents before appending a new SVG
+    backBubble.selectAll("*").remove();
     
     // Append new SVG
-    svgCircle = backBubble
+    const svgCircle = backBubble
         .append("svg")
-        .attr("width", 600)
+        .attr("width", 500)
         .attr("height", 75);
 
-    // console.log(svgCircle)
-
-    // Append a circle inside the SVG
+    // Append a circle inside the SVG (with your requested changes)
     svgCircle.append("circle")
         .attr("cx", 260)  // Center the circle
-        .attr("cy", -125)
-        .attr("r", 200)
+        .attr("cy", -125) // Keeps the same positioning as requested
+        .attr("r", 200)  // Large circle size as specified
         .style("fill", "#333739")
         .style("opacity", 0.85)
-        .on("mouseover", function(event, d) {
+        .on("mouseover", function(event) {
             d3.select(this)
                 .transition()
-                // .duration(200)
                 .style("fill", "#7ed957")
-                .style("opacity", 1)
+                .style("opacity", 1);
         })
-        .on("mouseout", function(event, d) {
+        .on("mouseout", function(event) {
             d3.select(this)
                 .transition()
-                // .duration(200)
                 .style("fill", "#333739")
-                .style("opacity", 0.85)
+                .style("opacity", 0.85);
         })
         .on("click", async function(event, d) {
-            
             transitionToBubble(d);
-        })         
+        });
 
+    // Add text inside the circle
+    svgCircle.append("text")
+        .attr("x", 260)  // Center the text horizontally
+        .attr("y", 30) // Adjusted for better centering
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .style("fill", "white")
+        .style("font-size", "16px")
+        .style("font-weight", "bold")
+        .style("pointer-events", "none")  // Prevents text from blocking clicks
+        .text("Select a different case");
+
+    // Add text to the right of the SVG
+    backBubble.append("h1")
+        .attr("id", "case-text")
+        .text(`Case ${selectedCaseID}`);
 }
 
 function transitionToBubble(d) {

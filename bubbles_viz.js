@@ -572,11 +572,11 @@ async function setupCategoryDetailView(category) {
 }
 
 function transitionToGraph(d) {
-    // Fade out the story section
+    // Fade out the bubble section
     document.getElementById('bubble-section').style.opacity = '0';
 
     setTimeout(() => {
-        // Hide the story and show visualization
+        // Hide the bubble section and show the graph section
         document.getElementById('bubble-section').style.display = 'none';
         document.getElementById('graph-section').style.display = 'block';
 
