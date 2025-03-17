@@ -34,25 +34,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // intro animation sequence
     function startIntroSequence() {
-        // 1: animate heartbeat line
+        // 1: animate heartbeat line - starting from left and ending in the middle
         setTimeout(() => {
-            // generate heartbeat EKG pattern
+            // generate heartbeat EKG pattern - using half width to stop halfway
             const svgPath = document.getElementById('heartbeat-path');
-            const pathData = generateHeartbeatPath(1000, 50, 6); // width, baseline, # of beats
+            const pathData = generateHeartbeatPath(700, 50, 3); // width, baseline, # of beats - reduced to stop halfway
             svgPath.setAttribute('d', pathData);
     
             // trigger animation
             svgPath.style.animation = 'none';
             svgPath.offsetHeight; // Trigger reflow
             svgPath.style.animation = 'dash 3s ease-in-out forwards';
-            }, 500);
+        }, 500);
+
+        // show group names and icon
+        setTimeout(() => {
+            const groupCredits = document.getElementById('group-credits');
+            const teamIcon = document.getElementById('team-icon');
+            
+            groupCredits.classList.add('visible');
+            teamIcon.classList.add('visible');
+        }, 4000);
 
         // 2: fade in the intro text
         setTimeout(() => {
             introText.classList.add('visible');
+            
+            const titleElement = document.querySelector('#intro-text h1');
+            if (titleElement) {
+                const titleText = titleElement.textContent;
+                const updatedText = titleText.replace('Racing', '<span class="racing-text">Racing</span>');
+                titleElement.innerHTML = updatedText;
+            }
+            
+            // change racing text to red after a delay
+            setTimeout(() => {
+                const racingSpan = document.querySelector('.racing-text');
+                if (racingSpan) {
+                    racingSpan.style.color = '#ff3131';
+                }
+            }, 2000);
         }, 3500);
 
-        // 3: transition to case intro screen
+        // 3: transition to case intro screen - increased delay for longer reading time
         setTimeout(() => {
             fadeTransition(introSection, introSecond);
             
@@ -66,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     startButton.classList.add('visible');
                 }, 1000);
             }, 1000);
-        }, 7000);
+        }, 12000); // IN ms
     }
 
     // function to handle fade transition between sections
@@ -138,7 +162,7 @@ function generateHeartbeatPath(width, baseline, numBeats) {
     }
     
     return path;
-  }
+}
 
 // listen for custom event from story.js when scrollytelling is done
 document.addEventListener('scrollytellingComplete', function() {

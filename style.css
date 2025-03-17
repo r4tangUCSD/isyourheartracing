@@ -22,16 +22,65 @@ section {
     color: #fff;
     text-align: center;
   }
-  
-  .intro-text {
-    opacity: 0;
-    transition: opacity 1.5s ease-in-out;
+
+  #intro-section .intro-text {
+    position: absolute !important;
+    bottom: 55% !important;
+    left: 50%;
+    transform: translateX(-50%);
     max-width: 80%;
     z-index: 2;
   }
   
   .intro-text.visible {
     opacity: 1;
+  }
+
+  .racing-text {
+    transition: color 1.5s ease-in-out;
+    color: #ffffff; /* starts white, changes to red */
+  }
+
+  .group-credits {
+    position: absolute;
+    top: 72.5%;
+    left: 700px;
+    transform: translateY(-50%);
+    text-align: left;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+    z-index: 2;
+  }
+  
+  .group-credits.visible {
+    opacity: 1;
+  }
+
+  .group-credits h3 {
+    margin-bottom: 10px;
+  }
+  
+  .group-credits p {
+    margin: 5px 0;
+  }
+
+  .team-icon {
+    position: absolute;
+    top: 73%;
+    left: 1250px; 
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+    z-index: 2;
+  }
+  
+  .team-icon.visible {
+    opacity: 1;
+  }
+  
+  .team-icon img {
+    max-width: 50px;
+    height: auto;
   }
 
 /* Intro Heartline Animation */
@@ -43,13 +92,12 @@ section {
     height: 100px;
     display: flex;
     justify-content: flex-start; 
-    align-items: center;
+    align-items: left;
     z-index: 1;
-    /* padding-left: 10%; */
   }
   
   #heartbeat-svg {
-    width: 80%;
+    width: 100%;
     height: 100px;
   }
   
@@ -225,7 +273,7 @@ h4 {
     width: 100%;
     height: 100%;
     display: flex;
-     align-items: center; 
+    align-items: center; 
     justify-content: space-between;
     pointer-events: none;
     padding: 0 50px; 
