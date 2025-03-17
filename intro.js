@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             const finalText = finalSection.querySelector('.intro-text');
             finalText.classList.add('visible');
-        }, 500);
+        }, 850);
     });
 
     // intro animation sequence
