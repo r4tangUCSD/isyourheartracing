@@ -202,6 +202,24 @@ async function showCategoryDetail(category) {
         });
 }
 
+export function deselectCurrentPatient() {
+    // Reset the current patient selection
+    currentPatient = null;
+
+    // Clear the heart rate graph
+    d3.select("#chart").html('<div class="no-data">No patient selected</div>');
+
+    // Hide the patient info panel if it exists
+    d3.select("#patient-info-panel").style("display", "none");
+
+    // Reset the appearance of all patient circles
+    d3.selectAll(".patient")
+        .attr("fill", "#7b7878")
+        .style("opacity", 0.7)
+        .attr("stroke", "#7b7878")
+        .attr("stroke-width", 1);
+}
+
 // Extract the setup functionality into a separate function
 async function setupCategoryDetailView(category) {
     tooltip.style("opacity", 0);
@@ -595,7 +613,7 @@ function transitionToGraph(d) {
 
 
 // Function to create an empty heart rate graph with instructions
-function createEmptyHeartRateGraph() {
+export function createEmptyHeartRateGraph() {
     const margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const chartContainer = document.getElementById("chart");
     const containerWidth = chartContainer.clientWidth;

@@ -1,5 +1,7 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 
+import { deselectCurrentPatient, createEmptyHeartRateGraph } from './bubbles_viz.js';
+
 // GLOBAL VARIABLES
 
 let animating;
@@ -654,6 +656,10 @@ function transitionToBubble(d) {
             d3.selectAll("#graph svg").remove();
             // d3.selectAll("#tooltip").remove();
             d3.selectAll("#back-bubble svg").remove();
+
+            // Deselect the current patient and create an empty heart rate graph
+            deselectCurrentPatient();
+            createEmptyHeartRateGraph();
 
             // Call the magic function with the caseid
             magic(d.id);
