@@ -199,7 +199,8 @@ h4 {
     position: absolute;
     background-color: rgba(61, 61, 61, 0.9);
     color: rgba(255, 255, 255, 0.7);
-    padding: 8px;
+    padding-left: 15px;
+    padding-right: 15px;
     border-radius: 15px;
     border: rgba(255, 255, 255, 0.3) dotted 2px;
     pointer-events: none;
@@ -208,7 +209,7 @@ h4 {
     z-index: 100;
     text-align: center;
     display: none;
-    max-width: 300px;
+    max-width: 250px;
 }
 
 .back-button {
@@ -263,9 +264,9 @@ h4 {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 3.5em;
-    margin-bottom: 3em;
-    padding-bottom: 4em;
-    border-bottom: 1.5px solid rgba(255, 255, 255, 0.5);
+    /* margin-bottom: 3em; */
+    /* padding-bottom: 4em; */
+    /* border-bottom: 1.5px solid rgba(255, 255, 255, 0.5); */
 }
 
 #average {
@@ -314,7 +315,13 @@ h4 {
     width: 430px;
 }
 
+#details {
+    padding: 0.75em;
+    line-height: 8px;
+
+}
 #surgery-info {
+    padding: 0.25em;
     line-height: 8px;
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -327,7 +334,6 @@ h4 {
 #label {
     /* margin-left: 4em; */
     width: 84%;
-
 }
 #tracker {
     display: grid;
@@ -368,32 +374,34 @@ h4 {
     background-color: rgb(126, 217, 87);
 }
 
-
-#post-animate {
-    color: white;
-    text-align: center;
-    padding-top: 1em;
-}
-
 .legend {
+    padding-left: 1em;
     color: white;
     opacity: 75%;
+    margin-top: 1em;
+    display: flex;
+    align-content: center;
+}
+
+#legend-title{
+    padding: 1em;
+    padding-top: 1.75em;
+}
+
+#categories {
     display: flex;
     gap: 6px;  
     margin-block: 20px;
     width: 100%;
     align-content: center;
     flex: 1;
-    padding-left: 1em;
-    margin-top: 1em;
-    
 }
 
 /* Heart rate categories */
 
 #low {
     background-color: rgba(0, 154, 238, 0.25);
-    width: 175px;
+    width: 150px;
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: center;
@@ -404,7 +412,7 @@ h4 {
 
 #resting {
     background-color: rgba(45, 180, 30, 0.25);
-    width: 175px;
+    width: 150px;
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: center;
@@ -414,7 +422,7 @@ h4 {
 
 #moderate {
     background-color: rgba(254, 237, 83, 0.25);   
-    width: 175px;
+    width: 150px;
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: center;
@@ -423,7 +431,7 @@ h4 {
 
 #high {
     background-color: rgb(246, 60, 76, 0.25);
-    width: 175px;
+    width: 150px;
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: center;

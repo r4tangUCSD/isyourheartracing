@@ -534,12 +534,12 @@ async function setupCategoryDetailView(category) {
             caseTooltip
                 .style("left", `${event.pageX + 10}px`)
                 .style("top", `${event.pageY -75}px`)
-                .html(`<strong>Patient ID:</strong> ${d.id}<br>
+                .html(`<p> <strong>Patient ID:</strong> ${d.id}<br>
                         <strong>Age:</strong> ${d.age}<br>
+                        <strong>Surgery name:</strong> ${d.opname}<br>
                         <strong>Average HR:</strong> ${Math.floor(d.avg_hr)} bpm<br>
                         <strong>Duration:</strong> ${durationTime}<br>
-                        <strong>Description:</strong> ${d.dx}<br>
-                        <strong>Surgery name:</strong> ${d.opname}`)
+                        `)
                 .style("opacity", 1)
                 .style('display', 'block');
                 

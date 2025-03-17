@@ -5,7 +5,7 @@ import { deselectCurrentPatient, createEmptyHeartRateGraph } from './bubbles_viz
 // GLOBAL VARIABLES
 
 let animating;
-let instruction = d3.select('#post-animate');
+// let instruction = d3.select('#post-animate');
 
 // data processing
 let patient_info;
@@ -45,6 +45,7 @@ let maxHeartRate = 220;
 let surgeryType;
 let infoTitle = document.getElementById('title');
 let surgeryInfo = document.getElementById('surgery-info');
+let detailed = document.getElementById('details');
 
 //slider and time
 let timeScale; 
@@ -402,7 +403,7 @@ function animateSlider() {
         if (sliderValue >= 100) {
             animating = false;
             slider.value = maxTime;
-            instruction.style.opacity = 0.3;
+            // instruction.style.opacity = 0.3;
             clearInterval(interval);
         } else {
             sliderValue += 0.175; // Adjust step size based on range
@@ -545,6 +546,7 @@ export function magic(caseId) {
         // surgery details
         surgeryType = patient_details.optype;
         infoTitle.textContent = 'Details for Case ' + selectedCaseID;
+        detailed.innerHTML = `<strong>Description: </strong>${patient_details.dx}<br>`
         surgeryInfo.innerHTML = `
         <div id="left">
             <p>Age: ${patientAge}</p>
@@ -572,7 +574,7 @@ export function magic(caseId) {
         // Set Up
         slider.step = 1 / maxTime;
         currentTime();
-        instruction.style.opacity = 0;
+        // instruction.style.opacity = 0;
         animating = true;
         animateSlider();
 
