@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             // generate heartbeat EKG pattern - using half width to stop halfway
             const svgPath = document.getElementById('heartbeat-path');
-            const pathData = generateHeartbeatPath(700, 50, 3); // width, baseline, # of beats - reduced to stop halfway
+            const pathData = generateHeartbeatPath(500, 50, 3); // width, baseline, # of beats - reduced to stop halfway
             svgPath.setAttribute('d', pathData);
     
             // trigger animation
