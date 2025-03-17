@@ -207,15 +207,8 @@ h4 {
     transition: opacity 0.3s;
     z-index: 100;
     text-align: center;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     display: none;
-=======
     max-width: 300px;
->>>>>>> Stashed changes
-=======
-    max-width: 300px;
->>>>>>> Stashed changes
 }
 
 .back-button {
