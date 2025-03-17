@@ -93,82 +93,6 @@ export async function loadData() {
     }
 }
 
-// Create a function to display patient information panel
-function displayPatientInfo(patient) {
-    // Create or update the info panel
-    let infoPanel = d3.select("#patient-info-panel");
-    
-    if (infoPanel.empty()) {
-        // Create the panel if it doesn't exist
-        infoPanel = d3.select(".chart-container")
-            .append("div")
-            .attr("id", "patient-info-panel")
-            .style("color", "#a5a2a2")
-            .style("display", "flex")
-            .style("flex-direction", "column") // Stack elements vertically
-            .style("align-items", "center") // Center everything
-            .style("margin-top", "50px")
-            .style("font-size", "20px")
-            .style("padding", "10px")
-    }
-    
-    // Clear existing content
-    infoPanel.html("");
-    
-     // Create a centered container for the patient details (to avoid left shifting)
-     const detailsContainer = infoPanel.append("div")
-     .style("display", "flex")
-     .style("justify-content", "center") // Center the two columns
-     .style("width", "60%") // Adjust width so it's balanced
-     .style("max-width", "600px") // Prevent it from getting too wide
-     .style("gap", "40px"); // Adds space between the columns
-
- // Create left column
- const leftColumn = detailsContainer.append("div")
-     .style("flex", "1")
-     .style("text-align", "center"); // Center text inside column
-
- // Create right column
- const rightColumn = detailsContainer.append("div")
-     .style("flex", "1")
-     .style("text-align", "center"); // Center text inside column
-
- // Add info to left column
- leftColumn.html(`
-     <div><strong>Case ID:</strong> ${patient.id}</div>
-     <div><strong>Sex:</strong> ${patient.sex}</div>
-     <div><strong>Age:</strong> ${patient.age}</div>
-     <div><strong>BMI:</strong> ${patient.bmi.toFixed(1)}</div>
- `);
-
- // Add info to right column
- rightColumn.html(`
-     <div><strong>Location:</strong> ${patient.position || "Unknown"}</div>
-     <div><strong>Mortality:</strong> ${patient.death_inhosp}</div>
-     <div><strong>Hypertension:</strong> ${patient.preop_htn}</div>
-     <div><strong>Diabetes:</strong> ${patient.preop_dm}</div>
- `);
-
- // Add footer text centered at the bottom
- infoPanel.append("div")
-     .style("margin-top", "15px")
-     .style("color", "#dcdcdc")
-     .style("font-size", "16px")
-     .style("font-style", "italic")
-     .style("text-align", "center")
-     .text("Click a case for more.");
-}
-
-// Hide patient info panel when no patient is selected
-function hidePatientInfo() {
-    d3.select("#patient-info-panel").style("display", "none");
-}
-
-// Show patient info panel
-function showPatientInfo() {
-    d3.select("#patient-info-panel").style("display", "flex");
-}
-
 
 // Helper to format category names
 function formatCategoryName(categoryId) {
@@ -491,6 +415,48 @@ async function setupCategoryDetailView(category) {
         .style("opacity", 0.8)
         .style("font-weight", 'bold')
         .text("Average Heart Rate (bpm)");
+
+        // Add size legend
+        const legendX = width / 2 - 200;
+        const legendY = height - 30; // Position at bottom
+        const legendGroup = svg.append("g")
+            .attr("class", "size-legend")
+            .attr("transform", `translate(${legendX}, ${legendY})`);
+        
+        // Add small filled bubble
+        legendGroup.append("circle")
+            .attr("cx", 0)
+            .attr("cy", 0)
+            .attr("r", 10)
+            .attr("fill", "#7b7878")
+            .style("opacity", 0.5)
+            .attr("stroke", "#7b7878")
+            .attr("padding", 1)
+            .attr("stroke-width", 1);
+        
+        // Add larger dotted outline bubble
+        legendGroup.append("circle")
+            .attr("cx", 0)
+            .attr("cy", 0)
+            .attr("r", 22)
+            .attr("stroke", "#7b7878")
+            .attr("stroke-width", 1.5)
+            .attr("fill", "none")
+            .attr("stroke-dasharray", "3,3")
+            .attr("padding", 1)
+            .attr("opacity", 0.7);
+        
+        // Add legend text
+        legendGroup.append("text")
+            .attr("x", 40)
+            .attr("y", 5)
+            .attr("text-anchor", "start")
+            .attr("fill", "white")
+            .style("opacity", 0.7)
+            .style("font-size", "14px")
+            .style("font-weight", 'bold')
+            .text("Bubble size refers to surgery duration");
+    
     
     const sortedPatients = [...patients].sort((a, b) => 
         sizeScale(b.duration) - sizeScale(a.duration)
@@ -580,6 +546,8 @@ async function setupCategoryDetailView(category) {
             
             // Hide tooltip
             caseTooltip.style("opacity", 0).style('display', 'none');
+            createEmptyHeartRateGraph();
+            
         })
         .on("click", async function(event, d) {
             // Reset all patient circles
@@ -628,7 +596,7 @@ function createEmptyHeartRateGraph() {
     const containerHeight = chartContainer.clientHeight;
 
     const width = 750 - margin.left - margin.right;
-    const height = 375 - margin.top - margin.bottom - 40;
+    const height = 375 - margin.top - margin.bottom - 15;
 
     d3.select("#chart").selectAll("*").remove();
 
@@ -938,8 +906,8 @@ function drawAllCategoryBubbles() {
             surgeryContainer.select("*").remove();
             surgeryContainer.select("*").remove();
             surgeryContainer.append('div')
-            .attr('id', 'surgery-name')
-            .text(currentCategory + ' Surgery Info');
+            .attr('id', 'surgery-name');
+            //.text(currentCategory + ' Surgery Info');
 
             surgeryContainer.append('div')
             .attr("id", "words")
@@ -966,16 +934,8 @@ function drawAllCategoryBubbles() {
         .style("pointer-events", "none")
         .text(d => d.data.avgBPM > 0 ? `Avg. BPM: ${d.data.avgBPM}` : "");
 
-    currentView = "categories";
-}
 
-// Helper function to convert seconds to HH:MM:SS format
-function secondsToHHMMSS(seconds) {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    currentView = "categories";
 }
 
 // The createWholeGraph function
@@ -985,22 +945,24 @@ function createWholeGraph() {
         return;
     }
     
-    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+    const margin = { top: 20, right: 30, bottom: 15, left: 50 }; 
     const chartContainer = document.getElementById("chart");
     const containerWidth = chartContainer.clientWidth;
     const containerHeight = chartContainer.clientHeight;
 
-    const width = 750 - margin.left - margin.right;
-    const height = 375 - margin.top - margin.bottom - 40;
-
+    // Clear existing chart
     d3.select("#chart").selectAll("*").remove();
-
+    
+    // Create main SVG for the chart
     const svg = d3.select("#chart")
         .append("svg")
         .attr("width", containerWidth)
         .attr("height", containerHeight)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    const width = 750 - margin.left - margin.right;
+    const height = 375 - margin.top - margin.bottom - 40;
 
     // Add axis labels
     svg.append("text")
@@ -1026,12 +988,12 @@ function createWholeGraph() {
 
     svg.append("text")
         .attr("x", width / 2 - 40)
-        .attr("y", height - 280)
+        .attr("y", height - 305)
         .style("fill", "rgb(126, 217, 87, 0.65)")
         .style("font-weight", "bold")
         .text('Case ' + selectedCaseID);
     
-        // Ensure we use the full dataset range without filtering NaN values
+    // Ensure we use the full dataset range without filtering NaN values
     const fullData = processedData; 
 
     if (fullData.length === 0) {
@@ -1041,7 +1003,6 @@ function createWholeGraph() {
 
     // Find max time value without slicing or filtering
     const maxTime = d3.max(fullData, d => d.second);
-    // let maxTimeMins = Math.floor(maxTime/60)
 
     // Creates x-axis scale
     const xScale = d3.scaleLinear()
@@ -1063,7 +1024,6 @@ function createWholeGraph() {
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
         const remainingMinutes = minutes % 60;
-        // console.log(hours, remainingMinutes)
         return `${hours.toString().padStart(2, "0")}:${remainingMinutes.toString().padStart(2, "0")}`;
     }
 
@@ -1143,7 +1103,87 @@ function createWholeGraph() {
         .attr("d", line)
         .style("fill", "none")
         .style("stroke", "#7ed957")
-        .style("stroke-width", 2);    
+        .style("stroke-width", 2);
+    
+    // Calculate mean heart rate and confidence interval
+    const validHeartRates = fullData.filter(d => !isNaN(d.heartrate)).map(d => d.heartrate);
+    const mean = d3.mean(validHeartRates);
+    const stdDev = d3.deviation(validHeartRates);
+    const n = validHeartRates.length;
+    
+    // Calculate standard error
+    const stdError = stdDev / Math.sqrt(n);
+    
+    // Calculate the range that includes 95% of BPM values (±1.96 standard deviations)
+    const bpmRange = Math.round(1.96 * stdDev * 10) / 10;
+
+    // Calculate 95% confidence interval (using 1.96 for 95% CI)
+    const ciLower = Math.round((mean - 1.96 * stdDev) * 10) / 10;
+    const ciUpper = Math.round((mean + 1.96 * stdDev) * 10) / 10; 
+    
+    // Draw mean line
+    svg.append("line")
+        .attr("x1", 0)
+        .attr("y1", yScale(mean))
+        .attr("x2", width)
+        .attr("y2", yScale(mean))
+        .style("stroke", "white")
+        .style("stroke-width", 2)
+        .style("stroke-dasharray", "5,5")
+        .style("opacity", 0.5);
+    
+    // Create separate SVG for legend and CI info below the main chart
+    const legendHeight = 60; // Height for the legend area
+    
+    const legendSvg = d3.select("#chart")
+        .append("svg")
+        .attr("width", containerWidth)
+        .attr("height", legendHeight)
+        .style("display", "block") // Force block display
+        .style("padding-bottom", "20px")
+        .style("margin-top", "0px"); // Add space between chart and legend
+    
+    // Add legend for mean line
+    // legendSvg.append("line")
+    //     .attr("x1", margin.left + 10)
+    //     .attr("y1", 15)
+    //     .attr("x2", margin.left + 30)
+    //     .attr("y2", 15)
+    //     .style("stroke", "white")
+    //     .style("stroke-width", 2)
+    //     .style("stroke-dasharray", "5,5")
+    //     .style("opacity", 0.7);
+    
+    // legendSvg.append("text")
+    //     .attr("x", margin.left + 35)
+    //     .attr("y", 18)
+    //     .text("Mean Heart Rate")
+    //     .style("font-size", "12px")
+    //     .style("fill", "white")
+    //     .style("opacity", 0.7);
+
+    
+    // Add confidence interval text
+
+    legendSvg.append("text")
+        .attr("x", margin.left + width/2)
+        .attr("y", 20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("fill", "white")
+        .style("font-weight", "bold")
+        .style("opacity", 0.5)
+        .text(`Mean BPM: ${Math.round(mean)}    Confidence Interval [${ciLower}, ${ciUpper}]`);
+
+    legendSvg.append("text")
+        .attr("x", margin.left + width/2)
+        .attr("y", 45)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("fill", "white")
+        .style("font-weight", "bold")
+        .style("opacity", 0.5)
+        .text(`95% of BPM fall within ±${bpmRange} of the Mean`);
 }
 
 // Initialize visualization when the page loads
@@ -1177,3 +1217,81 @@ window.addEventListener('resize', () => {
         createWholeGraph();
     }
 });
+
+/* Unused Code */
+
+// Create a function to display patient information panel
+// function displayPatientInfo(patient) {
+//     // Create or update the info panel
+//     let infoPanel = d3.select("#patient-info-panel");
+    
+//     if (infoPanel.empty()) {
+//         // Create the panel if it doesn't exist
+//         infoPanel = d3.select(".chart-container")
+//             .append("div")
+//             .attr("id", "patient-info-panel")
+//             .style("color", "#a5a2a2")
+//             .style("display", "flex")
+//             .style("flex-direction", "column") // Stack elements vertically
+//             .style("align-items", "center") // Center everything
+//             .style("margin-top", "50px")
+//             .style("font-size", "20px")
+//             .style("padding", "10px")
+//     }
+    
+//     // Clear existing content
+//     infoPanel.html("");
+    
+//      // Create a centered container for the patient details (to avoid left shifting)
+//      const detailsContainer = infoPanel.append("div")
+//      .style("display", "flex")
+//      .style("justify-content", "center") // Center the two columns
+//      .style("width", "60%") // Adjust width so it's balanced
+//      .style("max-width", "600px") // Prevent it from getting too wide
+//      .style("gap", "40px"); // Adds space between the columns
+
+//  // Create left column
+//  const leftColumn = detailsContainer.append("div")
+//      .style("flex", "1")
+//      .style("text-align", "center"); // Center text inside column
+
+//  // Create right column
+//  const rightColumn = detailsContainer.append("div")
+//      .style("flex", "1")
+//      .style("text-align", "center"); // Center text inside column
+
+//  // Add info to left column
+//  leftColumn.html(`
+//      <div><strong>Case ID:</strong> ${patient.id}</div>
+//      <div><strong>Sex:</strong> ${patient.sex}</div>
+//      <div><strong>Age:</strong> ${patient.age}</div>
+//      <div><strong>BMI:</strong> ${patient.bmi.toFixed(1)}</div>
+//  `);
+
+//  // Add info to right column
+//  rightColumn.html(`
+//      <div><strong>Location:</strong> ${patient.position || "Unknown"}</div>
+//      <div><strong>Mortality:</strong> ${patient.death_inhosp}</div>
+//      <div><strong>Hypertension:</strong> ${patient.preop_htn}</div>
+//      <div><strong>Diabetes:</strong> ${patient.preop_dm}</div>
+//  `);
+
+//  // Add footer text centered at the bottom
+//  infoPanel.append("div")
+//      .style("margin-top", "15px")
+//      .style("color", "#dcdcdc")
+//      .style("font-size", "16px")
+//      .style("font-style", "italic")
+//      .style("text-align", "center")
+//      .text("Click a case for more.");
+// }
+
+// // Hide patient info panel when no patient is selected
+// function hidePatientInfo() {
+//     d3.select("#patient-info-panel").style("display", "none");
+// }
+
+// // Show patient info panel
+// function showPatientInfo() {
+//     d3.select("#patient-info-panel").style("display", "flex");
+// }
