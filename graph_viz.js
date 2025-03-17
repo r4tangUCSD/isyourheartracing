@@ -1,6 +1,10 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 
+<<<<<<< Updated upstream
 import { deselectCurrentPatient, createEmptyHeartRateGraph } from './bubbles_viz.js';
+=======
+// import { createEmptyHeartRateGraph } from "./bubbles_viz";
+>>>>>>> Stashed changes
 
 // GLOBAL VARIABLES
 
@@ -648,6 +652,9 @@ function transitionToBubble(d) {
         document.getElementById('graph-section').style.display = 'none';
         document.getElementById('bubble-section').style.display = 'block';
 
+        // createEmptyHeartRateGraph();
+
+
         // Apply fade-in effect with a slight delay
         setTimeout(() => {
             document.getElementById('bubble-section').style.opacity = '1';
@@ -662,7 +669,7 @@ function transitionToBubble(d) {
             createEmptyHeartRateGraph();
 
             // Call the magic function with the caseid
-            magic(d.id);
+            // magic(d.id);
         }, 300);
 
     }, 1000); // Matches fade-out duration

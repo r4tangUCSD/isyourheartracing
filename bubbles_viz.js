@@ -222,6 +222,7 @@ export function deselectCurrentPatient() {
 
 // Extract the setup functionality into a separate function
 async function setupCategoryDetailView(category) {
+    console.log('wjabk')
     tooltip.style("opacity", 0);
     // Clear previous content
     svg.selectAll("*").remove();
@@ -615,12 +616,11 @@ function transitionToGraph(d) {
 // Function to create an empty heart rate graph with instructions
 export function createEmptyHeartRateGraph() {
     const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+    const width = 750 - margin.left - margin.right;
+    const height = 375 - margin.top - margin.bottom - 15;
     const chartContainer = document.getElementById("chart");
     const containerWidth = chartContainer.clientWidth;
     const containerHeight = chartContainer.clientHeight;
-
-    const width = 750 - margin.left - margin.right;
-    const height = 375 - margin.top - margin.bottom - 15;
 
     d3.select("#chart").selectAll("*").remove();
 
@@ -1019,6 +1019,12 @@ function createWholeGraph() {
         .style("font-weight", "bold")
         .style("opacity", 0.6)
         .text("Heart Rate (bpm)");
+
+    svg.append("text")
+    .attr("x", width / 2 + 150)
+    .attr("y", height - 305)
+    .style("fill", "rgba(255,255,255,0.5)")
+    .text("- - - - Average bpm");
 
     svg.append("text")
         .attr("x", width / 2 - 40)

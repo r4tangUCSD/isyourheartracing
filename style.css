@@ -201,13 +201,17 @@ h4 {
     color: rgba(255, 255, 255, 0.7);
     padding: 8px;
     border-radius: 15px;
-    border: rgba(255, 255, 255, 0.2) dotted 2px;
+    border: rgba(255, 255, 255, 0.3) dotted 2px;
     pointer-events: none;
     opacity: 0.6;
     transition: opacity 0.3s;
     z-index: 100;
     text-align: center;
+<<<<<<< Updated upstream
     display: none;
+=======
+    max-width: 300px;
+>>>>>>> Stashed changes
 }
 
 .back-button {
