@@ -35,6 +35,10 @@ h1 {
     font-size: 3.5em;
 }
 
+h2 {
+    text-align: center;
+}
+
 h3 {
     text-align: center;
     color: rgba(255, 255, 255, 0.75);
@@ -124,7 +128,7 @@ h4 {
 
 .description {
     font-size: 1.2rem;
-    line-height: 1.6;
+    line-height: 1.6px;
     width: 75%;
 }
 
@@ -304,26 +308,16 @@ h4 {
 }
 
 #information {
-    #title {
-        text-align: center;
-        font-weight: bold;
-        font-style: italic;
-        color:rgba(255, 255, 255, 0.6);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-        margin-bottom: 0.25em;
-        padding: 0.25em;
-    }
     margin-top: 10px;
     padding: 0.5em;
     color: rgba(255, 255, 255, 0.5);
     
-    /* border: rgba(255, 255, 255, 0.4), 2px, solid; */
     width: 430px;
 }
 
 #details {
-    padding: 0.75em;
-    line-height: 8px;
+    /* padding: 0.75em; */
+    line-height: 20px;
 
 }
 #surgery-info {

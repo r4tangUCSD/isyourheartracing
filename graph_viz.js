@@ -3,7 +3,6 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 import { deselectCurrentPatient, createEmptyHeartRateGraph, explored } from './bubbles_viz.js';
 // GLOBAL VARIABLES
 
-let caseTitle = d3.select('#case-title');
 let animating;
 // let instruction = d3.select('#post-animate');
 
@@ -43,7 +42,6 @@ let patientAge;
 let patient_details;
 let maxHeartRate = 220;
 let surgeryType;
-let infoTitle = document.getElementById('title');
 let surgeryInfo = document.getElementById('surgery-info');
 let detailed = document.getElementById('details');
 
@@ -548,7 +546,7 @@ export function magic(caseId) {
 
         // surgery details
         surgeryType = patient_details.optype;
-        infoTitle.textContent = 'Details for Case ' + selectedCaseID;
+        // infoTitle.textContent = 'Details for Case ' + selectedCaseID;
         detailed.innerHTML = `<strong>Description: </strong>${patient_details.dx}<br>`
         surgeryInfo.innerHTML = `
         <div id="left">
@@ -587,6 +585,7 @@ export function magic(caseId) {
 
         // Call drawBackBubble after updating selectedCaseID
         drawBackBubble();
+        
         drawDoneBubble();
     });
 
@@ -630,6 +629,13 @@ function drawBackBubble() {
             transitionToBubble(d);
         });
 
+    svgCircle.append("text").attr("x", 800)  // Center the text horizontally
+        .attr("y", 50).attr("text-anchor", "middle")
+        .attr("text-align", "middle")
+        .style("fill", "white")
+        .style("font-size", "32px")
+        .style("font-weight", "bold").text("Case " + selectedCaseID)
+
     // Add text inside the circle
     svgCircle.append("text")
         .attr("x", 260)  // Center the text horizontally
@@ -644,12 +650,11 @@ function drawBackBubble() {
         .text("Back");
 
     // Add text to the right of the SVG
-    caseTitle.innerHTML = `Case ${selectedCaseID}`;
 }
 
 function drawDoneBubble() {
     svgCircle.append("circle")
-    .attr("cx", 1100)  // Center the circle
+    .attr("cx", 1240)  // Center the circle
     .attr("cy", -125) // Keeps the same positioning as requested
     .attr("r", 200)  // Large circle size as specified
     .style("fill", "#333739")
@@ -670,7 +675,7 @@ function drawDoneBubble() {
     });
 
     svgCircle.append("text")
-        .attr("x", 1100)  // Center the text horizontally
+        .attr("x", 1240)  // Center the text horizontally
         .attr("y", 40) // Adjusted for better centering
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")

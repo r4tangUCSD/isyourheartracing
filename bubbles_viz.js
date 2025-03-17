@@ -1294,7 +1294,7 @@ function drawDoneBubble() {
         .attr("height", 75);
 
     svgCircle.append("circle")
-    .attr("cx", 1100)  // Center the circle
+    .attr("cx", 1240)  // Center the circle
     .attr("cy", -125) // Keeps the same positioning as requested
     .attr("r", 200)  // Large circle size as specified
     .style("fill", "#333739")
@@ -1315,7 +1315,7 @@ function drawDoneBubble() {
     });
 
     svgCircle.append("text")
-        .attr("x", 1100)  // Center the text horizontally
+        .attr("x", 1240)  // Center the text horizontally
         .attr("y", 40) // Adjusted for better centering
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
