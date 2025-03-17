@@ -238,11 +238,12 @@ h4 {
 
 
 #back-bubble h1 {
-    display: inline;
-    position: absolute;
+    position: fixed;
     left: 50%;
-    transform: translate(-50%, 0);
-    margin-top: 10px;
+    transform: translate(-50%, -50%);
+    top: 50px;
+    font-weight: bold;
+    color: white;
 }
 
 #slider {
