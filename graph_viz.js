@@ -626,14 +626,15 @@ function drawBackBubble() {
     // Add text inside the circle
     svgCircle.append("text")
         .attr("x", 260)  // Center the text horizontally
-        .attr("y", 30) // Adjusted for better centering
+        .attr("y", 40) // Adjusted for better centering
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .style("fill", "white")
         .style("font-size", "16px")
         .style("font-weight", "bold")
+        .style("opacity", 0.4)
         .style("pointer-events", "none")  // Prevents text from blocking clicks
-        .text("Select a different case");
+        .text("Back");
 
     // Add text to the right of the SVG
     backBubble.append("h1")
