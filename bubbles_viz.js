@@ -2,6 +2,8 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 
 import {magic} from "./graph_viz.js";
 
+export let explored = false;
+
 let svg, xScale, yScale;
 let width, height;
 let processedData, maxTime, minRate, maxRate;
@@ -13,6 +15,9 @@ let surgeryCategories = [];
 let patientsByCategoryId = {};
 let selectedCaseID;
 
+let svgCircle;
+let doneBubble = d3.select('#done-bubble')
+
 let tooltip = d3.select('#tooltip');
 let caseTooltip = d3.select('#case-tooltip');
 
@@ -23,6 +28,7 @@ if (!response.ok) {
 }
 
 const surgeryDescription = await response.json();
+drawDoneBubble();
 
 // Load data on page load
 export async function loadData() {
@@ -150,7 +156,7 @@ function initVisualization() {
         .append("svg")
         .attr("width", width)
         .attr("height", height);
-        
+
     drawCategoryBubbles();
 }
 
@@ -203,6 +209,13 @@ async function showCategoryDetail(category) {
 }
 
 export function deselectCurrentPatient() {
+
+    if (explored) {
+        doneBubble.style("opacity", 1);
+    } else {
+        doneBubble.style("opacity", 0);
+    }
+
     // Reset the current patient selection
     currentPatient = null;
 
@@ -610,6 +623,8 @@ function transitionToGraph(d) {
         }, 300);
 
     }, 1000); // Matches fade-out duration
+
+    explored = true;
 }
 
 
@@ -735,10 +750,18 @@ export function createEmptyHeartRateGraph() {
 }
 
 // Update the drawCategoryBubbles function to handle the click event
+// all bubbles
 function drawCategoryBubbles() {
     // Hide chart container FIRST before doing anything else
     d3.select(".chart-container").style("display", "none");
     d3.select("#patient-info-panel").remove(); // Remove the panel completely
+    // console.log('jaskn')
+
+    if (explored) {
+        doneBubble.style("opacity", 1);
+    } else {
+        doneBubble.style("opacity", 0);
+    }
 
 
     // Only do animation if we're coming from category detail view
@@ -816,6 +839,8 @@ function drawCategoryBubbles() {
             .style("opacity", 1)
             .style("pointer-events", "none");
 
+        
+
         drawAllCategoryBubbles();
             
         // Animate the circle shrinking back to its original position
@@ -858,6 +883,7 @@ function drawCategoryBubbles() {
 
 // Create a separate function for drawing the category bubbles
 function drawAllCategoryBubbles() {
+    // console.log('adjhk')
     console.log("Drawing all category bubbles");
     // Define available space and create bubble layout
     const bubble = d3.pack()
@@ -1257,6 +1283,51 @@ window.addEventListener('resize', () => {
         createWholeGraph();
     }
 });
+
+function drawDoneBubble() {
+    doneBubble.selectAll("*").remove();
+    
+    // Append new SVG
+    svgCircle = doneBubble
+        .append("svg")
+        .attr("width", 1500)
+        .attr("height", 75);
+
+    svgCircle.append("circle")
+    .attr("cx", 1100)  // Center the circle
+    .attr("cy", -125) // Keeps the same positioning as requested
+    .attr("r", 200)  // Large circle size as specified
+    .style("fill", "#333739")
+    .style("opacity", 0.85)
+    .on("mouseover", function(event) {
+        d3.select(this)
+            .transition()
+            .style("fill", "#7ed957")
+            .style("opacity", 1);
+    })
+    .on("mouseout", function(event) {
+        d3.select(this)
+            .transition()
+            .style("fill", "#333739")
+            .style("opacity", 0.85);
+    })
+    .on("click", async function(event, d) {
+    });
+
+    svgCircle.append("text")
+        .attr("x", 1100)  // Center the text horizontally
+        .attr("y", 40) // Adjusted for better centering
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .style("fill", "white")
+        .style("font-size", "16px")
+        .style("font-weight", "bold")
+        .style("opacity", 0.4)
+        .style("pointer-events", "none")  // Prevents text from blocking clicks
+        .text("I'm Done");
+
+    doneBubble.style("opacity", 0);
+}
 
 /* Unused Code */
 

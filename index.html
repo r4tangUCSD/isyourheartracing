@@ -35,8 +35,14 @@
 
     <!-- Bubble Section (Hidden Initially) -->
     <section id="bubble-section" style="display: none;">
-        <h1>Explore on your own</h1>
-        <h4>There are hundreds of surgeries, all unique.</h4>
+        <div id="done-bubble"></div>
+        <!-- <h1>Explore on your own</h1>
+        <h4>There are hundreds of surgeries, all unique.</h4> -->
+
+           
+
+        
+        
         <div class="container">
             <div class="visualization" id="visualization">
                 <div class="loading">Loading visualization data...</div>
@@ -55,8 +61,12 @@
 
     <!-- Graph Section (Hidden Initially) -->
     <section id="graph-section" style="display: none;">
-        <div id="back-bubble"></div>
-        <div id="done-bubble"></div>
+        <div class="bubbles">
+            <div id="done-bubble"></div>
+            <div id="back-bubble"></div>
+            <h1 id="case-title"></h1>
+           
+        </div>
         <div id="everything-else">
             <div id="stats">
                 <div class="left-side">

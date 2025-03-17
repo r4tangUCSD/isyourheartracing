@@ -1,9 +1,9 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
 
-import { deselectCurrentPatient, createEmptyHeartRateGraph } from './bubbles_viz.js';
-
+import { deselectCurrentPatient, createEmptyHeartRateGraph, explored } from './bubbles_viz.js';
 // GLOBAL VARIABLES
 
+let caseTitle = d3.select('#case-title');
 let animating;
 // let instruction = d3.select('#post-animate');
 
@@ -94,8 +94,11 @@ let mod70;
 let vig85;
 
 //back bubble
+let backBubble;
 let svgCircle;
 
+// done bubble
+let svgDone;
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Functions ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 function processCSV(data) {
@@ -584,20 +587,24 @@ export function magic(caseId) {
 
         // Call drawBackBubble after updating selectedCaseID
         drawBackBubble();
+        drawDoneBubble();
     });
+
+    
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Back Button ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 function drawBackBubble() {
-    const backBubble = d3.select("#back-bubble");
+    backBubble = d3.select("#back-bubble");
+
     // Clear previous contents before appending a new SVG
     backBubble.selectAll("*").remove();
     
     // Append new SVG
-    const svgCircle = backBubble
+    svgCircle = backBubble
         .append("svg")
-        .attr("width", 500)
+        .attr("width", 1500)
         .attr("height", 75);
 
     // Append a circle inside the SVG (with your requested changes)
@@ -637,15 +644,42 @@ function drawBackBubble() {
         .text("Back");
 
     // Add text to the right of the SVG
-    backBubble.append("h1")
-        .attr("id", "case-text")
-        .text(`Case ${selectedCaseID}`);
+    caseTitle.innerHTML = `Case ${selectedCaseID}`;
 }
 
 function drawDoneBubble() {
-    const doneBubble = d3.select("#done-bubble");
-    doneBubble.select('*').remove();
+    svgCircle.append("circle")
+    .attr("cx", 1100)  // Center the circle
+    .attr("cy", -125) // Keeps the same positioning as requested
+    .attr("r", 200)  // Large circle size as specified
+    .style("fill", "#333739")
+    .style("opacity", 0.85)
+    .on("mouseover", function(event) {
+        d3.select(this)
+            .transition()
+            .style("fill", "#7ed957")
+            .style("opacity", 1);
+    })
+    .on("mouseout", function(event) {
+        d3.select(this)
+            .transition()
+            .style("fill", "#333739")
+            .style("opacity", 0.85);
+    })
+    .on("click", async function(event, d) {
+    });
 
+    svgCircle.append("text")
+        .attr("x", 1100)  // Center the text horizontally
+        .attr("y", 40) // Adjusted for better centering
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .style("fill", "white")
+        .style("font-size", "16px")
+        .style("font-weight", "bold")
+        .style("opacity", 0.4)
+        .style("pointer-events", "none")  // Prevents text from blocking clicks
+        .text("I'm Done");
      
 }
 

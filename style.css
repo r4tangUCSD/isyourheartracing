@@ -22,6 +22,10 @@ body, html {
 
 /* Basic headings and stuff */
 
+#bubble-top {
+    display:flex;
+}
+
 h1 {
     color: #ebeaea;
     padding-top: 0.2em;
@@ -237,7 +241,9 @@ h4 {
 
 /* Graph (Vivian's CSS) */
 
-
+.bubbles {
+    display: flex;
+}
 #back-bubble h1 {
     position: fixed;
     left: 50%;
