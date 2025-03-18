@@ -95,8 +95,8 @@ let vig85;
 let backBubble;
 let svgCircle;
 
-// done bubble
-let svgDone;
+// done button
+
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Functions ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 function processCSV(data) {
@@ -586,7 +586,6 @@ export function magic(caseId) {
         // Call drawBackBubble after updating selectedCaseID
         drawBackBubble();
         
-        drawDoneBubble();
     });
 
     
@@ -650,42 +649,6 @@ function drawBackBubble() {
         .text("Back");
 
     // Add text to the right of the SVG
-}
-
-function drawDoneBubble() {
-    svgCircle.append("circle")
-    .attr("cx", 1240)  // Center the circle
-    .attr("cy", -125) // Keeps the same positioning as requested
-    .attr("r", 200)  // Large circle size as specified
-    .style("fill", "#333739")
-    .style("opacity", 0.85)
-    .on("mouseover", function(event) {
-        d3.select(this)
-            .transition()
-            .style("fill", "#7ed957")
-            .style("opacity", 1);
-    })
-    .on("mouseout", function(event) {
-        d3.select(this)
-            .transition()
-            .style("fill", "#333739")
-            .style("opacity", 0.85);
-    })
-    .on("click", async function(event, d) {
-    });
-
-    svgCircle.append("text")
-        .attr("x", 1240)  // Center the text horizontally
-        .attr("y", 40) // Adjusted for better centering
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .style("fill", "white")
-        .style("font-size", "16px")
-        .style("font-weight", "bold")
-        .style("opacity", 0.4)
-        .style("pointer-events", "none")  // Prevents text from blocking clicks
-        .text("I'm Done");
-     
 }
 
 function transitionToBubble(d) {

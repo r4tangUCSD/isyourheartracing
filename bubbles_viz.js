@@ -16,7 +16,9 @@ let patientsByCategoryId = {};
 let selectedCaseID;
 
 let svgCircle;
-let doneBubble = d3.select('#done-bubble')
+
+let doneButton = document.getElementById('done-button');
+doneButton.style.display = "none"; 
 
 let tooltip = d3.select('#tooltip');
 let caseTooltip = d3.select('#case-tooltip');
@@ -28,7 +30,6 @@ if (!response.ok) {
 }
 
 const surgeryDescription = await response.json();
-drawDoneBubble();
 
 // Load data on page load
 export async function loadData() {
@@ -162,6 +163,8 @@ function initVisualization() {
 
 // Update the showCategoryDetail function to include animation
 async function showCategoryDetail(category) {
+
+    
     // Store the original category circle position and radius for animation
     const originalX = category.x;
     const originalY = category.y;
@@ -211,9 +214,7 @@ async function showCategoryDetail(category) {
 export function deselectCurrentPatient() {
 
     if (explored) {
-        doneBubble.style("opacity", 1);
-    } else {
-        doneBubble.style("opacity", 0);
+        doneButton.style.display = "block"; 
     }
 
     // Reset the current patient selection
@@ -236,11 +237,14 @@ export function deselectCurrentPatient() {
 // Extract the setup functionality into a separate function
 async function setupCategoryDetailView(category) {
     console.log('wjabk')
+
+    if (explored) {
+        doneButton.style.display = "block"; 
+    }
     tooltip.style("opacity", 0);
     // Clear previous content
     svg.selectAll("*").remove();
-
-
+    
     // Update the width and height based on new container size
     const visualizationContainer = d3.select("#visualization");
     const containerRect = visualizationContainer.node().getBoundingClientRect();
@@ -586,6 +590,7 @@ async function setupCategoryDetailView(category) {
             
         })
         .on("click", async function(event, d) {
+            explored = true;
             // Reset all patient circles
             d3.selectAll(".patient")
                 .attr("fill", "#7b7878")
@@ -600,8 +605,11 @@ async function setupCategoryDetailView(category) {
                 .style("opacity", 1)
                 .attr("stroke", "#ff3131")
                 .attr("stroke-width", 2);
-            
+                
             transitionToGraph(d, clickedCircle);
+            if (explored) {
+                doneButton.style.display = "block"; 
+            }
         });
         
     currentView = "category-detail";
@@ -624,7 +632,7 @@ function transitionToGraph(d) {
 
     }, 1000); // Matches fade-out duration
 
-    explored = true;
+    
 }
 
 
@@ -756,13 +764,9 @@ function drawCategoryBubbles() {
     d3.select(".chart-container").style("display", "none");
     d3.select("#patient-info-panel").remove(); // Remove the panel completely
     // console.log('jaskn')
-
     if (explored) {
-        doneBubble.style("opacity", 1);
-    } else {
-        doneBubble.style("opacity", 0);
+        doneButton.style.display = "block"; 
     }
-
 
     // Only do animation if we're coming from category detail view
     if (currentView === "category-detail" && currentCategory) {
@@ -1268,6 +1272,7 @@ window.addEventListener('resize', () => {
     if (currentView === "categories") {
         drawCategoryBubbles();
     } else if (currentView === "category-detail" && currentCategory) {
+        doneButton.style.display = "block"; 
         const category = surgeryCategories.find(c => c.id === currentCategory);
         const hierarchyNode = {
             data: category,
@@ -1284,50 +1289,6 @@ window.addEventListener('resize', () => {
     }
 });
 
-function drawDoneBubble() {
-    doneBubble.selectAll("*").remove();
-    
-    // Append new SVG
-    svgCircle = doneBubble
-        .append("svg")
-        .attr("width", 1500)
-        .attr("height", 75);
-
-    svgCircle.append("circle")
-    .attr("cx", 1240)  // Center the circle
-    .attr("cy", -125) // Keeps the same positioning as requested
-    .attr("r", 200)  // Large circle size as specified
-    .style("fill", "#333739")
-    .style("opacity", 0.85)
-    .on("mouseover", function(event) {
-        d3.select(this)
-            .transition()
-            .style("fill", "#7ed957")
-            .style("opacity", 1);
-    })
-    .on("mouseout", function(event) {
-        d3.select(this)
-            .transition()
-            .style("fill", "#333739")
-            .style("opacity", 0.85);
-    })
-    .on("click", async function(event, d) {
-    });
-
-    svgCircle.append("text")
-        .attr("x", 1240)  // Center the text horizontally
-        .attr("y", 40) // Adjusted for better centering
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .style("fill", "white")
-        .style("font-size", "16px")
-        .style("font-weight", "bold")
-        .style("opacity", 0.4)
-        .style("pointer-events", "none")  // Prevents text from blocking clicks
-        .text("I'm Done");
-
-    doneBubble.style("opacity", 0);
-}
 
 /* Unused Code */
 
