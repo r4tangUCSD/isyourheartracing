@@ -20,7 +20,7 @@ section {
 
 @font-face {
     font-family: 'OCR-B';
-    src: url('fonts/ocr-b.ttf') format('truetype'); /* Adjust if using .otf */
+    src: url('./fonts/OCR-B.ttf') format('truetype'); /* Adjust if using .otf */
     font-weight: normal;
     font-style: normal;
 }
