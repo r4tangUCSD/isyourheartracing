@@ -95,8 +95,8 @@ let vig85;
 let backBubble;
 let svgCircle;
 
-// done bubble
-let svgDone;
+// done button
+
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Functions ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 function processCSV(data) {
@@ -586,7 +586,6 @@ export function magic(caseId) {
         // Call drawBackBubble after updating selectedCaseID
         drawBackBubble();
         
-        drawDoneBubble();
     });
 
     
@@ -652,7 +651,7 @@ function drawBackBubble() {
     // Add text to the right of the SVG
 }
 
-/*function drawDoneBubble() {
+function drawDoneBubble() {
     svgCircle.append("circle")
     .attr("cx", 1240)  // Center the circle
     .attr("cy", -125) // Keeps the same positioning as requested
@@ -686,7 +685,7 @@ function drawBackBubble() {
         .style("pointer-events", "none")  // Prevents text from blocking clicks
         .text("I'm Done");
      
-}*/
+}
 
 function transitionToBubble(d) {
     // Fade out the graph section
