@@ -547,7 +547,9 @@ export function magic(caseId) {
         // surgery details
         surgeryType = patient_details.optype;
         // infoTitle.textContent = 'Details for Case ' + selectedCaseID;
-        detailed.innerHTML = `<strong>Description: </strong>${patient_details.dx}<br>`
+        detailed.innerHTML = `
+        <strong>Surgery Name: </strong>${patient_details.opname}<br>
+        <strong>Description: </strong>${patient_details.dx}<br>`
         surgeryInfo.innerHTML = `
         <div id="left">
             <p>Age: ${patientAge}</p>

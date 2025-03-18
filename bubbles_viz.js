@@ -213,10 +213,6 @@ async function showCategoryDetail(category) {
 
 export function deselectCurrentPatient() {
 
-    if (explored) {
-        doneButton.style.display = "block"; 
-    }
-
     // Reset the current patient selection
     currentPatient = null;
 
@@ -238,9 +234,7 @@ export function deselectCurrentPatient() {
 async function setupCategoryDetailView(category) {
     console.log('wjabk')
 
-    if (explored) {
-        doneButton.style.display = "block"; 
-    }
+
     tooltip.style("opacity", 0);
     // Clear previous content
     svg.selectAll("*").remove();
@@ -607,9 +601,8 @@ async function setupCategoryDetailView(category) {
                 .attr("stroke-width", 2);
                 
             transitionToGraph(d, clickedCircle);
-            if (explored) {
-                doneButton.style.display = "block"; 
-            }
+            doneButton.style.display = "block"; 
+
         });
         
     currentView = "category-detail";
@@ -764,9 +757,6 @@ function drawCategoryBubbles() {
     d3.select(".chart-container").style("display", "none");
     d3.select("#patient-info-panel").remove(); // Remove the panel completely
     // console.log('jaskn')
-    if (explored) {
-        doneButton.style.display = "block"; 
-    }
 
     // Only do animation if we're coming from category detail view
     if (currentView === "category-detail" && currentCategory) {
@@ -1272,7 +1262,7 @@ window.addEventListener('resize', () => {
     if (currentView === "categories") {
         drawCategoryBubbles();
     } else if (currentView === "category-detail" && currentCategory) {
-        doneButton.style.display = "block"; 
+        // doneButton.style.display = "block"; 
         const category = surgeryCategories.find(c => c.id === currentCategory);
         const hierarchyNode = {
             data: category,
