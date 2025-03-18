@@ -242,6 +242,8 @@ function updateStageInfo(stage) {
     const borderColoring = getBorderColor(stage.heartRate);
     heartRateEl.style.color = heartRateColor;
     bpmBoxEl.style.borderColor = borderColoring;
+
+    stageNameEl.style.color = heartRateColor
 }
 
 // scroll event handler

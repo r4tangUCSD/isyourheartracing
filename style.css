@@ -376,7 +376,7 @@ h4 {
 }
 
 .bpm-container {
-    flex: 0 0 25%;
+    flex: 0 0 20%;
     display: grid;
     grid-template-columns: 1fr, 2fr;
     flex-direction: column;
@@ -410,6 +410,7 @@ h4 {
 }
 
 .stage-name {
+    font-family: 'OCR-B';
     font-size: 2rem;
     margin-bottom: 10px;
     color: #999;
