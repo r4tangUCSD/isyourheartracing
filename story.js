@@ -74,41 +74,17 @@ function getHeartRateColor(heartRate) {
     const riskLow = 50;
     const riskHigh = 90;
     
-    // normal (green): 60-80 bpm
-    if (heartRate >= normalLow && heartRate <= normalHigh) {
-        return '#7ed957'; // green
+    // resting (green)
+    if (heartRate < 72) {
+        return '#2db41e'; 
     }
-    // risky (yellow): 50-60 or 80-90 bpm
-    else if ((heartRate >= riskLow && heartRate < normalLow) || 
-            (heartRate > normalHigh && heartRate <= riskHigh)) {
-        return '#ffff00'; // yellow
+    // moderate (yellow)
+    else if (heartRate < 102) {
+        return '#FEED53';
     }
-    // critical (red): < 50 or > 90 bpm
+    // high (red)
     else {
-        return '#ff3131'; // red
-    }
-}
-
-// border color opacity 
-function getBorderColor(heartRate) {
-    // define heart rate thresholds
-    const normalLow = 60;
-    const normalHigh = 80;
-    const riskLow = 50;
-    const riskHigh = 90;
-    
-    // normal (green): 60-80 bpm
-    if (heartRate >= normalLow && heartRate <= normalHigh) {
-        return 'rgba(126, 217, 87, 0.4)'; // green
-    }
-    // risky (yellow): 50-60 or 80-90 bpm
-    else if ((heartRate >= riskLow && heartRate < normalLow) || 
-            (heartRate > normalHigh && heartRate <= riskHigh)) {
-        return 'rgba(255, 255, 0, 0.4)'; // yellow
-    }
-    // critical (red): < 50 or > 90 bpm
-    else {
-        return 'rgba(255, 49, 49, 0.4)'; // red
+        return '#F63C4C'; 
     }
 }
 
@@ -239,7 +215,7 @@ function updateStageInfo(stage) {
 
     // update heart rate color
     const heartRateColor = getHeartRateColor(stage.heartRate);
-    const borderColoring = getBorderColor(stage.heartRate);
+    const borderColoring = getHeartRateColor(stage.heartRate);
     heartRateEl.style.color = heartRateColor;
     bpmBoxEl.style.borderColor = borderColoring;
 }
