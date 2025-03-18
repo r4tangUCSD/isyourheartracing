@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show final section
         finalSection.classList.remove('hidden');
         finalSection.classList.add('active');
+
+        // Hide done button
+        doneButton.style.display = 'none';
         
         // Using setTimeout to allow the section to become visible first
         setTimeout(() => {
@@ -62,9 +65,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (bubbleActive) {
                 bubbleSection.style.display = 'block';
                 bubbleSection.style.opacity = '1';
+                doneButton.style.display = 'block';
             } else {
                 graphSection.style.display = 'block';
                 graphSection.style.opacity = '1';
+                doneButton.style.display = 'block';
             }
           
             // Hide any lingering final section animations
