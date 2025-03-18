@@ -237,7 +237,7 @@ function handlingMissing() {
 
 
 function createGraph() {
-    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const margin = { top: 20, right: 30, bottom: 70, left: 40 };
     const container = d3.select("#graph").node();
     const width = container.getBoundingClientRect().width - margin.left - margin.right;
     const height = 375 - margin.top - margin.bottom;
@@ -303,9 +303,18 @@ function createGraph() {
         .call(d3.axisLeft(yScale).ticks(10))
         .style("opacity", 0.35);
 
-    // add shading
+    // add shading and instructions to move back
     if (animating === false || Math.ceil(current) >= maxTime) {
         shadingRange();
+
+        svg.append('text')
+        .attr("x", width / 2)
+        .attr("y", height + 65)
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        // .style("font-weight", "bold")
+        .style("fill", "rgb(255, 255, 255, 0.6)")
+        .text("Move the slider to go back");
     }
 
     // Creates grids
@@ -392,6 +401,7 @@ function createGraph() {
         .style("stroke", "#00ff00")
         .style("filter", "drop-shadow(0px 0px 4px #00ff00)");
     });
+    
 }
 
 function animateSlider() {
