@@ -632,8 +632,9 @@ function drawBackBubble() {
         .attr("y", 50).attr("text-anchor", "middle")
         .attr("text-align", "middle")
         .style("fill", "white")
-        .style("font-size", "32px")
-        .style("font-weight", "bold").text("Case " + selectedCaseID)
+        .style("font-size", "3.5em")
+        .style("text-shadow", "0px 0px 5px #00ff00")
+        .style("font-weight", "bold").text("Case " + selectedCaseID);
 
     // Add text inside the circle
     svgCircle.append("text")
