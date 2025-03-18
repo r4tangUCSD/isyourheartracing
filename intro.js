@@ -21,17 +21,31 @@ document.addEventListener('DOMContentLoaded', function() {
         // Hide current sections
         bubbleSection.style.display = 'none';
         graphSection.style.display = 'none';
-        doneButton.style.display = 'none';
         
         // Show final section
         finalSection.classList.remove('hidden');
         finalSection.classList.add('active');
         
-        // Add visible class to text for fade-in effect
+        // Using setTimeout to allow the section to become visible first
         setTimeout(() => {
-            const finalText = finalSection.querySelector('.intro-text');
-            finalText.classList.add('visible');
-        }, 850);
+            // Generate heartbeat EKG pattern for final section (full width)
+            const finalPath = document.getElementById('final-heartbeat-path');
+            const pathData = generateHeartbeatPath(1000, 50, 6); // width, baseline, # of beats
+            finalPath.setAttribute('d', pathData);
+            
+            // Reset animation
+            finalPath.style.animation = 'none';
+            finalPath.offsetHeight; // Trigger reflow
+            
+            // Apply the animation that fades out
+            finalPath.style.animation = 'finalHeartbeatDash 4s ease-in-out forwards';
+            
+            // Add visible class to text for fade-in effect (slightly delayed)
+            setTimeout(() => {
+                const finalText = finalSection.querySelector('.intro-text');
+                finalText.classList.add('visible');
+            }, 1000);
+        }, 500);
     });
 
     // intro animation sequence
