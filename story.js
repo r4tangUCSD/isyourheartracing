@@ -16,31 +16,31 @@ const storyData = [
         description: 'The surgery is minimally invasive, but gallstones pose a real risk to someone his age. He\'d be more prone to infection, inflammation, and abdominal pain. Patient 32\'s heart rate spikes after settling from anesthesia.' 
     },
     { 
-        time: 45, 
+        time: 25, 
         heartRate: 123, 
         stage: 'CO2 Inflation', 
         description: 'His abdomen was inflated with carbon dioxide to create space for the surgeons to work. If his body absorbed too much CO2, his blood chemistry could be altered; his body is working extra hard to keep this regulated.' 
     },
     { 
-        time: 90, 
-        heartRate: 160, 
+        time: 30, 
+        heartRate: 140, 
         stage: 'Irritation and Risk', 
         description: 'The gallbladder is relatively close to the diaphragm, which is closely linked to heart rate regulation; since it was irritated during the procedure, it caused bursts of increased heart rate before the body could stabilize.' 
     },
     { 
-        time: 120, 
+        time: 40, 
         heartRate: 55, 
         stage: 'Hypertension', 
         description: 'Patient 32 has a history of hypertension, making him more susecptible to blood pressure changes. Doctors had to keep a careful eye on his heart rate. Thankfully, this surgery was successful!' 
     },
     { 
-        time: 150, 
+        time: 55, 
         heartRate: 82, 
         stage: 'Surgery Completion', 
         description: 'Goodbye to your gallbladder, Patient 32!\nKeep scrolling for more stories.' 
     },
     { 
-        time: 150, 
+        time: 55, 
         heartRate: 82, 
         stage: 'Let\'s explore more!', 
         description: 'Loading visualization...' 
