@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const introText = document.getElementById('intro-text');
     const startButton = document.getElementById('start-button');
     const doneButton = document.getElementById('done-button');
+    doneButton.style.backgroundColor = '#333739';
+    doneButton.style.color = 'rgba(255, 255, 255, 0.4)';
+
 
 
     // RUN INTRO
@@ -79,6 +82,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+    });
+
+    doneButton.addEventListener('mouseover', function() {
+        doneButton.style.backgroundColor = '#7ed957'; // Change background on hover
+        doneButton.style.transition = 'all 0.3s ease-in-out'; // Smooth transition
+    });
+
+    doneButton.addEventListener('mouseout', function() {
+        doneButton.style.backgroundColor = '#333739'; // Reset background color
     });
 
     // intro animation sequence
