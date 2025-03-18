@@ -111,7 +111,6 @@ function processCSV(data) {
     });
 }
 
-
 function secondsToHHMMSS(seconds) {
     // number of seconds to HH:MM:SS
 
@@ -388,8 +387,10 @@ function createGraph() {
         .attr("class", "line") // Add a class for styling (optional)
         .attr("d", line) // Draw the path based on the data
         .style("fill", "none") // No fill for the line
-        .style("stroke", "#7ed957") // Line color
-        .style("stroke-width", 2); // Line width
+         //.style("stroke", "#7ed957") // Line color
+        .style("stroke-width", 2) // Line width
+        .style("stroke", "#00ff00")
+        .style("filter", "drop-shadow(0px 0px 4px #00ff00)");
     });
 }
 
@@ -634,8 +635,10 @@ function drawBackBubble() {
         .attr("y", 50).attr("text-anchor", "middle")
         .attr("text-align", "middle")
         .style("fill", "white")
-        .style("font-size", "32px")
-        .style("font-weight", "bold").text("Case " + selectedCaseID)
+        .style("font-size", "3.5em")
+        .style("text-shadow", "0px 0px 5px #00ff00")
+        .style("font-family", "OCR-B, sans-serif;")
+        .style("font-weight", "bold").text("Case " + selectedCaseID);
 
     // Add text inside the circle
     svgCircle.append("text")
@@ -653,7 +656,7 @@ function drawBackBubble() {
     // Add text to the right of the SVG
 }
 
-function drawDoneBubble() {
+/*function drawDoneBubble() {
     svgCircle.append("circle")
     .attr("cx", 1240)  // Center the circle
     .attr("cy", -125) // Keeps the same positioning as requested
@@ -687,7 +690,7 @@ function drawDoneBubble() {
         .style("pointer-events", "none")  // Prevents text from blocking clicks
         .text("I'm Done");
      
-}
+}*/
 
 function transitionToBubble(d) {
     // Fade out the graph section
@@ -722,4 +725,6 @@ function transitionToBubble(d) {
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Bubble Page ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+
+    
 

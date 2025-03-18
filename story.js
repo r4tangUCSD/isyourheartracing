@@ -224,7 +224,9 @@ document.head.appendChild(styleSheet);
 // update stages function
 function updateStageInfo(stage) {
     stageNameEl.textContent = stage.stage;
-    heartRateEl.innerHTML = `<div id="unit" style="font-size: 2rem;">HR</div><div id="unit" style="font-size: 2rem;">bpm</div>${stage.heartRate} `;
+    heartRateEl.innerHTML = `<div id="unit" style="font-size: 2rem; font-family: 'OCR-B', sans-serif;">HR</div>
+    <div id="unit" style="font-size: 2rem; font-family: 'OCR-B', sans-serif;">bpm</div>
+    <span style="font-family: 'OCR-B', sans-serif;">${stage.heartRate}</span>`;
     stageDescriptionEl.textContent = stage.description;
     stageTimeEl.innerHTML = `
     <p>Time: ${stage.time} minutes into surgery </p>

@@ -6,40 +6,77 @@ section {
     justify-content: center;
     align-items: center;
     position: relative;
-  }
-  
-  .hidden {
+}
+
+.hidden {
     display: none !important;
-  }
-  
-  .active {
+}
+
+.active {
     display: flex !important;
-  }
+}
   
-  /* Intro Sections */
-  #intro-section, #intro-second, #final-section {
+/* Silly styling */
+
+@font-face {
+    font-family: 'OCR-B';
+    src: url('fonts/ocr-b.ttf') format('truetype'); /* Adjust if using .otf */
+    font-weight: normal;
+    font-style: normal;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 255, 0, 0.04),
+        rgba(0, 255, 0, 0.04) 1px,
+        transparent 1px,
+        transparent 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+}
+
+h1, h2, h3, h4 {
+    text-shadow: 0px 0px 5px #00ff00;
+}
+
+h1, h2, #average {
+    font-family: 'OCR-B', sans-serif;
+}
+
+
+/* Intro Sections */
+#intro-section, #intro-second, #final-section {
     background-color: #000;
     color: #fff;
     text-align: center;
-  }
-  
-  .intro-text {
+}
+
+.intro-text {
     opacity: 0;
     transition: opacity 1.5s ease-in-out;
     max-width: 80%;
     z-index: 2;
-  }
-  
-  .intro-text.visible {
-    opacity: 1;
-  }
+}
 
-  .racing-text {
+.intro-text.visible {
+    opacity: 1;
+}
+
+.racing-text {
     transition: color 1.5s ease-in-out;
     color: #ffffff; /* starts white, changes to red */
-  }
+    text-shadow: 0px 0px 0px; /* removes shadow */;
+}
 
-  .group-credits {
+.group-credits {
     position: absolute;
     top: 72.5%;
     left: 700px;
@@ -48,21 +85,21 @@ section {
     opacity: 0;
     transition: opacity 1.5s ease-in-out;
     z-index: 2;
-  }
-  
-  .group-credits.visible {
+}
+
+.group-credits.visible {
     opacity: 1;
-  }
+}
 
-  .group-credits h3 {
+.group-credits h3 {
     margin-bottom: 10px;
-  }
-  
-  .group-credits p {
-    margin: 5px 0;
-  }
+}
 
-  .team-icon {
+.group-credits p {
+    margin: 5px 0;
+}
+
+.team-icon {
     position: absolute;
     top: 73%;
     left: 1250px;
@@ -70,16 +107,16 @@ section {
     opacity: 0;
     transition: opacity 1.5s ease-in-out;
     z-index: 2;
-  }
-  
-  .team-icon.visible {
+}
+
+.team-icon.visible {
     opacity: 1;
-  }
-  
-  .team-icon img {
+}
+
+.team-icon img {
     max-width: 50px;
     height: auto;
-  }
+}
 
 /* Intro Heartline Animation */
   
@@ -219,8 +256,8 @@ body, html {
     height: 100%;
     background-color: black;
     color: white;
-    font-family: Arial, sans-serif;
     overflow-x: hidden;
+    font-family: 'Arial', sans-serif;
 }
 
 #everything-else {
