@@ -48,23 +48,27 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Using setTimeout to allow the section to become visible first
         setTimeout(() => {
-            // Generate heartbeat EKG pattern for final section (full width)
-            const finalPath = document.getElementById('final-heartbeat-path');
-            const pathData = generateHeartbeatPath(700, 50, 3); // width, baseline, # of beats
-            finalPath.setAttribute('d', pathData);
+            // Get the final section element first
+            const finalSection = document.getElementById('final-section');
             
-            // Reset animation
-            finalPath.style.animation = 'none';
-            finalPath.offsetHeight; // Trigger reflow
+            // Add visible class to text first
+            const finalText = finalSection.querySelector('.intro-text');
+            finalText.classList.add('visible');
             
-            // Apply the animation that fades out
-            finalPath.style.animation = 'finalHeartbeatDash 4s ease-in-out forwards';
-            
-            // Add visible class to text for fade-in effect (slightly delayed)
+            // Delay the heartbeat animation to start after text has faded in
             setTimeout(() => {
-                const finalText = finalSection.querySelector('.intro-text');
-                finalText.classList.add('visible');
-            }, 3000);
+                // Generate heartbeat EKG pattern for final section (full width)
+                const finalPath = document.getElementById('final-heartbeat-path');
+                const pathData = generateHeartbeatPath(700, 50, 3); // width, baseline, # of beats
+                finalPath.setAttribute('d', pathData);
+                
+                // Reset animation
+                finalPath.style.animation = 'none';
+                finalPath.offsetHeight; // Trigger reflow
+                
+                // Apply the animation that fades out
+                finalPath.style.animation = 'finalHeartbeatDash 4s ease-in-out forwards';
+            }, 1500); // 2 second delay before starting the heartbeat animation
         }, 500);
 
         const backToGraph = document.getElementById('back-to-graph');
