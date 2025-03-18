@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', function() {
     startButton.addEventListener('click', startExploration);
     
     doneButton.addEventListener('click', function() {
+        // Remember if the bubble section or graph section was active
+        const bubbleActive = bubbleSection.style.display === 'block';
+
         // Hide current sections
         bubbleSection.style.display = 'none';
         graphSection.style.display = 'none';
@@ -55,10 +58,15 @@ document.addEventListener('DOMContentLoaded', function() {
             finalSection.classList.add('hidden');
             
             // Show graph section
-            graphSection.style.display = 'block';
-            graphSection.style.opacity = '1';
-            
-            
+            // If on graph section show it again, otherwise show bubble section
+            if (bubbleActive) {
+                bubbleSection.style.display = 'block';
+                bubbleSection.style.opacity = '1';
+            } else {
+                graphSection.style.display = 'block';
+                graphSection.style.opacity = '1';
+            }
+          
             // Hide any lingering final section animations
             const finalPath = document.getElementById('final-heartbeat-path');
             if (finalPath) {
