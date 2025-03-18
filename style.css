@@ -765,3 +765,22 @@ h4 {
     
 }
 
+
+
+#back-to-graph {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333739;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#back-to-graph:hover {
+    background-color: #7ed957;
+}

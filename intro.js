@@ -46,6 +46,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 finalText.classList.add('visible');
             }, 1000);
         }, 500);
+
+        const backToGraph = document.getElementById('back-to-graph');
+    
+        backToGraph.addEventListener('click', function() {
+            // Hide final section
+            finalSection.classList.remove('active');
+            finalSection.classList.add('hidden');
+            
+            // Show graph section
+            graphSection.style.display = 'block';
+            graphSection.style.opacity = '1';
+            
+            
+            // Hide any lingering final section animations
+            const finalPath = document.getElementById('final-heartbeat-path');
+            if (finalPath) {
+                finalPath.style.animation = 'none';
+            }
+        });
+
     });
 
     // intro animation sequence
