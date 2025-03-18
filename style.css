@@ -199,10 +199,10 @@ h1, h2, #average {
     height: 100px;
     display: flex;
     justify-content: flex-start;
-    align-items: right;
+    align-items: center;
     z-index: 1;
     overflow: hidden;
-    left: 0px !important;
+    left: 350px !important;
   }
   
   #final-heartbeat-svg {
