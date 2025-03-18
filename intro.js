@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 const finalText = finalSection.querySelector('.intro-text');
                 finalText.classList.add('visible');
-            }, 1000);
+            }, 3000);
         }, 500);
     });
 
