@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Hide current sections
         bubbleSection.style.display = 'none';
         graphSection.style.display = 'none';
+        doneButton.style.display = 'none';
         
         // Show final section
         finalSection.classList.remove('hidden');
