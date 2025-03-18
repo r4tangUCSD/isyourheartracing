@@ -8,12 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const heartbeatLine = document.getElementById('heartbeat-line');
     const introText = document.getElementById('intro-text');
     const startButton = document.getElementById('start-button');
-    startButton.style.color = 'rgba(255, 255, 255, 0.6)';
+    startButton.style.color = 'rgba(255, 255, 255, 1)';
     startButton.style.backgroundColor = '#333739';
     const doneButton = document.getElementById('done-button');
     doneButton.style.backgroundColor = '#7ed957';
     doneButton.style.opacity = '0.7';
-    doneButton.style.color = 'rgba(255, 255, 255, 0.6)';
+    doneButton.style.color = 'rgba(255, 255, 255, 1)';
 
 
 

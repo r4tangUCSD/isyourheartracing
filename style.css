@@ -382,6 +382,7 @@ h4 {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin-left: -10%;
 }
 
 .bpm-box {
@@ -404,9 +405,9 @@ h4 {
 }
 
 #stage-info {
-    flex: 0 0 40%;
-    padding-right: 30px;
-    /* border: 2px solid, rgb(255, 255, 255); */ 
+    flex: 0 0 37%;
+    margin-right: 5em;
+    transform: translateX(-50px);
 }
 
 .stage-name {
