@@ -8,9 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const heartbeatLine = document.getElementById('heartbeat-line');
     const introText = document.getElementById('intro-text');
     const startButton = document.getElementById('start-button');
+    startButton.style.color = 'rgba(255, 255, 255, 0.6)';
+    startButton.style.backgroundColor = '#333739';
     const doneButton = document.getElementById('done-button');
-    doneButton.style.backgroundColor = '#333739';
-    doneButton.style.color = 'rgba(255, 255, 255, 0.4)';
+    doneButton.style.backgroundColor = '#7ed957';
+    doneButton.style.opacity = '0.7';
+    doneButton.style.color = 'rgba(255, 255, 255, 0.6)';
 
 
 
@@ -19,6 +22,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // event listeners for buttons
     startButton.addEventListener('click', startExploration);
+    startButton.addEventListener('mouseover', function() {
+        startButton.style.backgroundColor = '#7ed957'; // Change background on hover
+        startButton.style.transition = 'all 0.3s ease-in-out'; // Smooth transition
+    });
+
+    startButton.addEventListener('mouseout', function() {
+        startButton.style.backgroundColor = '#333739'; // Reset background color
+    });
     
     doneButton.addEventListener('click', function() {
         // Remember if the bubble section or graph section was active
@@ -57,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
 
         const backToGraph = document.getElementById('back-to-graph');
+        backToGraph.style.color = 'rgba(255, 255, 255, 0.4)';
     
         backToGraph.addEventListener('click', function() {
             // Hide final section
@@ -85,13 +97,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     doneButton.addEventListener('mouseover', function() {
-        doneButton.style.backgroundColor = '#7ed957'; // Change background on hover
+        doneButton.style.opacity = '1';
         doneButton.style.transition = 'all 0.3s ease-in-out'; // Smooth transition
+        
     });
 
     doneButton.addEventListener('mouseout', function() {
-        doneButton.style.backgroundColor = '#333739'; // Reset background color
-    });
+        doneButton.style.opacity = '0.7';
+        });
 
     // intro animation sequence
     function startIntroSequence() {
