@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             // Generate heartbeat EKG pattern for final section (full width)
             const finalPath = document.getElementById('final-heartbeat-path');
-            const pathData = generateHeartbeatPath(1000, 50, 6); // width, baseline, # of beats
+            const pathData = generateHeartbeatPath(700, 50, 3); // width, baseline, # of beats
             finalPath.setAttribute('d', pathData);
             
             // Reset animation
