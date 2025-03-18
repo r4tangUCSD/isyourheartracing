@@ -546,6 +546,11 @@ h4 {
 .bubbles {
     display: flex;
 }
+
+#back-bubble {
+    cursor: pointer;
+}
+
 #back-bubble h1 {
     position: fixed;
     left: 50%;
