@@ -545,13 +545,13 @@ h4 {
     width: 375px;
     #unit{
         opacity: 70%;
-        font-size: 1.25em;
+        font-size: 1.5em;
         display: block;
         margin: 10px
         
     }
     #value {
-        font-size: 10em;
+        font-size: 8em;
         display: block;
         margin-right: px;
         text-align: right;
