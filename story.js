@@ -7,37 +7,37 @@ const storyData = [
         time: 0, 
         heartRate: 61, 
         stage: 'Initial Status', 
-        description: 'Given Patient 32\'s old age and his previous history of hypertension (high blood pressure), doctors decided to remove these stones with a laparoscopic cholecystectomy - a minimally invasive procedure to remove the gallbladder' 
+        description: 'This is Patient 32, a 74 year old man about to undergo gallbladder removal surgery. Doctors have decided to remove his gallstones with a laparoscopic cholecystectomy.' 
     },
     { 
         time: 15, 
         heartRate: 100, 
-        stage: 'Stage 1', 
-        description: 'After settling from general anesthesia, Patient 32\'s heart rate starts to spike.' 
+        stage: 'Anesthesia Administered', 
+        description: 'The surgery is minimally invasive, but gallstones pose a real risk to someone his age. He\'d be more prone to infection, inflammation, and abdominal pain. Patient 32\'s heart rate spikes after settling from anesthesia.' 
     },
     { 
         time: 45, 
         heartRate: 123, 
-        stage: 'Stage 2', 
-        description: 'Patient 32’s abdomen was inflated with carbon dioxide to create space for the surgeons to work. If his body absorbed too much carbon dioxide, his blood chemistry could be altered.' 
+        stage: 'CO2 Inflation', 
+        description: 'His abdomen was inflated with carbon dioxide to create space for the surgeons to work. If his body absorbed too much CO2, his blood chemistry could be altered; his body is working extra hard to keep this regulated.' 
     },
     { 
         time: 90, 
         heartRate: 160, 
-        stage: 'Stage 3', 
-        description: 'The gallbladder is relatively close to the diaphragm, which is closely linked to heart rate regulation; it was irritated during the procedure, it might have caused bursts of increased heart rate before the body could stabilize' 
+        stage: 'Irritation and Risk', 
+        description: 'The gallbladder is relatively close to the diaphragm, which is closely linked to heart rate regulation; since it was irritated during the procedure, it caused bursts of increased heart rate before the body could stabilize.' 
     },
     { 
         time: 120, 
         heartRate: 55, 
-        stage: 'Stage 4', 
-        description: 'He has hypertension, making him more susecptible to blood pressure changes. Thankfully, this surgery was successful! goodbye to your gallbladder, patient 32!' 
+        stage: 'Hypertension', 
+        description: 'Patient 32 has a history of hypertension, making him more susecptible to blood pressure changes. Doctors had to keep a careful eye on his heart rate. Thankfully, this surgery was successful!' 
     },
     { 
         time: 150, 
         heartRate: 82, 
         stage: 'Surgery Completion', 
-        description: 'Ending heart rate' 
+        description: 'Goodbye to your gallbladder, Patient 32!\nKeep scrolling for more stories.' 
     },
     { 
         time: 150, 
@@ -69,21 +69,21 @@ document.body.appendChild(scrollContainer);
 // set heart rate color based on value
 function getHeartRateColor(heartRate) {
     // define heart rate thresholds
-    const normalLow = 60;
-    const normalHigh = 80;
+    const normalLow = 61;
+    const normalHigh = 82;
     const riskLow = 50;
-    const riskHigh = 90;
+    const riskHigh = 109;
     
-    // normal (green): 60-80 bpm
+    // normal (green): 61-82 bpm
     if (heartRate >= normalLow && heartRate <= normalHigh) {
         return '#7ed957'; // green
     }
-    // risky (yellow): 50-60 or 80-90 bpm
+    // risky (yellow): 50-60 or 83-109 bpm
     else if ((heartRate >= riskLow && heartRate < normalLow) || 
             (heartRate > normalHigh && heartRate <= riskHigh)) {
         return '#ffff00'; // yellow
     }
-    // critical (red): < 50 or > 90 bpm
+    // critical (red): < 50 or > 110 bpm
     else {
         return '#ff3131'; // red
     }
@@ -92,23 +92,23 @@ function getHeartRateColor(heartRate) {
 // border color opacity 
 function getBorderColor(heartRate) {
     // define heart rate thresholds
-    const normalLow = 60;
-    const normalHigh = 80;
+    const normalLow = 61;
+    const normalHigh = 82;
     const riskLow = 50;
-    const riskHigh = 90;
+    const riskHigh = 109;
     
-    // normal (green): 60-80 bpm
+    // normal (green): 61-82 bpm
     if (heartRate >= normalLow && heartRate <= normalHigh) {
-        return 'rgba(126, 217, 87, 0.4)'; // green
+        return '#7ed957'; // green
     }
-    // risky (yellow): 50-60 or 80-90 bpm
+    // risky (yellow): 50-60 or 83-109 bpm
     else if ((heartRate >= riskLow && heartRate < normalLow) || 
             (heartRate > normalHigh && heartRate <= riskHigh)) {
-        return 'rgba(255, 255, 0, 0.4)'; // yellow
+        return '#ffff00'; // yellow
     }
-    // critical (red): < 50 or > 90 bpm
+    // critical (red): < 50 or > 110 bpm
     else {
-        return 'rgba(255, 49, 49, 0.4)'; // red
+        return '#ff3131'; // red
     }
 }
 
